@@ -1,87 +1,62 @@
-# Welcome to React Router!
+# Base Repo
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Repo base para arrancar proyectos nuevos. Cloná, instalá y listo.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Stack
 
-## Features
+| Paquete | Versión | Para qué |
+|---|---|---|
+| React Router | v7 | Framework full-stack con SSR |
+| Tailwind CSS | v4 | Utility-first CSS |
+| Flowbite React | latest | Componentes UI + dark mode toggle |
+| React Hook Form | v7 | Manejo de formularios |
+| React Data Table | v7 | Tablas con paginado y filtros |
+| React Icons | v5 | Librería de iconos |
+| TypeScript | v5 | Tipado estático |
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+## Uso
 
 ```bash
+# Clonar
+git clone <url> nombre-proyecto
+cd nombre-proyecto
+
+# Instalar
 npm install
+
+# Desarrollo
+npm run dev
+# → http://localhost:5173
 ```
 
-### Development
-
-Start the development server with HMR:
+## Scripts
 
 ```bash
-npm run dev
+npm run dev        # Servidor de desarrollo con HMR
+npm run build      # Build de producción
+npm run start      # Servidor de producción
+npm run typecheck  # Chequeo de tipos
 ```
 
-Your application will be available at `http://localhost:5173`.
+## Dark mode
 
-## Building for Production
+Configurado con `useDarkMode` (hook en `app/hooks/`) que sincroniza el tema con la preferencia del sistema y persiste en `localStorage` vía la key `flowbite-theme-mode`. Funciona junto con el `<DarkThemeToggle />` de Flowbite.
 
-Create a production build:
+## Build para producción
 
 ```bash
 npm run build
+docker build -t mi-app .
+docker run -p 3000:3000 mi-app
 ```
 
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+Output:
+```
+build/
+├── client/   # Assets estáticos
+└── server/   # Código SSR
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+## Licencia
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+[MIT](LICENSE)

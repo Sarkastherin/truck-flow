@@ -17,7 +17,7 @@ type MovimientoModalConfig = {
   isEfectivo?: boolean;
 };
 
-export default function ButtonsActionsCtaCte({ ctaCte }: { ctaCte: CtaCte }) {
+export default function ButtonsActionsCtaCte({ clienteId }: { clienteId: string }) {
   const { openModal } = useModal();
   const [files, setFiles] = useState<FileTypeActions<Documento>>({
     add: null,
@@ -61,7 +61,7 @@ export default function ButtonsActionsCtaCte({ ctaCte }: { ctaCte: CtaCte }) {
         : [];
 
     form.reset({
-      cliente_id: ctaCte.cliente.id,
+      cliente_id: clienteId,
       fecha_movimiento: new Date().toISOString().split("T")[0],
       tipo_movimiento: tipoMovimiento,
       origen: medioPago === "cheque" ? "cheque" : "manual",

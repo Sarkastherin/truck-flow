@@ -1,6 +1,6 @@
-import { Input, Textarea, formatCuit, Select } from "~/components/InputsForm";
+import { Input, formatCuit, Select } from "~/components/InputsForm";
 import { Button, Card } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   getChequeTransition,
   chequeStateMachine,
@@ -377,6 +377,7 @@ export default function ChequeForm() {
                     type="button"
                     onClick={() => handleSetAction("depositar")}
                     outline
+                    className="focus:ring-0 focus:bg-green-600 focus:text-white"
                   >
                     Depositar
                   </Button>
@@ -387,6 +388,7 @@ export default function ChequeForm() {
                     type="button"
                     onClick={() => handleSetAction("endosar")}
                     outline
+                    className="focus:ring-0 focus:bg-blue-600 focus:text-white"
                   >
                     Endosar
                   </Button>
@@ -397,6 +399,7 @@ export default function ChequeForm() {
                     type="button"
                     onClick={() => handleSetAction("anular")}
                     outline
+                    className="focus:ring-0 focus:bg-red-600 focus:text-white"
                   >
                     Anular
                   </Button>
@@ -409,6 +412,7 @@ export default function ChequeForm() {
                       type="button"
                       onClick={() => handleSetAction("rechazar")}
                       outline
+                      className="focus:ring-0 focus:bg-red-600 focus:text-white"
                     >
                       Rechazar
                     </Button>
@@ -419,6 +423,7 @@ export default function ChequeForm() {
                     type="button"
                     onClick={() => handleSetAction("acreditar")}
                     outline
+                    className="focus:ring-0 focus:bg-green-600 focus:text-white"
                   >
                     Acreditar
                   </Button>
@@ -431,6 +436,7 @@ export default function ChequeForm() {
                       type="button"
                       onClick={handleBackToReceived}
                       outline
+                      className="focus:ring-0 focus:bg-yellow-600 focus:text-white"
                     >
                       Anular endoso
                     </Button>

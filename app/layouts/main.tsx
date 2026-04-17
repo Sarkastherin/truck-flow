@@ -6,7 +6,28 @@ import { PedidosProvider } from "~/context/PedidoContext";
 import { ConfiguracionesProvider } from "~/context/ConfiguracionesContext";
 import { AdministracionProvider } from "~/context/AdministracionContext";
 import { GlobalProvider } from "~/context/GlobalContext";
-import { SociosProvider } from "~/context/SociosComercialesContext";
+import {
+  SociosProvider,
+  useSociosComercial,
+} from "~/context/SociosComercialesContext";
+import { LoadingComponent } from "~/components/LoadingComponent";
+
+function ProvidersAfterSocios({ children }: { children: React.ReactNode }) {
+  const { isReady, isLoading } = useSociosComercial();
+
+  if (isLoading || !isReady) {
+    return <LoadingComponent message="Cargando socios comerciales..." />;
+  }
+
+  return (
+    <ConfiguracionesProvider>
+      <AdministracionProvider>
+        <PedidosProvider>{children}</PedidosProvider>
+      </AdministracionProvider>
+    </ConfiguracionesProvider>
+  );
+}
+
 export default function Layout() {
   return (
     <main className="min-h-screen w-full flex flex-col gap-4 text-gray-800 dark:text-white bg-white dark:bg-gray-900">
@@ -15,16 +36,12 @@ export default function Layout() {
         <ProtectedRoute>
           <GlobalProvider>
             <SociosProvider>
-              <ConfiguracionesProvider>
-                <AdministracionProvider>
-                  <PedidosProvider>
+              <ProvidersAfterSocios>
                     <div className="container mx-auto px-6 lg:px-0">
                       <Outlet />
                     </div>
                     <ModalManager />
-                  </PedidosProvider>
-                </AdministracionProvider>
-              </ConfiguracionesProvider>
+              </ProvidersAfterSocios>
             </SociosProvider>
           </GlobalProvider>
         </ProtectedRoute>

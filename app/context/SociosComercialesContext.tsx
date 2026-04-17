@@ -24,6 +24,8 @@ import { useGlobal, type CreateGlobalMethod } from "./GlobalContext";
 type SociosContextType = {
   getSociosData: () => Promise<void>;
   socios: SocioComercial[];
+  isReady: boolean;
+  isLoading: boolean;
   provincias: Provincia[] | null;
   localidades: Localidades[] | null;
   createNewSocio: CreateGlobalMethod<SocioComercial>;
@@ -58,6 +60,8 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
   const { activeUser } = useUser();
   const { createGlobalEntityCrud } = useGlobal();
   const [socios, setSocios] = useState<SocioComercial[]>([]);
+  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [provincias, setProvincias] = useState<Provincia[] | null>(null);
   const [localidades, setLocalidades] = useState<Localidades[] | null>(null);
   const [paramsFromSheets, setParamsFromSheets] = useState<{
@@ -65,6 +69,7 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
     values: Record<string, SheetCellValue[][]>;
   } | null>(null);
   const getSociosData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await getAllSheets(SHEET_ID_SOCIOS, SHEETS);
       if (error) {
@@ -74,6 +79,8 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
       }
       if (!data || data.length === 0) {
         console.warn("No se encontraron datos en la hoja de usuarios.");
+        setSocios([]);
+        setIsReady(true);
         return;
       }
       setParamsFromSheets({
@@ -86,11 +93,15 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
       });
       const normalizedSocios = getDataInJSONFormat<SocioComercial>(data[0]);
       setSocios(normalizedSocios);
+      setIsReady(true);
     } catch (error) {
+      setIsReady(false);
       console.error("Error fetching user data:", error);
       return;
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [SHEETS]);
   const fetchProvincias = useCallback(async () => {
     try {
       const data = await fetch("/provincias.json")
@@ -141,13 +152,19 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
       void getSociosData();
       void fetchProvincias();
       void fetchLocalidades();
+      return;
     }
-  }, [auth]);
+    setSocios([]);
+    setIsReady(false);
+    setIsLoading(false);
+  }, [auth, fetchLocalidades, fetchProvincias, getSociosData]);
   return (
     <SociosContext.Provider
       value={{
         getSociosData,
         socios,
+        isReady,
+        isLoading,
         provincias,
         localidades,
         createNewSocio,

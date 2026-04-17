@@ -8,6 +8,9 @@ import type { CtaCte } from "~/types/cuentas-corrientes";
 import { useAdministracion } from "~/context/AdministracionContext";
 import { SubTitles } from "~/components/SubTitles";
 import { LuBookUser } from "react-icons/lu";
+import { useModal } from "~/context/ModalContext";
+import { SeleccionarSocioModal } from "~/components/modals/customs/SeleccionarSocioModal";
+import type { SocioComercial } from "~/types/socios";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuentas Corrientes" },
@@ -55,6 +58,7 @@ const columns: TableColumn<CtaCte>[] = [
   },
 ];
 export default function CtasCtesHome() {
+  const { openModal, closeModal } = useModal();
   const { getAdministracionData, ctasCorrientesData } = useAdministracion();
   const navigate = useNavigate();
   useEffect(() => {
@@ -63,9 +67,19 @@ export default function CtasCtesHome() {
     }
   }, [getAdministracionData, ctasCorrientesData]);
   const handleRowClick = (row: CtaCte) => {
-    navigate(`/administracion/cuentas-corrientes/${row.cliente.id}`, {
-      state: { ctaCte: row },
+    navigate(`/administracion/cuentas-corrientes/${row.cliente.id}`);
+  };
+  const handleOpenModal = () => {
+    openModal("custom", {
+      title: `Seleccionar cliente`,
+      component: SeleccionarSocioModal,
+      onSelect: handleSelectSocio,
+      tipoSocio: "cliente",
     });
+  };
+  const handleSelectSocio = (item: SocioComercial) => {
+    navigate(`/administracion/cuentas-corrientes/${item.id}`);
+    closeModal();
   };
   if (!ctasCorrientesData) {
     return <LoadingComponent />;
@@ -91,7 +105,7 @@ export default function CtasCtesHome() {
         btnOnClick={{
           color: "orange",
           title: "Agregar movimiento",
-          onClick: () => navigate("/administracion/cuentas-corrientes/nuevo"),
+          onClick: handleOpenModal,
         }}
         scrollHeightOffset={370}
       />

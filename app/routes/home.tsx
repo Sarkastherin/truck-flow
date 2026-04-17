@@ -1,15 +1,12 @@
 import type { Route } from "./+types/home";
 import { Welcome } from "../welcome/welcome";
-import { useUser } from "~/context/UserContext";
-import { useEffect } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Base Repo" },
+    { title: "Inicio" },
     {
       name: "description",
-      content:
-        "Stack base para nuevos proyectos con React Router, Tailwind, Flowbite y más.",
+      content: "Dashboard de inicio con accesos rapidos y resumen operativo.",
     },
   ];
 }

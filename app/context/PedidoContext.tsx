@@ -144,7 +144,7 @@ export const PedidosProvider = ({
   } | null>(null);
   const getPedidosData = useCallback(async () => {
     try {
-      if (!socios || socios.length === 0) {
+      if (!socios) {
         return;
       }
       const { data, error } = await getAllSheets(SHEET_ID_PEDIDO, SHEETS);

@@ -455,32 +455,14 @@ export function TableComponent<T>({
       });
     }
   }, []);
+  // Lógica para diferenciar entre sin datos y sin coincidencias
+  const noData = data.length === 0;
+  const noMatches = data.length > 0 && visibleData.length === 0;
+
   return (
     <>
-      {visibleData.length > 0 && (
-        <div className="flex items-center justify-between mb-2">
-          {inactiveField && (
-            <div className="mb-4 flex items-center gap-2">
-              <ToggleSwitch
-                checked={showInactive}
-                onChange={setShowInactive}
-                label="Mostrar inactivos"
-              />
-            </div>
-          )}
-          {showFilterInfo && filterFields.length > 0 && (
-            <div className="flex justify-between w-full items-center text-sm font-semibold">
-              <div className="text-blue-600 dark:text-blue-400 ">
-                ℹ️ Filtros aplicados.
-              </div>
-              <div className="mt-2 bg-zinc-300/50 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300 px-2 rounded">
-                Registros encontrados: {visibleData.length}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      {filterFields.length > 0 && visibleData.length > 0 && (
+      {/* Filtros y switches SIEMPRE visibles si hay campos de filtro y hay datos o hay filtros activos */}
+      {filterFields.length > 0 && (!noData || Object.values(filters).some((v) => v)) && (
         <form
           className="flex gap-2 md:flex-row flex-col mb-6"
           onSubmit={(e) => {
@@ -562,6 +544,32 @@ export function TableComponent<T>({
           )}
         </form>
       )}
+
+      {/* Switch de inactivos y resumen de filtros solo si hay datos */}
+      {data.length > 0 && visibleData.length > 0 && (
+        <div className="flex items-center justify-between mb-2">
+          {inactiveField && (
+            <div className="mb-4 flex items-center gap-2">
+              <ToggleSwitch
+                checked={showInactive}
+                onChange={setShowInactive}
+                label="Mostrar inactivos"
+              />
+            </div>
+          )}
+          {showFilterInfo && filterFields.length > 0 && (
+            <div className="flex justify-between w-full items-center text-sm font-semibold">
+              <div className="text-blue-600 dark:text-blue-400 ">
+                ℹ️ Filtros aplicados.
+              </div>
+              <div className="mt-2 bg-zinc-300/50 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300 px-2 rounded">
+                Registros encontrados: {visibleData.length}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <DataTable
           columns={processedColumns}
@@ -588,8 +596,20 @@ export function TableComponent<T>({
           noDataComponent={
             noDataComponent || (
               <EmptyTableState
-                title={emptyState?.title || "No se encontraron registros"}
-                description={emptyState?.description}
+                title={
+                  noData
+                    ? emptyState?.title || "No hay registros cargados"
+                    : noMatches
+                    ? "No hay coincidencias para los filtros"
+                    : emptyState?.title || "No se encontraron registros"
+                }
+                description={
+                  noData
+                    ? emptyState?.description || "Todavía no se cargaron datos para esta sección."
+                    : noMatches
+                    ? "Intenta modificar o limpiar los filtros para ver resultados."
+                    : emptyState?.description
+                }
                 actionLabel={emptyState?.actionLabel || btnOnClick?.title}
                 onAction={emptyState?.onAction || btnOnClick?.onClick}
               />

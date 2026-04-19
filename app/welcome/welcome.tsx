@@ -336,10 +336,20 @@ export function Welcome() {
           </section>
         </div>
       </section>
+      <footer></footer>
       <footer>
         <div className="flex items-center justify-center gap-2 mt-6 text-center text-sm text-gray-500 dark:text-gray-400 scale-75">
           <LogoComponent />
           <span>- Versión {appVersion}</span>
+        </div>
+        <div className="text-sm text-center">
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
+            Política de Privacidad
+          </a>
+          <span> | </span>
+          <a href="/terms.html" target="_blank" rel="noopener noreferrer">
+            Términos y Condiciones
+          </a>
         </div>
       </footer>
     </main>

@@ -1,6 +1,6 @@
 import { Input, formatCuit, Select } from "~/components/InputsForm";
 import { Button, Card } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getChequeTransition,
   chequeStateMachine,
@@ -29,9 +29,10 @@ export default function ChequeForm() {
   const { chequeId } = useParams();
   const { cheques, bancos, updateCheque, createNewMovimiento } =
     useAdministracion();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
   const cheque = cheques?.find((c) => c.id === chequeId);
   const [accion, setAccion] = useState<AccionTypes | "">("");
+  useEffect(() => { closeModal(); }, []);
   const {
     register,
     handleSubmit,
@@ -41,9 +42,7 @@ export default function ChequeForm() {
     formState: {
       errors,
       isSubmitting,
-      isDirty,
       dirtyFields,
-      isSubmitSuccessful,
     },
   } = useForm<ChequeConSociosYMovimiento>({
     defaultValues: cheque,

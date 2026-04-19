@@ -11,6 +11,7 @@ import { LuBookUser } from "react-icons/lu";
 import { useModal } from "~/context/ModalContext";
 import { SeleccionarSocioModal } from "~/components/modals/customs/SeleccionarSocioModal";
 import type { SocioComercial } from "~/types/socios";
+import { useLocation } from "react-router";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuentas Corrientes" },
@@ -58,7 +59,8 @@ const columns: TableColumn<CtaCte>[] = [
   },
 ];
 export default function CtasCtesHome() {
-  const { openModal, closeModal } = useModal();
+  const location = useLocation();
+  const { openModal } = useModal();
   const { getAdministracionData, ctasCorrientesData } = useAdministracion();
   const navigate = useNavigate();
   useEffect(() => {
@@ -78,12 +80,17 @@ export default function CtasCtesHome() {
     });
   };
   const handleSelectSocio = (item: SocioComercial) => {
+    openModal("loading", { props: { title: "Cargando cuenta corriente..." } });
     navigate(`/administracion/cuentas-corrientes/${item.id}`);
-    closeModal();
   };
   if (!ctasCorrientesData) {
     return <LoadingComponent />;
   }
+  useEffect(() =>{
+    if(location.search.includes("openNuevoMovimiento=true")){
+      handleOpenModal();
+    }
+  },[location.search])
   return (
     <>
       <SubTitles

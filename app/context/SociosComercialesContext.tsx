@@ -57,7 +57,6 @@ const SociosContext = createContext<SociosContextType | undefined>(undefined);
 export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
   const SHEETS = useMemo(() => getCompleteSheetRange(SHEET_NAMES_SOCIOS), []);
   const { auth } = useAuth();
-  const { activeUser } = useUser();
   const { createGlobalEntityCrud } = useGlobal();
   const [socios, setSocios] = useState<SocioComercial[]>([]);
   const [isReady, setIsReady] = useState(false);

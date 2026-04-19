@@ -20,20 +20,21 @@ export function meta({}: Route.MetaArgs) {
 
 const columns: TableColumn<Pedido>[] = [
   {
-    name: "Núm. Pedido",
+    name: "Número",
     selector: (row) => row.numero_pedido,
-    width: "150px",
+    width: "100px",
     sortable: true,
   },
   {
     name: "Cliente",
     selector: (row) => row.cliente?.razon_social || "",
     sortable: true,
+    width: "200px",
   },
   {
-    name: "Fecha prevista",
+    name: "F. prevista",
     selector: (row) => formatDateUStoES(row.fecha_estimada_entrega),
-    width: "150px",
+    width: "120px",
     sortable: true,
     sortFunction: (rowA, rowB) => {
       if (!rowA.fecha_estimada_entrega) return 1;
@@ -44,9 +45,9 @@ const columns: TableColumn<Pedido>[] = [
     },
   },
   {
-    name: "Fecha de pedido",
+    name: "F. pedido",
     selector: (row) => formatDateUStoES(row.fecha_pedido),
-    width: "150px",
+    width: "120px",
     sortable: true,
     sortFunction: (rowA, rowB) => {
       const dateA = new Date(rowA.fecha_pedido);
@@ -62,7 +63,7 @@ const columns: TableColumn<Pedido>[] = [
         style: "currency",
         currency: "ARS",
       }),
-    width: "180px",
+    width: "150px",
     sortable: true,
   },
   {
@@ -70,7 +71,7 @@ const columns: TableColumn<Pedido>[] = [
     selector: (row) =>
       row.ordenes_trabajo?.find((wo) => wo.cargo === "armador")
         ?.responsable_nombre || "",
-    width: "200px",
+    width: "150px",
     sortable: true,
   },
   {

@@ -49,9 +49,29 @@ type InputProps = ComponentPropsWithoutRef<typeof TextInput> & {
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, requiredField = false, ...props },
+  {
+    label,
+    error,
+    requiredField = false,
+    type,
+    onInput,
+    inputMode,
+    pattern,
+    ...props
+  },
   ref,
 ) {
+  const isNumberLike = type === "number";
+
+  const handleInput: React.InputEventHandler<HTMLInputElement> = (event) => {
+    if (isNumberLike) {
+      const input = event.target as HTMLInputElement;
+      input.value = input.value.replace(/[^0-9]/g, "");
+    }
+
+    onInput?.(event);
+  };
+
   return (
     <div className="w-full">
       {label && (
@@ -66,9 +86,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       )}
       <TextInput
         ref={ref}
-        type={props.type || "text"}
-        color={error ? "failure" : "gray"}
         {...props}
+        type={isNumberLike ? "text" : (type ?? "text")}
+        inputMode={isNumberLike ? "numeric" : inputMode}
+        pattern={isNumberLike ? "[0-9]*" : pattern}
+        color={error ? "failure" : "gray"}
+        onInput={handleInput}
       />
       {error && (
         <HelperText className="text-red-500 dark:text-red-400">
@@ -385,9 +408,29 @@ export const InputGroupWithIcon = forwardRef<
   HTMLInputElement,
   InputGroupWithIconProps
 >(function InputGroupWithIcon(
-  { error, icon, requiredField = false, ...props },
+  {
+    error,
+    icon,
+    requiredField = false,
+    type,
+    onInput,
+    inputMode,
+    pattern,
+    ...props
+  },
   ref,
 ) {
+  const isNumberLike = type === "number";
+
+  const handleInput: React.InputEventHandler<HTMLInputElement> = (event) => {
+    if (isNumberLike) {
+      const input = event.target as HTMLInputElement;
+      input.value = input.value.replace(/[^0-9]/g, "");
+    }
+
+    onInput?.(event);
+  };
+
   return (
     <div className="w-full">
       <div className={`${props.sizing === "sm" ? "mb-0.5" : "mb-1"} block`}>
@@ -399,9 +442,12 @@ export const InputGroupWithIcon = forwardRef<
       <TextInput
         ref={ref}
         {...props}
-        type={props.type || "text"}
+        type={isNumberLike ? "text" : (type ?? "text")}
+        inputMode={isNumberLike ? "numeric" : inputMode}
+        pattern={isNumberLike ? "[0-9]*" : pattern}
         rightIcon={icon}
         color={error ? "failure" : "gray"}
+        onInput={handleInput}
       />
       {error && (
         <HelperText className="text-red-500 dark:text-red-400">

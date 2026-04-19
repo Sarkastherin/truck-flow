@@ -5,6 +5,8 @@ import { useAuth } from "~/context/AuthContext";
 import { LogoComponent } from "~/components/LogoComponent";
 import PaintRollerIcon from "~/components/PaintRollerIcon";
 import { Button, Card } from "flowbite-react";
+import pkg from "../../package.json";
+const appVersion = pkg.version;
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -59,6 +61,7 @@ export default function Login() {
           {errorMessage && (
             <p className="text-sm font-medium text-center text-white bg-red-600 rounded-md py-2">{`${errorMessage?.includes("gapi") ? "Comprueba tu conexión" : errorMessage}`}</p>
           )}
+          <p className="text-sm text-center text-white ">Versión: {appVersion}</p>
         </Card>
       </div>
     </div>

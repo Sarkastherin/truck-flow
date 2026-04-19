@@ -7,8 +7,13 @@ export const useSocio = () => {
   const form = useForm<SocioComercialFormValues>({
     defaultValues: {},
   });
-  const { createNewSocio, updateSocio, removeSocio, reactivateSocio, isCUITRegistered } =
-    useSociosComercial();
+  const {
+    createNewSocio,
+    updateSocio,
+    removeSocio,
+    reactivateSocio,
+    isCUITRegistered,
+  } = useSociosComercial();
   const onCreate = async (data: SocioComercialFormValues) => {
     const duplicatedCUIT = isCUITRegistered(data.cuit_cuil, data.tipo);
     if (duplicatedCUIT) {
@@ -29,7 +34,10 @@ export const useSocio = () => {
     return result.data;
   };
   const onUpdate = async (data: SocioComercialFormValues) => {
-    const result = await updateSocio(data as SocioComercial, form.formState.dirtyFields);
+    const result = await updateSocio(
+      data as SocioComercial,
+      form.formState.dirtyFields,
+    );
     if (!result.success) {
       setMessageForm(
         result.message || "Error al actualizar el socio comercial",

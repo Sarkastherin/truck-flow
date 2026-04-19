@@ -59,7 +59,7 @@ function FormModalContent({
             </div>
           )}
           {stepForm === "success" && (
-            <Button className="ms-auto" color={"green"} onClick={closeModal}>
+            <Button className="ms-auto" color={"green"} onClick={formProps.onCloseCustom || closeModal}>
               Aceptar
             </Button>
           )}

@@ -6,13 +6,15 @@ import { usePedido } from "~/context/PedidoContext";
 import type { Movimientos } from "~/types/cuentas-corrientes";
 import type { Pedido } from "~/types/pedido";
 import {
-  LuArrowRight,
   LuBriefcaseBusiness,
   LuCircleDollarSign,
   LuClipboardPlus,
   LuFilePlus2,
   LuWalletCards,
 } from "react-icons/lu";
+import pkg from "../../package.json";
+import { LogoComponent } from "~/components/LogoComponent";
+const appVersion = pkg.version;
 
 type DashboardAction = {
   title: string;
@@ -67,7 +69,11 @@ export function Welcome() {
   const { ctasCorrientesData, getAdministracionData } = useAdministracion();
   const [isLoading, setIsLoading] = useState(false);
   const hasRequestedData = useRef(false);
-
+  useEffect(() => {
+    if (!pedidos) {
+      getPedidosData();
+    }
+  }, [pedidos, getPedidosData]);
   useEffect(() => {
     if (hasRequestedData.current) {
       return;
@@ -330,6 +336,12 @@ export function Welcome() {
           </section>
         </div>
       </section>
+      <footer>
+        <div className="flex items-center justify-center gap-2 mt-6 text-center text-sm text-gray-500 dark:text-gray-400 scale-75">
+          <LogoComponent />
+          <span>- Versión {appVersion}</span>
+        </div>
+      </footer>
     </main>
   );
 }

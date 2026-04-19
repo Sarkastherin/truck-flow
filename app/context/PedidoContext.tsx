@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -144,9 +145,7 @@ export const PedidosProvider = ({
   } | null>(null);
   const getPedidosData = useCallback(async () => {
     try {
-      if (!socios) {
-        return;
-      }
+      if (!socios || socios.length === 0) return;
       const { data, error } = await getAllSheets(SHEET_ID_PEDIDO, SHEETS);
       if (error) {
         throw new Error(

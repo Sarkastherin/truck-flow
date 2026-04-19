@@ -47,11 +47,13 @@ export default function PedidosControlesCalidad() {
     ];
   }, [ordenes_trabajo]);
 
-  
   const controlCarrozadoData = useMemo(() => {
-    return controlCarrozado.filter(
-      (control) => control.carrozado_id === pedido.carroceria?.tipo_carrozado_id,
-    ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    return controlCarrozado
+      .filter(
+        (control) =>
+          control.carrozado_id === pedido.carroceria?.tipo_carrozado_id,
+      )
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [controlCarrozado, pedido.carroceria?.tipo_carrozado_id]);
   const handleOpenModal = (tipo: TipoOrden) => {
     openModal("custom", {
@@ -64,9 +66,59 @@ export default function PedidosControlesCalidad() {
       controlCarrozado: controlCarrozadoData,
     });
   };
+  if (!pedido?.carroceria?.id) {
+    return (
+      <section className="ps-4 w-full">
+        <div
+          className="flex items-center justify-center"
+          style={{ minHeight: "calc(100vh - 115px)" }}
+        >
+          <div className="flex flex-col gap-6">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No hay carrocería asociada a este pedido.
+            </p>
+            <Button
+              color={"violet"}
+              className="w-fit mx-auto"
+              onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
+            >
+              Agregar Carrocería
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+  if (controlCarrozadoData.length === 0) {
+    return (
+      <section className="ps-4 w-full">
+        <div
+          className="flex items-center justify-center"
+          style={{ minHeight: "calc(100vh - 115px)" }}
+        >
+          <div className="flex flex-col gap-6">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No hay controles de calidad disponibles para este pedido.
+            </p>
+            <Button
+              color={"yellow"}
+              className="w-fit mx-auto"
+              onClick={() =>
+                navigate(
+                  `/configuraciones/carrozados/control-carrozado/${pedido.carroceria?.tipo_carrozado_id}`,
+                )
+              }
+            >
+              Defina los controles aquí
+            </Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="ps-4 w-full">
-      {pedido.carroceria && pedido.carroceria.id ? (
+      {pedido.carroceria && pedido.carroceria.id && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {tiposControles.map(
             ({ name, description, icon: Icon, tipo, status }) => (
@@ -90,24 +142,6 @@ export default function PedidosControlesCalidad() {
               </Card>
             ),
           )}
-        </div>
-      ) : (
-        <div
-          className="flex items-center justify-center"
-          style={{ minHeight: "calc(100vh - 115px)" }}
-        >
-          <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No hay carrocería asociada a este pedido.
-            </p>
-            <Button
-              color={"violet"}
-              className="w-fit mx-auto"
-              onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
-            >
-              Agregar Carrocería
-            </Button>
-          </div>
         </div>
       )}
     </section>

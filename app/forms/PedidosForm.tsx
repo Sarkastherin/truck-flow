@@ -17,7 +17,7 @@ import type { Pedido, PedidoFormValues } from "~/types/pedido";
 import { useModal } from "~/context/ModalContext";
 import type { SocioComercial } from "~/types/socios";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePedido } from "~/context/PedidoContext";
 import { useNavigate } from "react-router";
 import { statusOptionsPedidos, tipoPedidoOptions } from "~/types/pedido";
@@ -26,7 +26,9 @@ import { SocioComponentForm } from "~/components/specials/SocioComponent";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 import { useAdministracion } from "~/context/AdministracionContext";
 import type { MovimientoDetalle } from "~/types/cuentas-corrientes";
+import { useSociosComercial } from "~/context/SociosComercialesContext";
 export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
+  const { socios } = useSociosComercial();
   const { vendedoresOptions } = useConfiguracion();
   const { openModal } = useModal();
   const { createNewPedido, updatePedido } = usePedido();
@@ -138,10 +140,39 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
           haber: 0,
           concepto: `Deuda generada por pedido ${dataInsert.numero_pedido}`,
         };
-        const { data: movimientoData, error: movimientoError } =
-          await createNewMovimiento(
-            payloadMovimiento as Omit<MovimientoDetalle, "id">,
+        if (data.formas_pago && data.formas_pago.length > 0) {
+          //buscar si alguna forma de pago es carrcceria_usada
+          const tieneCarroceriaUsada = data.formas_pago.some(
+            (formaPago) => formaPago.tipo === "carroceria_usada",
           );
+          const carroceriaUsada = data.formas_pago.find(
+            (formaPago) => formaPago.tipo === "carroceria_usada",
+          );
+          if (tieneCarroceriaUsada) {
+            const payloadMvtoCarroceria = {
+              cliente_id: dataInsert.cliente_id,
+              fecha_movimiento: fecha_movimiento,
+              tipo_movimiento: "pago",
+              origen: "pedido",
+              medio_pago: "carroceria_usada",
+              debe: 0,
+              haber: carroceriaUsada?.monto || 0,
+              concepto: `Pago generado por pedido ${dataInsert.numero_pedido}`,
+            };
+            const { error: movimientoError } = await createNewMovimiento(
+              payloadMvtoCarroceria as Omit<MovimientoDetalle, "id">,
+            );
+
+            if (movimientoError) {
+              throw new Error(
+                `Error al crear movimiento en cuenta corriente: ${movimientoError}`,
+              );
+            }
+          }
+        }
+        const { error: movimientoError } = await createNewMovimiento(
+          payloadMovimiento as Omit<MovimientoDetalle, "id">,
+        );
 
         if (movimientoError) {
           throw new Error(
@@ -224,6 +255,10 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
     isSubmitSuccessful,
     dirtyFields,
   });
+  useEffect(() =>{
+    console.log("watch cliente_id:", watch("cliente_id"));
+  },[watch("cliente_id")])
+  //20369565169
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
       <Accordion alwaysOpen>
@@ -246,8 +281,9 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
                   error={errors.cliente_id?.message}
                   value={watch(`cliente.razon_social`) || ""}
                   onSelect={(cliente: SocioComercial) => {
-                    setValue("cliente", cliente, { shouldDirty: true });
+                    console.log("Cliente seleccionado en PedidosForm:", cliente);
                     setValue("cliente_id", cliente.id, { shouldDirty: true });
+                    setValue("cliente", cliente, { shouldDirty: true });
                     setValue("vendedor_id", cliente.vendedor_id || "", {
                       shouldDirty: true,
                     });
@@ -307,6 +343,10 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
                 control={control}
                 rules={{
                   required: "Este campo es requerido",
+                  min: {
+                    value: 0.01,
+                    message: "El precio total debe ser mayor a cero",
+                  },
                 }}
                 error={errors.precio?.message}
                 requiredField={true}

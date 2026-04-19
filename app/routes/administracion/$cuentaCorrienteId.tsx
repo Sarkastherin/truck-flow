@@ -4,10 +4,11 @@ import { LoadingComponent } from "~/components/LoadingComponent";
 import { useAdministracion } from "~/context/AdministracionContext";
 import { Card } from "flowbite-react";
 import { formatCuit } from "~/components/InputsForm";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import ButtonsActionsCtaCte from "~/components/specials/ButtonsActionsCtaCte";
 import TableMovimientos from "~/components/specials/TableMovimientos";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
+import { useModal } from "~/context/ModalContext";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuenta Corriente" },
@@ -22,6 +23,8 @@ export default function CuentaCorriente() {
   const { socioId } = useParams();
   const { ctasCorrientesData } = useAdministracion();
   const { socios } = useSociosComercial();
+  const { closeModal } = useModal();
+  useEffect(() => { closeModal(); }, []);
   const ctaCte =
     ctasCorrientesData?.find((s) => String(s.cliente.id) === socioId) || null;
   const saldo = useMemo(() => {

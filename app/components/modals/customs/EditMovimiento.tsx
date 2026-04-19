@@ -39,7 +39,7 @@ export default function EditMovimiento({
   };
 }) {
   const navigate = useNavigate();
-  const { closeModal } = useModal();
+  const { openModal } = useModal();
   const { bancos } = useAdministracion();
   const { form, isEfectivo, files, setFiles } = props;
   const cheques = (form.watch("cheques") as Cheque[]) || [];
@@ -155,8 +155,8 @@ export default function EditMovimiento({
                 className="hover:border-violet-400 hover:shadow-md transition-shadow cursor-pointer"
                 title="Ir al cheque"
                 onClick={() => {
+                  openModal("loading", { props: { title: "Cargando cheque..." } });
                   navigate(`/administracion/cheques/${cheque.id}`);
-                  closeModal();
                 }}
                 style={{ cursor: "pointer" }}
               >

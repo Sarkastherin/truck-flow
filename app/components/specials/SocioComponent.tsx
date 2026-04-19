@@ -40,12 +40,9 @@ export function SocioComponentForm<T>({
 
   const handleCreateSocio = async (data: Parameters<typeof onCreate>[0]) => {
     const newSocio = await onCreate(data);
-
     if (newSocio) {
       onSelect(newSocio);
     }
-
-    return newSocio;
   };
 
   const handleOpenNuevoSocioModal = () => {

@@ -18,7 +18,11 @@ import {
   SHEET_NAMES_CTAS_CORRIENTES,
 } from "~/backend/Database/SheetsConfig";
 import { type DirtyMap } from "~/utils/prepareUpdatePayload";
-import { useGlobal, type CreateGlobalMethod, type CreateGlobalResponse } from "./GlobalContext";
+import {
+  useGlobal,
+  type CreateGlobalMethod,
+  type CreateGlobalResponse,
+} from "./GlobalContext";
 import type {
   Movimientos,
   Cheque,
@@ -65,7 +69,7 @@ type AdministracionContextType = {
     cheque: Cheque,
     dirtyFields: DirtyMap<Cheque>,
   ) => Promise<CrudResponse>;
-  createNewMovimiento: CreateGlobalMethod<MovimientoDetalle>
+  createNewMovimiento: CreateGlobalMethod<MovimientoDetalle>;
   isCHEQUERegistered: (numeroCheque: number, cliente_id: string) => boolean;
 };
 type HeadersType = {
@@ -99,6 +103,7 @@ export const AdministracionProvider = ({
     values: Record<string, SheetCellValue[][]>;
   } | null>(null);
   const getAdministracionData = useCallback(async () => {
+    if (!socios || socios.length === 0) return;
     try {
       const { data, error } = await getAllSheets(
         SHEET_ID_CTAS_CORRIENTES,
@@ -237,17 +242,15 @@ export const AdministracionProvider = ({
       void getBancos();
     }
   }, [auth, getAdministracionData, getBancos, socios, activeUser]);
-  const {
-    create: createNewMovimiento,
-    update: updateMovimiento,
-  } = createGlobalEntityCrud<Movimientos>(
-    "movimientos",
-    "movimiento",
-    paramsFromSheets,
-    SHEET_ID_CTAS_CORRIENTES,
-    SHEET_NAMES_CTAS_CORRIENTES.movimientos,
-    getAdministracionData,
-  );
+  const { create: createNewMovimiento, update: updateMovimiento } =
+    createGlobalEntityCrud<Movimientos>(
+      "movimientos",
+      "movimiento",
+      paramsFromSheets,
+      SHEET_ID_CTAS_CORRIENTES,
+      SHEET_NAMES_CTAS_CORRIENTES.movimientos,
+      getAdministracionData,
+    );
   const {
     create: createNewCheque,
     update: updateCheque,
@@ -469,7 +472,11 @@ export const AdministracionProvider = ({
   const isCHEQUERegistered = useCallback(
     (numeroCheque: number, cliente_id: string) => {
       return cheques.some(
-        (cheque) => cheque.numero === numeroCheque && cheque.cliente.id === cliente_id && cheque.status !== "anulado" && cheque.status !== "rechazado",
+        (cheque) =>
+          cheque.numero === numeroCheque &&
+          cheque.cliente.id === cliente_id &&
+          cheque.status !== "anulado" &&
+          cheque.status !== "rechazado",
       );
     },
     [cheques],
@@ -486,7 +493,7 @@ export const AdministracionProvider = ({
         updateMovimientoAndDocumentos,
         updateCheque,
         createNewMovimiento,
-        isCHEQUERegistered
+        isCHEQUERegistered,
       }}
     >
       {children}
@@ -495,6 +502,7 @@ export const AdministracionProvider = ({
 };
 export const useAdministracion = () => {
   const context = useContext(AdministracionContext);
+  const { socios } = useSociosComercial();
   if (context === undefined) {
     throw new Error(
       "useAdministracion must be used within an AdministracionProvider",

@@ -11,7 +11,6 @@ import {
 } from "flowbite-react";
 import { useState } from "react";
 import type {
-  CarroceriaFormValues,
   TrabajoChasis,
   Camion,
   PedidoFormValues,
@@ -57,6 +56,15 @@ export default function DatosColocacion({
     });
     try {
       const { camionData, carroceria, trabajo_chasis } = data;
+      if (Object.keys(dirtyFields).length === 0) {
+        openModal("info", {
+          props: {
+            title: "Sin cambios",
+            message: "No se han realizado cambios en los datos de colocación.",
+          },
+        });
+        return;
+      }
       // Actualizar camión si hay cambios
       if (dirtyFields.camionData) {
         const { error } = await updateCamionBase(

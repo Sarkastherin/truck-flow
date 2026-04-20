@@ -141,13 +141,14 @@ export const AdministracionProvider = ({
         (acc, cta) => {
           const key = cta.cliente_id;
           if (!acc[key]) {
-            acc[key] = { debe: 0, haber: 0 };
+            acc[key] = { debe: 0, haber: 0, isClosed: false };
           }
           acc[key].debe += Number(cta.debe) || 0;
           acc[key].haber += Number(cta.haber) || 0;
+          acc[key].isClosed = acc[key].debe - acc[key].haber === 0;
           return acc;
         },
-        {} as Record<string, { debe: number; haber: number }>,
+        {} as Record<string, { debe: number; haber: number; isClosed: boolean }>,
       );
       let ctasCorrientesArray: CtaCte[] = [];
       const ctasCorrientesData = Object.entries(ctasCorrientes);
@@ -181,6 +182,7 @@ export const AdministracionProvider = ({
           cliente,
           debe: saldo.debe,
           haber: saldo.haber,
+          isClosed: saldo.isClosed,
           movimientos: movimientosConChequesYDocumentos,
         });
       });

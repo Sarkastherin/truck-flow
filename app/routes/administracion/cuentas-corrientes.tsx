@@ -86,11 +86,11 @@ export default function CtasCtesHome() {
   if (!ctasCorrientesData) {
     return <LoadingComponent />;
   }
-  useEffect(() =>{
-    if(location.search.includes("openNuevoMovimiento=true")){
+  useEffect(() => {
+    if (location.search.includes("openNuevoMovimiento=true")) {
       handleOpenModal();
     }
-  },[location.search])
+  }, [location.search]);
   return (
     <>
       <SubTitles
@@ -106,6 +106,15 @@ export default function CtasCtesHome() {
           {
             key: "cliente.cuit_cuil",
             label: "CUIT/CUIL",
+          },
+          {
+            key: "isClosed",
+            label: "Estado de Cuenta",
+            type: "select",
+            options: [
+              { value: "true", label: "Cerrada" },
+              { value: "false", label: "Abierta" },
+            ],
           },
         ]}
         onRowClick={(row) => handleRowClick(row)}

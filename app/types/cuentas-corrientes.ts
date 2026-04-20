@@ -132,6 +132,7 @@ export type CtaCte = {
   cliente: SocioComercial;
   debe: number;
   haber: number;
+  isClosed: boolean;
 } & {
   movimientos: MovimientoDetalle[];
 };

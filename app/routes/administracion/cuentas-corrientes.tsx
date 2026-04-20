@@ -77,6 +77,7 @@ export default function CtasCtesHome() {
       component: SeleccionarSocioModal,
       onSelect: handleSelectSocio,
       tipoSocio: "cliente",
+      btnNewClient: true,
     });
   };
   const handleSelectSocio = (item: SocioComercial) => {

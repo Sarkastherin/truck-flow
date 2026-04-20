@@ -112,73 +112,6 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
         if (error) {
           throw new Error(`Error al crear pedido: ${error}`);
         }
-        // crear movimiento en cuenta corriente para el pedido nuevo
-        openModal("loading", {
-          props: {
-            title: "Creando pedido...",
-            message: "Generando movimiento en cuenta corriente...",
-          },
-        });
-        if (!dataInsert?.id || !dataInsert?.cliente_id || !dataInsert?.precio) {
-          throw new Error(
-            "Datos incompletos para crear movimiento en cuenta corriente: id, cliente_id y precio son requeridos",
-          );
-        }
-        const now = new Date();
-        const fecha_movimiento = [
-          now.getFullYear(),
-          String(now.getMonth() + 1).padStart(2, "0"),
-          String(now.getDate()).padStart(2, "0"),
-        ].join("-");
-        const payloadMovimiento = {
-          cliente_id: dataInsert.cliente_id,
-          fecha_movimiento: fecha_movimiento,
-          tipo_movimiento: "deuda",
-          origen: "pedido",
-          medio_pago: "no_aplica",
-          debe: dataInsert.precio,
-          haber: 0,
-          concepto: `Deuda generada por pedido ${dataInsert.numero_pedido}`,
-        };
-        if (data.formas_pago && data.formas_pago.length > 0) {
-          //buscar si alguna forma de pago es carrcceria_usada
-          const tieneCarroceriaUsada = data.formas_pago.some(
-            (formaPago) => formaPago.tipo === "carroceria_usada",
-          );
-          const carroceriaUsada = data.formas_pago.find(
-            (formaPago) => formaPago.tipo === "carroceria_usada",
-          );
-          if (tieneCarroceriaUsada) {
-            const payloadMvtoCarroceria = {
-              cliente_id: dataInsert.cliente_id,
-              fecha_movimiento: fecha_movimiento,
-              tipo_movimiento: "pago",
-              origen: "pedido",
-              medio_pago: "carroceria_usada",
-              debe: 0,
-              haber: carroceriaUsada?.monto || 0,
-              concepto: `Pago generado por pedido ${dataInsert.numero_pedido}`,
-            };
-            const { error: movimientoError } = await createNewMovimiento(
-              payloadMvtoCarroceria as Omit<MovimientoDetalle, "id">,
-            );
-
-            if (movimientoError) {
-              throw new Error(
-                `Error al crear movimiento en cuenta corriente: ${movimientoError}`,
-              );
-            }
-          }
-        }
-        const { error: movimientoError } = await createNewMovimiento(
-          payloadMovimiento as Omit<MovimientoDetalle, "id">,
-        );
-
-        if (movimientoError) {
-          throw new Error(
-            `Error al crear movimiento en cuenta corriente: ${movimientoError}`,
-          );
-        }
         if (success) {
           openModal("success", {
             props: {
@@ -255,10 +188,6 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
     isSubmitSuccessful,
     dirtyFields,
   });
-  useEffect(() =>{
-    console.log("watch cliente_id:", watch("cliente_id"));
-  },[watch("cliente_id")])
-  //20369565169
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
       <Accordion alwaysOpen>
@@ -281,7 +210,6 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
                   error={errors.cliente_id?.message}
                   value={watch(`cliente.razon_social`) || ""}
                   onSelect={(cliente: SocioComercial) => {
-                    console.log("Cliente seleccionado en PedidosForm:", cliente);
                     setValue("cliente_id", cliente.id, { shouldDirty: true });
                     setValue("cliente", cliente, { shouldDirty: true });
                     setValue("vendedor_id", cliente.vendedor_id || "", {

@@ -12,6 +12,8 @@ export const flowbiteTheme = createTheme({
     outlineColor: {
       violet:
         "border border-violet-600 text-violet-600 hover:border-violet-700 hover:bg-violet-700 hover:text-white focus:ring-violet-300 dark:border-violet-500 dark:text-violet-400 dark:hover:border-violet-600 dark:hover:bg-violet-600 dark:hover:text-white dark:focus:ring-violet-800",
+      orange:
+        "border border-orange-500 text-orange-600 hover:border-orange-600 hover:bg-orange-600 hover:text-white focus:ring-orange-300 dark:border-orange-500 dark:text-orange-400 dark:hover:border-orange-500 dark:hover:bg-orange-600 dark:hover:text-white dark:focus:ring-orange-800",
     },
   },
   textInput: {

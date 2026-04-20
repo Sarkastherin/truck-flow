@@ -1,15 +1,28 @@
-import { TextInput, ListGroup, ListGroupItem } from "flowbite-react";
+import { TextInput, ListGroup, ListGroupItem, Button } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import type { SocioComercial } from "~/types/socios";
 import { Spinner } from "flowbite-react";
+import { useSocio } from "~/hooks/useSocio";
 export function SeleccionarSocioModal({
   onSelect,
-  tipoSocio
+  tipoSocio,
+  btnNewClient,
 }: {
   onSelect: (item: SocioComercial) => void;
   tipoSocio: "cliente" | "proveedor";
+  btnNewClient?: boolean;
 }) {
+  const handleCreateSocio = async (data: Parameters<typeof onCreate>[0]) => {
+    const newSocio = await onCreate(data);
+    if (newSocio) {
+      onSelect(newSocio);
+    }
+  };
+  const {onCreate, handleOpenNuevoSocioModal } = useSocio({
+    tipoSocio,
+    handleCreateSocio,
+  });
   const { socios, getSociosData } = useSociosComercial();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState<SocioComercial[]>(socios || []);
@@ -58,6 +71,9 @@ export function SeleccionarSocioModal({
           )}
         </ListGroup>
       )}
+      <div className="mt-2 w-full">
+        {btnNewClient && <Button className="w-full" color={"orange"} outline onClick={handleOpenNuevoSocioModal}>Nuevo Cliente</Button>}
+      </div>
     </div>
   );
 }

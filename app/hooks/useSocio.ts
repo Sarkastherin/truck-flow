@@ -2,8 +2,15 @@ import { useForm } from "react-hook-form";
 import type { SocioComercial, SocioComercialFormValues } from "~/types/socios";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import { useModal } from "~/context/ModalContext";
-export const useSocio = () => {
-  const { setMessageForm, setStepForm } = useModal();
+import { SocioModal } from "~/components/modals/customs/SocioModal";
+export const useSocio = ({
+  tipoSocio,
+  handleCreateSocio
+}: {
+  tipoSocio: "cliente" | "proveedor";
+  handleCreateSocio: (data: SocioComercialFormValues) => Promise<void>;
+}) => {
+  const { setMessageForm, setStepForm, openModal } = useModal();
   const form = useForm<SocioComercialFormValues>({
     defaultValues: {},
   });
@@ -73,5 +80,41 @@ export const useSocio = () => {
     setStepForm("success");
     return result;
   };
-  return { form, onCreate, onUpdate, onDelete, onReactivate };
+  const handleOpenNuevoSocioModal = () => {
+    const newForm = form;
+    newForm.reset({
+      razon_social: "",
+      cuit_cuil: "",
+      direccion: "",
+      telefono_contacto: "",
+      email_contacto: "",
+      nombre_contacto: "",
+      tipo: tipoSocio,
+      provincia_id: "",
+      provincia: "",
+      localidad_id: "",
+      localidad: "",
+      condicion_iva: "",
+      vendedor_id: "",
+    });
+    newForm.clearErrors();
+    openModal("form", {
+      component: SocioModal,
+      props: {
+        form: newForm,
+        title: `Nuevo ${tipoSocio}`,
+        size: "2xl",
+        tipoSocio,
+      },
+      onSubmit: newForm.handleSubmit(handleCreateSocio),
+    });
+  };
+  return {
+    form,
+    onCreate,
+    onUpdate,
+    onDelete,
+    onReactivate,
+    handleOpenNuevoSocioModal,
+  };
 };

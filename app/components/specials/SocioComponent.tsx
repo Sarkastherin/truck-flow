@@ -19,9 +19,18 @@ export function SocioComponentForm<T>({
   error,
   value,
   onSelect,
-  tipoSocio
+  tipoSocio,
 }: SocioComponentFormProps<T>) {
-  const { form, onCreate } = useSocio();
+  const handleCreateSocio = async (data: Parameters<typeof onCreate>[0]) => {
+    const newSocio = await onCreate(data);
+    if (newSocio) {
+      onSelect(newSocio);
+    }
+  };
+  const {onCreate, handleOpenNuevoSocioModal } = useSocio({
+    tipoSocio,
+    handleCreateSocio,
+  });
   const { openModal, closeModal } = useModal();
 
   const handleSelectSocio = (item: SocioComercial) => {
@@ -34,46 +43,10 @@ export function SocioComponentForm<T>({
       title: `Seleccionar ${tipoSocio}`,
       component: SeleccionarSocioModal,
       onSelect: handleSelectSocio,
-      tipoSocio
+      tipoSocio,
     });
   };
 
-  const handleCreateSocio = async (data: Parameters<typeof onCreate>[0]) => {
-    const newSocio = await onCreate(data);
-    if (newSocio) {
-      onSelect(newSocio);
-    }
-  };
-
-  const handleOpenNuevoSocioModal = () => {
-    const newForm = form;
-    newForm.reset({
-      razon_social: "",
-      cuit_cuil: "",
-      direccion: "",
-      telefono_contacto: "",
-      email_contacto: "",
-      nombre_contacto: "",
-      tipo: tipoSocio,
-      provincia_id: "",
-      provincia: "",
-      localidad_id: "",
-      localidad: "",
-      condicion_iva: "",
-      vendedor_id: "",
-    });
-    newForm.clearErrors();
-    openModal("form", {
-      component: SocioModal,
-      props: {
-        form: newForm,
-        title: `Nuevo ${tipoSocio}`,
-        size: "2xl",
-        tipoSocio,
-      },
-      onSubmit: newForm.handleSubmit(handleCreateSocio),
-    });
-  };
   return (
     <div className="flex gap-1 items-end">
       <Input

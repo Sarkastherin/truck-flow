@@ -61,7 +61,7 @@ export default function PedidosHome() {
   },
   {
     name: "Número",
-    selector: (row) => row.numero,
+    selector: (row) => row.numero || "-",
     sortable: true,
     width: "100px",
   },
@@ -100,7 +100,7 @@ export default function PedidosHome() {
         data={cheques || []}
         filterFields={[
           {
-            key: "cliente?.razon_social",
+            key: "cliente.razon_social",
             label: "Origen (Cliente)",
           },
           {
@@ -118,7 +118,7 @@ export default function PedidosHome() {
             ],
           },
           {
-            key: "proveedor?.razon_social",
+            key: "proveedor.razon_social",
             label: "Destino (Proveedor)",
           },
           {

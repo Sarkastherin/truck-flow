@@ -69,6 +69,7 @@ export function SocioComponentForm<T>({
         form: newForm,
         title: `Nuevo ${tipoSocio}`,
         size: "2xl",
+        tipoSocio,
       },
       onSubmit: newForm.handleSubmit(handleCreateSocio),
     });

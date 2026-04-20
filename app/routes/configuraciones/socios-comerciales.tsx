@@ -119,6 +119,7 @@ export default function SociosComerciales() {
         form,
         title: `Nuevo ${singularName}`,
         size: "2xl",
+        tipoSocio: tipoActivo,
       },
       onSubmit: form.handleSubmit(onCreate),
     });
@@ -134,6 +135,7 @@ export default function SociosComerciales() {
         onDelete: () => onDelete(socio.id),
         onReactivate: () => onReactivate(socio.id),
         size: "2xl",
+        tipoSocio: tipoActivo,
       },
       onSubmit: form.handleSubmit(onUpdate),
     });

@@ -20,6 +20,7 @@ export function SocioModal({
     form: UseFormReturn<SocioComercialFormValues>;
     onDelete?: () => void;
     onReactivate?: () => void;
+    tipoSocio?: "cliente" | "proveedor";
   };
 }) {
   const { vendedoresOptions } = useConfiguracion();
@@ -208,35 +209,42 @@ export function SocioModal({
           disabled={!localidadValue} // Deshabilitar si no se ha seleccionado una localidad
         />
       </div>
-      <div className="md:col-span-3">
-        <Select
-          label="Condición de IVA"
-          {...register("condicion_iva", {
-            required: "La condición de IVA es obligatoria",
-          })}
-          error={errors.condicion_iva?.message}
-          requiredField
-          options={[
-            { value: "Responsable Inscripto", label: "Responsable Inscripto" },
-            { value: "Monotributista", label: "Monotributista" },
-            { value: "Exento", label: "Exento" },
-            { value: "Consumidor Final", label: "Consumidor Final" },
-          ]}
-        />
-      </div>
-      <div className="md:col-span-3">
-        <Select
-          label="Vendedor Asignado"
-          {...register("vendedor_id", {
-            required: "Este campo es requerido",
-          })}
-          error={errors.vendedor_id?.message}
-          requiredField={true}
-          options={vendedoresOptions}
-          disabledEmptyOption={true}
-          emptyOption="Seleccione el vendedor"
-        />
-      </div>
+      {props.tipoSocio === "cliente" && (
+        <>
+          <div className="md:col-span-3">
+            <Select
+              label="Condición de IVA"
+              {...register("condicion_iva", {
+                required: "La condición de IVA es obligatoria",
+              })}
+              error={errors.condicion_iva?.message}
+              requiredField
+              options={[
+                {
+                  value: "Responsable Inscripto",
+                  label: "Responsable Inscripto",
+                },
+                { value: "Monotributista", label: "Monotributista" },
+                { value: "Exento", label: "Exento" },
+                { value: "Consumidor Final", label: "Consumidor Final" },
+              ]}
+            />
+          </div>
+          <div className="md:col-span-3">
+            <Select
+              label="Vendedor Asignado"
+              {...register("vendedor_id", {
+                required: "Este campo es requerido",
+              })}
+              error={errors.vendedor_id?.message}
+              requiredField={true}
+              options={vendedoresOptions}
+              disabledEmptyOption={true}
+              emptyOption="Seleccione el vendedor"
+            />
+          </div>
+        </>
+      )}
       <div className="md:col-span-6">
         <Textarea
           label="Observaciones"

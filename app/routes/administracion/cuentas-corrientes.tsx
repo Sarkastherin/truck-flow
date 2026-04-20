@@ -111,6 +111,7 @@ export default function CtasCtesHome() {
             key: "isClosed",
             label: "Estado de Cuenta",
             type: "select",
+            emptyOption: "Todos",
             options: [
               { value: "true", label: "Cerrada" },
               { value: "false", label: "Abierta" },

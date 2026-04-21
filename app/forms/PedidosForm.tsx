@@ -17,24 +17,20 @@ import type { Pedido, PedidoFormValues } from "~/types/pedido";
 import { useModal } from "~/context/ModalContext";
 import type { SocioComercial } from "~/types/socios";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePedido } from "~/context/PedidoContext";
 import { useNavigate } from "react-router";
 import { statusOptionsPedidos, tipoPedidoOptions } from "~/types/pedido";
 import { LuBanknote } from "react-icons/lu";
 import { SocioComponentForm } from "~/components/specials/SocioComponent";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
-import { useAdministracion } from "~/context/AdministracionContext";
-import type { MovimientoDetalle } from "~/types/cuentas-corrientes";
-import { useSociosComercial } from "~/context/SociosComercialesContext";
+import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
-  const { socios } = useSociosComercial();
   const { vendedoresOptions } = useConfiguracion();
   const { openModal } = useModal();
   const { createNewPedido, updatePedido } = usePedido();
   const navigate = useNavigate();
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const { createNewMovimiento } = useAdministracion();
   const {
     control,
     register,
@@ -249,7 +245,7 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
                 requiredField={true}
                 options={tipoPedidoOptions}
                 emptyOption="Tipo de pedido"
-                disabled
+                disabled={!MODE_DEV}
               />
             </fieldset>
           </AccordionContent>

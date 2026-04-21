@@ -25,7 +25,11 @@ export function Sidebar({
     name: string;
     href?: string;
     icon: IconType;
-    alert?: boolean;
+    show?: boolean;
+    alert?: {
+      showAlert: boolean;
+      alertMessage: string;
+    };
   }[];
   activeTab: string;
   setActiveTab?: (tab: string) => void;
@@ -70,42 +74,50 @@ export function Sidebar({
           <SidebarItems>
             {props.title && (
               <span>
-                <h5 className={`${collapsed ? "hidden" : "font-bold text-center w-full text-sm bg-violet-200/50 rounded py-2 text-gray-700"}`}>
+                <h5
+                  className={`${collapsed ? "hidden" : "font-bold text-center w-full text-sm bg-violet-200/50 rounded py-2 text-gray-700"}`}
+                >
                   {props.title}
                 </h5>
               </span>
             )}
             <SidebarItemGroup>
-              {submenu.map((item) => (
-                <div key={item.key} className="relative">
-                  <SidebarItem
-                    key={item.key}
-                    onClick={() => {
-                      if (item.href) {
-                        navigate(item.href);
+              {submenu.map((item) => {
+                if (item.show === false) {
+                  return null;
+                }
+                return (
+                  <div key={item.key} className="relative">
+                    <SidebarItem
+                      key={item.key}
+                      onClick={() => {
+                        if (item.href) {
+                          navigate(item.href);
+                        }
+                        if (setActiveTab) {
+                          setActiveTab(item.key);
+                        }
+                      }}
+                      icon={item.icon}
+                      active={
+                        activeTab === item.key ||
+                        location.pathname === item.href
                       }
-                      if (setActiveTab) {
-                        setActiveTab(item.key);
-                      }
-                    }}
-                    icon={item.icon}
-                    active={
-                      activeTab === item.key || location.pathname === item.href
-                    }
-                    className="cursor-pointer"
-                  >
-                    {item.name}
-                  </SidebarItem>
-                  {item.alert && (
-                    <span
-                      className={`${collapsed ? "hidden" : "block"} absolute right-4 top-1/2 transform -translate-y-1/2`}
-                      title="Revisa las formas de pago"
+                      className="cursor-pointer"
                     >
-                      <LuCircleAlert size={16} className="text-red-500" />
-                    </span>
-                  )}
-                </div>
-              ))}
+                      {item.name}
+                    </SidebarItem>
+                    {item.alert && item.alert.showAlert && (
+                      <span
+                        className={`${collapsed ? "hidden" : "block"} absolute right-4 top-1/2 transform -translate-y-1/2`}
+                        title={item.alert.alertMessage}
+                      >
+                        <LuCircleAlert size={16} className="text-red-500" />
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </SidebarItemGroup>
             {/* Zona de peligro */}
             {dangerZone && !collapsed && (

@@ -32,7 +32,7 @@ export const statusOptionsOT = [
   { value: "generada", label: "Generada" },
   { value: "completada", label: "Completada" },
   { value: "cancelada", label: "Cancelada" },
-]
+];
 export type StatusPedido =
   | "incompleto"
   | "nuevo"
@@ -557,6 +557,67 @@ export type Carroceria = CommonTypes & {
   quiebre_alargue_2: boolean;
   notas?: string;
 };
+export type CarroceriaUsada = CommonTypes & {
+  pedido_id: string;
+  /* datos generales */
+  tipo_carrozado: string;
+  tipo_carrozado_otro: string;
+  marca: string;
+  anio_fabricacion: number | null;
+  largo: number | null;
+  alto: number | null;
+  ancho: number | null;
+  alt_baranda: number | null;
+  tipo_piso: (typeof pisoOptions)[number]["value"];
+  color: string;
+
+  material: (typeof materialOptions)[number]["value"];
+
+  ptas_por_lado: number | null;
+  puerta_trasera_id: string;
+  arcos_por_puerta: (typeof arcosOptions)[number]["value"] | null;
+  tipos_arcos: (typeof tiposArcosOptions)[number]["value"];
+  corte_guardabarros: boolean;
+  cumbreras: boolean;
+  espesor_chapa: (typeof espesorOptions)[number]["value"];
+  tipo_zocalo: (typeof zocaloOptions)[number]["value"];
+  lineas_refuerzo: (typeof lineasRefOptions)[number]["value"] | null;
+  
+  /* cuchetin */
+  cuchetin: boolean;
+  med_cuchetin: number | null;
+  alt_pta_cuchetin: number | null;
+  alt_techo_cuchetin: number | null;
+  notas_cuchetin?: string;
+  /* color */
+  color_lona_id?: string;
+  color_carrozado_id: string;
+  color_zocalo_id?: string;
+  notas_color?: string;
+  /* Boquillas */
+  boquillas: number | null;
+  tipo_boquillas: (typeof tiposBoquillasOptions)[number]["value"];
+  ubicacion_boquillas: (typeof ubicacionOptions)[number]["value"];
+  /* Cajon de herramientas */
+  med_cajon_herramientas: number | null;
+  ubicacion_cajon_herramientas: (typeof ubicacionOptions)[number]["value"];
+  /* Accesorios */
+  luces: number | null;
+  guardabarros: boolean;
+  dep_agua: boolean;
+  ubicacion_dep_agua: (typeof ubicacionOptions)[number]["value"];
+  cintas_reflectivas: (typeof cintasOptions)[number]["value"];
+  /* Alargue */
+  alargue_tipo_1: "baranda a cumbrera" | "N/A" | "";
+  cant_alargue_1: number | null;
+  med_alargue_1: number | null;
+  quiebre_alargue_1: boolean;
+  alargue_tipo_2: "sobre cumbrera" | "N/A" | "";
+  cant_alargue_2: number | null;
+  med_alargue_2: number | null;
+  quiebre_alargue_2: boolean;
+  notas?: string;
+};
 export type TrabajoChasis = CommonTypes & {
   pedido_id: string;
   tipo_trabajo_id: string;
@@ -607,6 +668,7 @@ export type Pedido = PedidoCreate & {
   cliente: SocioComercial;
   camion?: Camion | null;
   carroceria?: Carroceria | null;
+  carroceria_usada?: CarroceriaUsada | null;
   trabajo_chasis?: TrabajoChasis[] | [];
   ordenes_trabajo?: OrdenesTrabajo[] | [];
   documentos?: Documentos[] | [];
@@ -648,6 +710,17 @@ export type CamionFormValues = Omit<Camion, keyof CommonTypes> & {
   updated_by?: string;
 };
 export type CarroceriaFormValues = Omit<Carroceria, keyof CommonTypes> & {
+  id?: string;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+};
+export type CarroceriaUsadaFormValues = Omit<
+  CarroceriaUsada,
+  keyof CommonTypes
+> & {
   id?: string;
   active?: boolean;
   created_at?: string;

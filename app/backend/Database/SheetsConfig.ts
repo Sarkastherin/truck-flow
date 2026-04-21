@@ -1,3 +1,4 @@
+export const MODE_DEV = import.meta.env.MODE === "development";
 export const SHEET_NAMES_PEDIDOS = {
   pedidos: "pedidos",
   formas_pago: "formas_pago",
@@ -27,20 +28,22 @@ export const SHEET_NAMES_CTAS_CORRIENTES = {
 }
 
 export const SHEET_ID_PEDIDO =
-  import.meta.env.MODE === "development"
+  MODE_DEV
     ? import.meta.env.VITE_SHEET_ID_PEDIDOS_DEV
     : import.meta.env.VITE_SHEET_ID_PEDIDOS;
 export const SHEET_ID_CONFIGURACIONES =
-  import.meta.env.MODE === "development"
+  MODE_DEV
     ? import.meta.env.VITE_SHEET_ID_CONFIGURACIONES_DEV
     : import.meta.env.VITE_SHEET_ID_CONFIGURACIONES;
 export const SHEET_ID_SOCIOS =
-  import.meta.env.MODE === "development"
+  MODE_DEV
     ? import.meta.env.VITE_SHEET_ID_SOCIOS_DEV
     : import.meta.env.VITE_SHEET_ID_SOCIOS;
 export const SHEET_ID_CTAS_CORRIENTES =
-  import.meta.env.MODE === "development"
+  MODE_DEV
     ? import.meta.env.VITE_SHEET_ID_CTAS_CORRI_DEV
     : import.meta.env.VITE_SHEET_ID_CTAS_CORRI;
 export const getCompleteSheetRange = (sheetNames: Record<string, string>) =>
   Object.values(sheetNames).map((name) => `${name}!A:ZZZ`);
+
+

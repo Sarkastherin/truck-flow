@@ -13,7 +13,7 @@ import { usePedido } from "~/context/PedidoContext";
 import { useMemo } from "react";
 import { useModal } from "~/context/ModalContext";
 import { useNavigate } from "react-router";
-import { PiHashStraightBold } from "react-icons/pi";
+import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 export default function PedidosLayout() {
   const location = useLocation();
   const { pedidoId } = useParams();
@@ -37,19 +37,42 @@ export default function PedidosLayout() {
         name: "Pedido",
         href: `/pedidos/${id}`,
         icon: LuFolderOpenDot,
-        alert: !isMatch,
+        alert: {
+          showAlert: !isMatch,
+          alertMessage: `El total de las formas de pago (${sumFormasPago}) no coincide con el precio del pedido (${pedido?.precio}). Revisa las formas de pago.`,
+        },
       },
       {
         key: "camion",
         name: "Camión",
         href: `/pedidos/camion/${id}`,
         icon: LuTruck,
+        alert: {
+          showAlert: Object.entries(pedido?.camion ?? {}).length === 0,
+          alertMessage: "El pedido no tiene información del camión.",
+        },
       },
       {
         key: "carroceria",
         name: "Carrocería",
         href: `/pedidos/carroceria/${id}`,
         icon: LuLayoutPanelTop,
+        show: pedido?.tipo === "nueva",
+        alert: {
+          showAlert: Object.entries(pedido?.carroceria ?? {}).length === 0,
+          alertMessage: "El pedido no tiene información de la carrocería.",
+        },
+      },
+      {
+        key: "carroceria_usada",
+        name: "Carrocería Usada",
+        href: `/pedidos/carroceria-usada/${id}`,
+        icon: LuLayoutPanelTop,
+        show: MODE_DEV && pedido?.tipo === "usada",
+        alert: {
+          showAlert: Object.entries(pedido?.carroceria_usada ?? {}).length === 0,
+          alertMessage: "El pedido no tiene información de la carrocería usada.",
+        },
       },
       {
         key: "trabajo-chasis",

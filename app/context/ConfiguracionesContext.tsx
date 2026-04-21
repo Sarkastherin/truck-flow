@@ -188,7 +188,13 @@ export const ConfiguracionesProvider = ({
       const controlCarrozadoData = getDataInJSONFormat(data[7]);
 
       setCarrozados(carrozadosData as Carrozado[]);
-      setColores(coloresData as Color[]);
+      setColores(
+        coloresData.sort((a, b) => {
+          const colorA = a as Color;
+          const colorB = b as Color;
+          return colorA.nombre.localeCompare(colorB.nombre);
+        }) as Color[]
+      );
       setPuertasTraseras(puertasTraserasData as PuertaTrasera[]);
       setTrabajosChasis(trabajosChasisData as TipoTrabajo[]);
       setPersonal(personalData as Personal[]);

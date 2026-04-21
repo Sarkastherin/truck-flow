@@ -17,6 +17,7 @@ export default [
         route(":pedidoId", "routes/pedidos/$pedidoId.tsx"),
         route("camion/:pedidoId", "routes/pedidos/$camionId.tsx"),
         route("carroceria/:pedidoId", "routes/pedidos/$carroceriaId.tsx"),
+        route("carroceria-usada/:pedidoId", "routes/pedidos/$carroceriaUsadaId.tsx"),
         route(
           "trabajos-chasis/:pedidoId",
           "routes/pedidos/$trabajosChasisId.tsx",

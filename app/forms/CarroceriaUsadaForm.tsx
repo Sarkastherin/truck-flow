@@ -45,6 +45,7 @@ import AlarguesForm from "./AlarguesForm";
 import { usePedido } from "~/context/PedidoContext";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+import CuchetinForm from "./CuchetinForm";
 export default function CarroceriaUsadaForm({
   pedido,
 }: {
@@ -262,7 +263,11 @@ export default function CarroceriaUsadaForm({
                   />
                 </div>
               </div>
-              <Input label="Marca" {...register("marca")} placeholder="Nombre del fabricante"/>
+              <Input
+                label="Marca"
+                {...register("marca")}
+                placeholder="Nombre del fabricante"
+              />
               <InputNumberIcon
                 label="Año de fabricación"
                 placeholder="Ingrese un valor"
@@ -272,51 +277,41 @@ export default function CarroceriaUsadaForm({
               <InputNumberIcon
                 label="Largo"
                 placeholder="Ingrese un valor"
-                {...register("largo", {
-                  required: "Este campo es obligatorio",
-                })}
+                {...register("largo")}
                 icon={LuRuler}
-                error={errors.largo?.message}
-                requiredField
               />
               <InputNumberIcon
                 label="Alto"
                 placeholder="Ingrese un valor"
-                {...register("alto", {
-                  required: "Este campo es obligatorio",
-                })}
+                {...register("alto")}
                 icon={LuRuler}
-                requiredField
-                error={errors.alto?.message}
               />
               <Select
                 label="Ancho"
-                {...register("ancho", {
-                  required: "Este campo es obligatorio",
-                  valueAsNumber: true,
-                })}
-                requiredField
-                error={errors.ancho?.message}
+                {...register("ancho")}
                 options={anchoOptions}
               />
               <InputNumberIcon
                 label="Alt. baranda"
                 placeholder="Ingrese un valor"
-                {...register("alt_baranda", {
-                  required: "Este campo es obligatorio",
-                })}
+                {...register("alt_baranda")}
                 icon={LuRuler}
-                requiredField
-                error={errors.alt_baranda?.message}
               />
               <Select
                 label="Tipo piso"
-                {...register("tipo_piso", {
-                  required: "Este campo es obligatorio",
-                })}
-                requiredField
-                error={errors.tipo_piso?.message}
+                {...register("tipo_piso")}
                 options={pisoOptions}
+              />
+              <Select
+                label="Arcos por puerta"
+                {...register("arcos_por_puerta")}
+                options={arcosOptions}
+              />
+              <Select
+                label="Tipo de arcos"
+                {...register("tipos_arcos")}
+                disabled={String(watch("arcos_por_puerta")) === "0"}
+                options={tiposArcosOptions}
               />
               <div className="md:col-span-3">
                 <Input
@@ -329,87 +324,21 @@ export default function CarroceriaUsadaForm({
                   })}
                 />
               </div>
-              <Select
-                label="Espesor chapa"
-                {...register("espesor_chapa", {
-                  required: "Este campo es obligatorio",
-                })}
-                requiredField
-                error={errors.espesor_chapa?.message}
-                disabled={watch("material") === "fibra"}
-                options={espesorOptions}
-              />
 
               <InputNumberIcon
                 label="Ptas. por lado"
                 placeholder="Ingrese un valor"
-                {...register("ptas_por_lado", {
-                  required: "Este campo es obligatorio",
-                })}
+                {...register("ptas_por_lado")}
                 icon={LuRuler}
-                requiredField
-                error={errors.ptas_por_lado?.message}
               />
-              <Select
-                label="Arcos por puerta"
-                {...register("arcos_por_puerta", {
-                  required: "Este campo es obligatorio",
-                  onChange: handleChangeArcosField,
-                  valueAsNumber: true,
-                })}
-                error={errors.arcos_por_puerta?.message}
-                requiredField
-                options={arcosOptions}
-              />
-              <Select
-                label="Tipo de arcos"
-                {...register("tipos_arcos", {
-                  required: "Este campo es obligatorio",
-                })}
-                requiredField
-                error={errors.tipos_arcos?.message}
-                disabled={String(watch("arcos_por_puerta")) === "0"}
-                options={tiposArcosOptions}
-              />
+
               <div className="col-span-1 md:col-span-2 xl:col-span-2">
                 <Select
                   label="Puerta trasera"
-                  {...register("puerta_trasera_id", {
-                    required: "Este campo es obligatorio",
-                  })}
-                  requiredField
-                  error={errors.puerta_trasera_id?.message}
+                  {...register("puerta_trasera_id")}
                   options={puertasOptions}
                 />
               </div>
-              <Select
-                label="Líneas de refuerzo"
-                {...register("lineas_refuerzo", {
-                  required: "Este campo es obligatorio",
-                  valueAsNumber: true,
-                })}
-                requiredField
-                error={errors.lineas_refuerzo?.message}
-                options={lineasRefOptions}
-              />
-              <Select
-                label="Tipo zócalo"
-                {...register("tipo_zocalo", {
-                  required: "Este campo es obligatorio",
-                  onChange: (e) => {
-                    if (e.target.value === "gross_nuevo") {
-                      setValue("corte_guardabarros", false, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                    }
-                  },
-                })}
-                requiredField
-                error={errors.tipo_zocalo?.message}
-                options={zocaloOptions}
-              />
-
               <div className="flex gap-4 col-span-3 mt-2">
                 <ToggleSwitch
                   id="corte_guardabarros"
@@ -427,156 +356,42 @@ export default function CarroceriaUsadaForm({
           </AccordionContent>
         </AccordionPanel>
       </Accordion>
+      <CuchetinForm
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+        withAccordion
+      />
 
-      <Accordion alwaysOpen>
-        <AccordionPanel>
-          <AccordionTitle>Colores</AccordionTitle>
-          <AccordionContent>
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              <Select
-                label="Color carrozado"
-                {...register("color_carrozado_id", {
-                  required: "Este campo es obligatorio",
-                })}
-                requiredField
-                error={errors.color_carrozado_id?.message}
-                options={coloresEsmalteOptions}
-              />
-              <Select
-                label="Color zócalo"
-                {...register("color_zocalo_id", {
-                  required: "Este campo es obligatorio",
-                })}
-                requiredField
-                error={errors.color_zocalo_id?.message}
-                options={coloresEsmalteOptions}
-              />
-              <Select
-                label="Color lona"
-                {...register("color_lona_id")}
-                error={errors.color_lona_id?.message}
-                options={coloresLonaOptions}
-              />
-              <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                <Textarea
-                  label="Observaciones del color"
-                  placeholder="Agregue notas u observaciones del color adiconales si son necesarias"
-                  {...register("notas_color")}
-                />
-              </div>
-            </fieldset>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+      <AccesoriosForm
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+        withAccordion
+        isOptional={true}
+      />
 
-      <Accordion alwaysOpen>
-        <AccordionPanel>
-          <AccordionTitle>Cuchetín</AccordionTitle>
-          <AccordionContent>
-            <fieldset className="space-y-4">
-              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-center md:justify-between dark:border-slate-700 dark:bg-slate-900/40">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Configurar cuchetín
-                  </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Activá esta sección solo si la carroceria lleva cuchetín.
-                  </p>
-                </div>
-                <ToggleSwitch
-                  id="cuchetin"
-                  label={cuchetinEnabled ? "Cuchetín activo" : "Sin cuchetín"}
-                  value={cuchetinEnabled}
-                  onCustumChange={handleToggleCuchetinSection}
-                />
-              </div>
-
-              {cuchetinEnabled ? (
-                <div className="space-y-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-end">
-                    <InputNumberIcon
-                      label="Medida (mm)"
-                      {...register("med_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.med_cuchetin?.message}
-                    />
-                    <InputNumberIcon
-                      label="Altura puerta (mm)"
-                      {...register("alt_pta_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.alt_pta_cuchetin?.message}
-                    />
-                    <InputNumberIcon
-                      label="Altura techo (mm)"
-                      {...register("alt_techo_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.alt_techo_cuchetin?.message}
-                    />
-                  </div>
-                  <Textarea
-                    label="Observaciones cuchetín"
-                    placeholder="Agregue notas u observaciones para el cuchetin si son necesarias"
-                    {...register("notas_cuchetin")}
-                    rows={2}
-                  />
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                  Esta carroceria no lleva cuchetín. Activá la sección para
-                  cargar sus medidas y observaciones.
-                </div>
-              )}
-            </fieldset>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
-
-      {MODE_DEV && (
-        <AccesoriosForm
-          register={register}
-          watch={watch}
-          setValue={setValue}
-          errors={errors}
-          withAccordion
-        />
-      )}
-
-      {MODE_DEV && (
-        <AlarguesForm
-          register={register}
-          watch={watch}
-          setValue={setValue}
-          errors={errors}
-          withAccordion
-        />
-      )}
+      <AlarguesForm
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+        withAccordion
+      />
 
       <FileInputComponent
-        tipoDocumento="carroceria"
+        tipoDocumento="carroceria_usada"
         documentos={watch("documentos")}
         setFiles={setFiles}
         files={files}
+      />
+      <Textarea
+        label="Condición"
+        placeholder="Describa la condición general de la carrocería usada, detalles de golpes, reparaciones previas, estado de pintura, etc."
+        {...register("notas")}
+        error={errors.notas?.message}
       />
       <Textarea
         label="Observaciones"

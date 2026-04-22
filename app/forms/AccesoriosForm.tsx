@@ -43,6 +43,7 @@ export default function AccesoriosForm<
   errors,
   namePrefix,
   withAccordion = true,
+  isOptional = false,
 }: {
   register: UseFormRegister<TFieldValues>;
   watch: UseFormWatch<TFieldValues>;
@@ -50,6 +51,7 @@ export default function AccesoriosForm<
   errors: FieldErrors<TFieldValues>;
   namePrefix?: string;
   withAccordion?: boolean;
+  isOptional?: boolean;
 }) {
   const buildFieldName = (fieldName: AccesoriosFieldName) => {
     return buildFieldPath<TFieldValues>(fieldName, namePrefix);
@@ -123,23 +125,23 @@ export default function AccesoriosForm<
         label="Tipos de boquillas"
         {...register(buildFieldName("tipo_boquillas"), {
           onChange: handleChangeBoquillasField,
-          required: "Este campo es obligatorio",
+          required: !isOptional ? "Este campo es obligatorio" : false,
         })}
         error={getErrorMessage("tipo_boquillas")}
-        requiredField
+        requiredField={!isOptional}
         options={tiposBoquillasOptions}
       />
       <InputNumberIcon
         label="Cantidad de boquillas"
         {...register(buildFieldName("boquillas"), {
-          required: "Este campo es obligatorio",
+          required: !isOptional ? "Este campo es obligatorio" : false,
           min: {
             value: tipoBoquillas !== "N/A" ? 0.1 : 0,
             message: "La medida debe ser mayor a 0",
           },
           valueAsNumber: true,
         })}
-        requiredField={tipoBoquillas !== "N/A"}
+        requiredField={tipoBoquillas !== "N/A" && !isOptional}
         icon={LuRuler}
         error={getErrorMessage("boquillas")}
         disabled={tipoBoquillas === "N/A"}
@@ -148,10 +150,10 @@ export default function AccesoriosForm<
         label="Ubic. cajón de herramientas"
         {...register(buildFieldName("ubicacion_cajon_herramientas"), {
           onChange: handleChangeCajonField,
-          required: "Este campo es obligatorio",
+          required: !isOptional ? "Este campo es obligatorio" : false,
         })}
         error={getErrorMessage("ubicacion_cajon_herramientas")}
-        requiredField
+        requiredField={!isOptional}
         options={ubicacionOptions}
       />
       <InputNumberIcon

@@ -61,13 +61,13 @@ const columns: TableColumn<SocioComercial>[] = [
     sortable: true,
     width: "150px",
   },
-  
+
   {
     name: "Status",
-    selector: (row) => (row.active),
+    selector: (row) => row.active,
     sortable: true,
     width: "95px",
-  }
+  },
 ];
 
 const filterFields = [
@@ -80,7 +80,13 @@ const filterFields = [
 export default function SociosComerciales() {
   const { socios } = useSociosComercial();
   const { openModal } = useModal();
-  const { form, onCreate, onUpdate, onDelete, onReactivate } = useSocio();
+  const { form, onCreate, onUpdate, onDelete, onReactivate } = useSocio({
+    tipoSocio: "cliente",
+    handleCreateSocio: async (data: Parameters<typeof onCreate>[0]) => {
+      const newSocio = await onCreate(data);
+    },
+  });
+
   const [activeTab, setActiveTab] = useState<TabsTypes>("clientes");
 
   const isClientes = activeTab === "clientes";
@@ -155,7 +161,11 @@ export default function SociosComerciales() {
       />
       <div className="relative flex-1 min-w-0 p-6 pt-0 pb-0">
         <div className="flex justify-between items-center mb-4">
-          <SubTitles title={`Gestión de ${pluralName}`} back_path="/configuraciones" icon={{ component: LuUsers, color: "text-blue-500" }} />
+          <SubTitles
+            title={`Gestión de ${pluralName}`}
+            back_path="/configuraciones"
+            icon={{ component: LuUsers, color: "text-blue-500" }}
+          />
           <Button size="sm" color="violet" onClick={handleOpenNuevo}>
             <FaPlus className="mr-2" />
             Nuevo {singularName}

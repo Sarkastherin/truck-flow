@@ -40,6 +40,7 @@ import AccesoriosForm from "./AccesoriosForm";
 import AlarguesForm from "./AlarguesForm";
 import { usePedido } from "~/context/PedidoContext";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
+import CuchetinForm from "./CuchetinForm";
 const modeDev = import.meta.env.MODE === "development";
 export default function CarroceriaForm({
   pedido,
@@ -486,104 +487,33 @@ export default function CarroceriaForm({
         </AccordionPanel>
       </Accordion>
 
-      <Accordion alwaysOpen>
-        <AccordionPanel>
-          <AccordionTitle>Cuchetín</AccordionTitle>
-          <AccordionContent>
-            <fieldset className="space-y-4">
-              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-center md:justify-between dark:border-slate-700 dark:bg-slate-900/40">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Configurar cuchetín
-                  </p>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    Activá esta sección solo si la carroceria lleva cuchetín.
-                  </p>
-                </div>
-                <ToggleSwitch
-                  id="cuchetin"
-                  label={cuchetinEnabled ? "Cuchetín activo" : "Sin cuchetín"}
-                  value={cuchetinEnabled}
-                  onCustumChange={handleToggleCuchetinSection}
-                />
-              </div>
-
-              {cuchetinEnabled ? (
-                <div className="space-y-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-end">
-                    <InputNumberIcon
-                      label="Medida (mm)"
-                      {...register("med_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.med_cuchetin?.message}
-                    />
-                    <InputNumberIcon
-                      label="Altura puerta (mm)"
-                      {...register("alt_pta_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.alt_pta_cuchetin?.message}
-                    />
-                    <InputNumberIcon
-                      label="Altura techo (mm)"
-                      {...register("alt_techo_cuchetin", {
-                        required: "Este campo es obligatorio",
-                        min: {
-                          value: 0.1,
-                          message: "La medida debe ser mayor a 0",
-                        },
-                      })}
-                      icon={LuRuler}
-                      requiredField
-                      error={errors.alt_techo_cuchetin?.message}
-                    />
-                  </div>
-                  <Textarea
-                    label="Observaciones cuchetín"
-                    placeholder="Agregue notas u observaciones para el cuchetin si son necesarias"
-                    {...register("notas_cuchetin")}
-                    rows={2}
-                  />
-                </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                  Esta carroceria no lleva cuchetín. Activá la sección para
-                  cargar sus medidas y observaciones.
-                </div>
-              )}
-            </fieldset>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
-
-      {modeDev && <AccesoriosForm
+      <CuchetinForm
         register={register}
         watch={watch}
         setValue={setValue}
         errors={errors}
         withAccordion
-      />}
+      />
 
-      {modeDev && <AlarguesForm
-        register={register}
-        watch={watch}
-        setValue={setValue}
-        errors={errors}
-        withAccordion
-      />}
+      {modeDev && (
+        <AccesoriosForm
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+          withAccordion
+        />
+      )}
+
+      {modeDev && (
+        <AlarguesForm
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+          withAccordion
+        />
+      )}
 
       <FileInputComponent
         tipoDocumento="carroceria"

@@ -1,7 +1,11 @@
 import { Button, FileInput, Label } from "flowbite-react";
 import type { ChangeEvent } from "react";
 import { LuFileText, LuTrash2 } from "react-icons/lu";
-export type TipoDocumento = "camion" | "carroceria" | "movimiento";
+export type TipoDocumento =
+  | "camion"
+  | "carroceria"
+  | "movimiento"
+  | "carroceria_usada";
 export type FileTypeActions<T> = {
   add: FileList | null;
   remove: T[] | null;

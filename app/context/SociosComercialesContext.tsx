@@ -13,7 +13,6 @@ import {
 import { getDataInJSONFormat } from "~/backend/Database/helperTransformData";
 import { useAuth } from "~/context/AuthContext";
 import type { Provincia, SocioComercial, Localidades } from "~/types/socios";
-import { useUser } from "./UserContext";
 import {
   getCompleteSheetRange,
   SHEET_ID_SOCIOS,
@@ -33,6 +32,8 @@ type SociosContextType = {
   removeSocio: ToggleConfigMethod;
   reactivateSocio: ToggleConfigMethod;
   isCUITRegistered: (cuit: string, tipoSocio: string) => boolean;
+  proveedores: SocioComercial[];
+  clientes: SocioComercial[];
 };
 
 type HeadersType = {
@@ -146,6 +147,14 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [socios],
   );
+  const proveedores = useMemo(
+    () => socios.filter((s) => s.tipo === "proveedor"),
+    [socios],
+  );
+  const clientes = useMemo(
+    () => socios.filter((s) => s.tipo === "cliente"),
+    [socios],
+  );
   useEffect(() => {
     if (auth) {
       void getSociosData();
@@ -171,6 +180,8 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
         removeSocio,
         reactivateSocio,
         isCUITRegistered,
+        proveedores,
+        clientes,
       }}
     >
       {children}

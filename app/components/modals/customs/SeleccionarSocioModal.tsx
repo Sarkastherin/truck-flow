@@ -1,5 +1,5 @@
 import { TextInput, ListGroup, ListGroupItem, Button } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import type { SocioComercial } from "~/types/socios";
 import { Spinner } from "flowbite-react";
@@ -23,22 +23,28 @@ export function SeleccionarSocioModal({
     tipoSocio,
     handleCreateSocio,
   });
-  const { socios, getSociosData } = useSociosComercial();
+  const { socios, getSociosData, clientes, proveedores } = useSociosComercial();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState<SocioComercial[]>(socios || []);
   const [isLoading, setIsLoading] = useState(true);
+  const data = useMemo(() =>{
+    if (tipoSocio === "cliente") {
+      return clientes;
+    }
+    return proveedores;
+  },[tipoSocio, clientes, proveedores])
   useEffect(() => {
     if (!socios || socios.length === 0) {
       void getSociosData();
     } else {
       setIsLoading(false);
-      setFilteredData(socios.filter(s => s.tipo === tipoSocio));
+      setFilteredData(data);
     }
-  }, [getSociosData, socios]);
+  }, [getSociosData, socios, clientes, proveedores, data]);
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     const lowercasedValue = value.toLowerCase();
-    const filtered = socios?.filter((item) =>
+    const filtered = data?.filter((item) =>
       item.razon_social.toLowerCase().includes(lowercasedValue),
     );
     setFilteredData(filtered || []);

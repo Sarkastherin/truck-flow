@@ -78,7 +78,7 @@ const filterFields = [
 ];
 
 export default function SociosComerciales() {
-  const { socios } = useSociosComercial();
+  const { socios, proveedores, clientes } = useSociosComercial();
   const { openModal } = useModal();
   const { form, onCreate, onUpdate, onDelete, onReactivate } = useSocio({
     tipoSocio: "cliente",

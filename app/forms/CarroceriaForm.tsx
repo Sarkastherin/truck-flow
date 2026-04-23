@@ -134,8 +134,7 @@ export default function CarroceriaForm({
   }, [documentosCarroceria, setValue]);
 
   const isEditMode = Boolean(watch("id"));
-  const cuchetinEnabled = watch("cuchetin");
-
+  const guardaBarrosEnabled = watch("corte_guardabarros");
   const onSubmit = async (data: FormValues) => {
     openModal("loading", {
       props: {
@@ -154,6 +153,8 @@ export default function CarroceriaForm({
           throw new Error(`Error al crear la carroceria: ${error}`);
         }
       } else {
+        console.log("Datos a actualizar:", data.corte_guardabarros);
+        console.log("Campos modificados:", dirtyFields);
         const { error } = await updateCarroceria(
           data as Carroceria & { documentos: Documentos[] },
           dirtyFields,
@@ -431,14 +432,26 @@ export default function CarroceriaForm({
               <div className="flex gap-4 col-span-3 mt-2">
                 <ToggleSwitch
                   id="corte_guardabarros"
-                  label="Corte guardabarros"
-                  value={watch("corte_guardabarros")}
+                  label={`${guardaBarrosEnabled ? "Con corte de guardabarros" : "Sin corte de guardabarros"}`}
+                  value={guardaBarrosEnabled}
                   disabled={watch("tipo_zocalo") === "gross_nuevo"}
+                  onCustumChange={(checked) =>
+                    setValue("corte_guardabarros", checked, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
                 <ToggleSwitch
                   id="cumbreras"
                   label="Cumbreras"
                   value={watch("cumbreras")}
+                  onCustumChange={(checked) =>
+                    setValue("cumbreras", checked, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
               </div>
             </fieldset>

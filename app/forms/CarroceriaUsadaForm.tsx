@@ -111,12 +111,7 @@ export default function CarroceriaUsadaForm({
           quiebre_alargue_2: false,
           documentos: documentosCarroceria,
         };
-  const {
-    carrozadosOptions,
-    puertasOptions,
-    coloresEsmalteOptions,
-    coloresLonaOptions,
-  } = useConfiguracion();
+  const { carrozadosOptions, puertasOptions } = useConfiguracion();
 
   const {
     register,
@@ -137,8 +132,7 @@ export default function CarroceriaUsadaForm({
   }, [documentosCarroceria, setValue]);
 
   const isEditMode = Boolean(watch("id"));
-  const cuchetinEnabled = watch("cuchetin");
-
+  const guardaBarrosEnabled = watch("corte_guardabarros");
   const onSubmit = async (data: FormValues) => {
     openModal("loading", {
       props: {
@@ -342,14 +336,26 @@ export default function CarroceriaUsadaForm({
               <div className="flex gap-4 col-span-3 mt-2">
                 <ToggleSwitch
                   id="corte_guardabarros"
-                  label="Corte guardabarros"
-                  value={watch("corte_guardabarros")}
+                  label={`${guardaBarrosEnabled ? "Con corte de guardabarros" : "Sin corte de guardabarros"}`}
+                  value={guardaBarrosEnabled}
                   disabled={watch("tipo_zocalo") === "gross_nuevo"}
+                  onCustumChange={(checked) =>
+                    setValue("corte_guardabarros", checked, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
                 <ToggleSwitch
                   id="cumbreras"
                   label="Cumbreras"
                   value={watch("cumbreras")}
+                  onCustumChange={(checked) =>
+                    setValue("cumbreras", checked, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
                 />
               </div>
             </fieldset>

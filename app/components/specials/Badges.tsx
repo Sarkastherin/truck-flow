@@ -1,5 +1,6 @@
 import { statusOptionsPedidos, statusOptionsOT } from "~/types/pedido";
 import { statusOptionsCheques } from "~/types/cuentas-corrientes";
+import { statusOptionsCarroceriaUsada } from "~/types/carroceria-usada";
 import { Badge } from "flowbite-react";
 const statusColorsPedido: { [key: string]: string } = {
   nuevo: "purple",
@@ -23,6 +24,11 @@ const statusColorsCheques: { [key: string]: string } = {
   anulado: "red",
   rechazado: "gray",
 };
+const statusColorsCarroceriaUsada: { [key: string]: string } = {
+  disponible: "green",
+  vendida: "red",
+  prestada: "yellow",
+};
 export const BadgeStatusCheque = ({ status }: { status: string }) => {
   const label =
     statusOptionsCheques.find((s) => s.value === status)?.label || status;
@@ -38,4 +44,10 @@ export const BadgeStatusOT = ({ status }: { status: string }) => {
   const label =
     statusOptionsOT.find((s) => s.value === status)?.label || status;
   return <Badge color={statusColorsOT[status] || "gray"}>{label}</Badge>;
+};
+
+export const BadgeStatusCarroceriaUsada = ({ status }: { status: string }) => {
+  const label =
+    statusOptionsCarroceriaUsada.find((s) => s.value === status)?.label || status;
+  return <Badge color={statusColorsCarroceriaUsada[status] || "gray"}>{label}</Badge>;
 };

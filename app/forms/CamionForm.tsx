@@ -153,7 +153,7 @@ export default function CamionForm({ pedido }: { pedido: PedidoFormValues }) {
         <AccordionPanel>
           <AccordionTitle>Datos del camión</AccordionTitle>
           <AccordionContent>
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <fieldset className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               <Select
                 label="Marca"
                 {...register("marca", {

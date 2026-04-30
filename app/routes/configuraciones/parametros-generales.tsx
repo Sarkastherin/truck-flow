@@ -70,8 +70,8 @@ export default function ParametrosGenerales() {
   const iconActive = submenu.find((item) => item.key === activeTab)?.icon;
   return (
     <div
-      className="container mx-auto flex h-full pb-4 "
-      style={{ minHeight: "calc(100vh - 90px)" }}
+      className="flex h-full"
+      style={{ minHeight: "calc(100vh - 110px)" }}
     >
       <Sidebar
         aria-label="Menu de configuraciones de productos"
@@ -104,7 +104,7 @@ export default function ParametrosGenerales() {
               data={activeItem.data}
               onRowClick={activeItem.onOpenDetails}
               filterFields={activeItem.filterFields}
-              scrollHeightOffset={200}
+              scrollHeightOffset={375}
               inactiveField="active"
               emptyState={{
                 title: `No hay ${activeItem.name.toLowerCase()} cargadas`,

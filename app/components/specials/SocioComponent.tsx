@@ -13,6 +13,7 @@ interface SocioComponentFormProps<T> {
   value: string;
   onSelect: (item: SocioComercial) => void;
   tipoSocio: "cliente" | "proveedor";
+  customLabel?: string;
 }
 
 export function SocioComponentForm<T>({
@@ -20,6 +21,7 @@ export function SocioComponentForm<T>({
   value,
   onSelect,
   tipoSocio,
+  customLabel,
 }: SocioComponentFormProps<T>) {
   const handleCreateSocio = async (data: Parameters<typeof onCreate>[0]) => {
     const newSocio = await onCreate(data);
@@ -50,7 +52,7 @@ export function SocioComponentForm<T>({
   return (
     <div className="flex gap-1 items-end">
       <Input
-        label={capitalize(tipoSocio)}
+        label={customLabel || capitalize(tipoSocio) || "Socio Comercial"}
         type="text"
         placeholder={`Seleccione un ${tipoSocio}`}
         readOnly

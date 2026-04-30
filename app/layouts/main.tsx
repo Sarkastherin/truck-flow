@@ -6,34 +6,10 @@ import { PedidosProvider } from "~/context/PedidoContext";
 import { ConfiguracionesProvider } from "~/context/ConfiguracionesContext";
 import { AdministracionProvider } from "~/context/AdministracionContext";
 import { GlobalProvider } from "~/context/GlobalContext";
-import {
-  SociosProvider,
-  useSociosComercial,
-} from "~/context/SociosComercialesContext";
-import { LoadingComponent } from "~/components/LoadingComponent";
+import { CarroceriasUsadasProvider } from "~/context/CarroceriasUsadasContext";
+import { SociosProvider } from "~/context/SociosComercialesContext";
 import { useAuth } from "~/context/AuthContext";
 import { useEffect } from "react";
-
-function ProvidersAfterSocios({ children }: { children: React.ReactNode }) {
-  const { isReady, isLoading } = useSociosComercial();
-
-  if (isLoading || !isReady) {
-    return <LoadingComponent message="Cargando socios comerciales..." />;
-  }
-
-  return (
-    <ConfiguracionesProvider>
-      <AdministracionProvider>
-        <PedidosProvider>
-          <div className="container mx-auto px-6 lg:px-0">
-            <Outlet />
-          </div>
-          <ModalManager />
-        </PedidosProvider>
-      </AdministracionProvider>
-    </ConfiguracionesProvider>
-  );
-}
 
 export default function Layout() {
   const { auth } = useAuth();
@@ -52,12 +28,14 @@ export default function Layout() {
             <SociosProvider>
               <ConfiguracionesProvider>
                 <AdministracionProvider>
-                  <PedidosProvider>
-                    <div className="container mx-auto px-6 lg:px-0">
-                      <Outlet />
-                    </div>
-                    <ModalManager />
-                  </PedidosProvider>
+                  <CarroceriasUsadasProvider>
+                    <PedidosProvider>
+                      <div className="container mx-auto px-6 md:px-8 xl:px-0 pb-4">
+                        <Outlet />
+                      </div>
+                      <ModalManager />
+                    </PedidosProvider>
+                  </CarroceriasUsadasProvider>
                 </AdministracionProvider>
               </ConfiguracionesProvider>
             </SociosProvider>

@@ -2,8 +2,7 @@ import type { Route } from "../+types/home";
 import { useOutletContext, useNavigate } from "react-router";
 import type { PedidoFormValues, TipoOrden } from "~/types/pedido";
 import { LuHammer, LuBrush } from "react-icons/lu";
-import { Badge, Button, Card } from "flowbite-react";
-import { capitalize } from "~/utils/functions";
+import { Button, Card } from "flowbite-react";
 import { LoadingComponent } from "~/components/LoadingComponent";
 import { useModal } from "~/context/ModalContext";
 import OrdenTrabajoModal from "~/components/modals/customs/OrdenTrabajoModal";
@@ -64,7 +63,6 @@ export default function PedidosOrdenesTrabajo() {
     ];
   }, [ordenes_trabajo]);
 
-  
   if (pedido.id === undefined) {
     return <LoadingComponent />;
   }
@@ -111,16 +109,24 @@ export default function PedidosOrdenesTrabajo() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No hay carrocería asociada a este pedido.
-            </p>
-            <Button
-              color={"violet"}
-              className="w-fit mx-auto"
-              onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
-            >
-              Agregar Carrocería
-            </Button>
+            {pedido.carroceria_usada_id ? (
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                No aplica.
+              </p>
+            ) : (
+              <>
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  No hay carrocería asociada a este pedido.
+                </p>
+                <Button
+                  color={"violet"}
+                  className="w-fit mx-auto"
+                  onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
+                >
+                  Agregar Carrocería
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

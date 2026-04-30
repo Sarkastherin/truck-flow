@@ -13,9 +13,15 @@ import type {
   FieldErrors,
   Control,
   UseFormWatch,
+  UseFormSetValue,
 } from "react-hook-form";
 import { LuBanknote, LuTrash2, LuTruck } from "react-icons/lu";
 import { useModal } from "~/context/ModalContext";
+import { AddCarroceriaUsada } from "~/components/modals/customs/AddCarroceriaUsada";
+import { useCarroceriaUsada } from "~/hooks/useCarroceriaUsada";
+import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
+import { useNavigate } from "react-router";
+import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 
 export default function FormaPagoForm({
   watchedPrecio,
@@ -29,6 +35,8 @@ export default function FormaPagoForm({
   fields,
   setDeletedIds,
   remove,
+  clienteId,
+  setValue,
 }: {
   watchedPrecio: number;
   watchedFormasPago: FormaPagoFormValues[];
@@ -53,8 +61,12 @@ export default function FormaPagoForm({
     "fieldId"
   >["remove"];
   setDeletedIds: React.Dispatch<React.SetStateAction<string[]>>;
+  clienteId: string;
+  setValue: UseFormSetValue<PedidoFormValues>;
 }) {
   const { openModal } = useModal();
+  const navigate = useNavigate();
+  const { form, onCreate } = useCarroceriaUsada();
   const totalPrecio = Number(watchedPrecio) || 0;
   const totalAsignado = useMemo(
     () =>
@@ -107,16 +119,48 @@ export default function FormaPagoForm({
 
     remove(index);
   };
-  const handleAddCarroceria = () => {
-    openModal("info", {
-          props: {
-            title: "No disponible",
-            message:
-              "Se está trabajando en la integración de esta funcionalidad para que puedas registrar carrocerías usadas.",
-          },
-        });
-
-  }
+  const handleAddCarroceria = (index: number) => {
+    if (MODE_DEV) {
+      openModal("info", {
+        title: "Funcionalidad en desarrollo",
+        message:
+          "La funcionalidad de registrar carrocerías usadas está en desarrollo y no está disponible por el momento.",
+      });
+    } else {
+      const newForm = form;
+      newForm.reset({
+        tipo_carrozado: "",
+        marca_carroceria: "",
+        anno_fabricacion: null,
+        color: "",
+        duenno_id: clienteId,
+        precio_lista: 0,
+        status: "disponible",
+      });
+      openModal("form", {
+        component: AddCarroceriaUsada,
+        props: {
+          form: newForm,
+          title: "Registrar carrocería usada",
+          size: "2xl",
+        },
+        onSubmit: form.handleSubmit((data: CarroceriaUsadaData) =>
+          handleCreateCarroceriaUsada(data, index),
+        ),
+      });
+    }
+  };
+  const handleCreateCarroceriaUsada = async (
+    data: CarroceriaUsadaData,
+    index: number,
+  ) => {
+    const result = await onCreate(data);
+    if (result) {
+      setValue(`formas_pago.${index}.carroceria_usada_id`, result.id, {
+        shouldDirty: true,
+      });
+    }
+  };
   return (
     <div>
       <div className={`rounded-xl border p-4 ${summaryTone}`}>
@@ -236,18 +280,34 @@ export default function FormaPagoForm({
                     locale="es-AR"
                   />
                 </div>
-                <div className="mt-2 md:mt-0 md:col-span-3 flex justify-end items-end gap-2">
+                <div className="mt-2 md:mt-0 md:col-span-3 flex justify-center items-end gap-2">
                   <Button
-                    className="w-full"
-                    color={"lime"}
+                    className="w-full py-5"
+                    color={`${
+                      watch(`formas_pago.${index}.carroceria_usada_id`)
+                        ? "gray"
+                        : "lime"
+                    }`}
+                    size="sm"
                     outline
                     disabled={
                       watch(`formas_pago.${index}.tipo`) !== "carroceria_usada"
                     }
-                    onClick={handleAddCarroceria}
+                    onClick={
+                      watch(`formas_pago.${index}.carroceria_usada_id`)
+                        ? () =>
+                            navigate(
+                              `/carrocerias-usadas/${watch(`formas_pago.${index}.carroceria_usada_id`)}`,
+                            )
+                        : () => handleAddCarroceria(index)
+                    }
                   >
                     <LuTruck className="mr-2 w-4 h-4" />
-                    Registrar carroceria usada
+                    {`${
+                      watch(`formas_pago.${index}.carroceria_usada_id`)
+                        ? "Carroceria registrada"
+                        : "Registrar carroceria usada"
+                    }`}
                   </Button>
                   <Button
                     type="button"

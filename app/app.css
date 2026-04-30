@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
-
+@import "react-image-gallery/styles/image-gallery.css";
 @variant dark (&:where(.dark, .dark *));
 .font-logo-primary {
   font-family: "Sansation", sans-serif;
@@ -9,4 +9,34 @@
 
 .font-logo-secondary {
   font-family: "Birthstone", sans-serif;
+}
+/* En tu app.css o un archivo global */
+.image-gallery-fullscreen-button {
+
+  color: oklch(60.6% 0.25 292.717);
+
+  background: white;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem;
+}
+
+.image-gallery-right-nav, .image-gallery-left-nav  {
+
+  color: oklch(60.6% 0.25 292.717);
+
+  background: white;
+  border-radius: 9999px;
+  padding: 0.8rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem;
 }

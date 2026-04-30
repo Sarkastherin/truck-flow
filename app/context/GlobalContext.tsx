@@ -97,7 +97,10 @@ type GlobalContextType = {
 export type CreateGlobalMethod<T extends BaseGlobalEntity> = (
   entityData: Omit<T, "id">,
 ) => Promise<CreateGlobalResponse<T>>;
-
+export type UpdateGlobalMethod<T extends BaseGlobalEntity> = (
+  existingEntity: T,
+  dirtyFields: DirtyMap<T>,
+) => Promise<CrudGlobalResponse>;
 type ParamsFromSheetsType<H extends Record<string, string>> = {
   headers: Record<keyof H, SheetCellValue[] | null>;
   values: Record<string, SheetCellValue[][]>;
@@ -319,7 +322,6 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       sheetId: string,
       sheetName: string,
     ) => {
-      console.log(`Actualizando ${entityLabel}:`, data);
       const {
         headers,
         values,

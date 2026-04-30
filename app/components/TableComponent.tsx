@@ -201,7 +201,7 @@ type TableProps<T> = {
   btnOnClick?: {
     onClick: () => void;
     title: string;
-    color?: "blue" | "primary" | "success" | "cyan" | "indigo" | "orange";
+    color?: "blue" | "primary" | "success" | "cyan" | "indigo" | "orange" | "pink" | "purple" | "red" | "teal" | "violet" | "yellow" | "default";
   };
   emptyState?: {
     title?: string;

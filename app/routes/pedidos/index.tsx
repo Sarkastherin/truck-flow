@@ -11,6 +11,8 @@ import { LoadingComponent } from "~/components/LoadingComponent";
 import { BadgeStatusPedido } from "~/components/specials/Badges";
 import { SubTitles } from "~/components/SubTitles";
 import { LuBookMarked } from "react-icons/lu";
+import { Badge } from "flowbite-react";
+import { capitalize } from "~/utils/functions";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Pedidos" },
@@ -29,7 +31,12 @@ const columns: TableColumn<Pedido>[] = [
     name: "Cliente",
     selector: (row) => row.cliente?.razon_social || "",
     sortable: true,
-    width: "200px",
+  },
+  {
+    name: "Tipo",
+    cell: (row) => <Badge color={`${row.tipo === "nueva" ? "blue" : "yellow"}`}>{capitalize(row.tipo)}</Badge>,
+    sortable: true,
+    width: "120px",
   },
   {
     name: "F. prevista",
@@ -116,6 +123,15 @@ export default function PedidosHome() {
             label: "Estado",
             type: "select",
             options: statusOptionsPedidos,
+          },
+          {
+            key: "tipo",
+            label: "Tipo",
+            type: "select",
+            options: [
+              { label: "Nueva", value: "nueva" },
+              { label: "Usada", value: "usada" },
+            ],
           },
         ]}
         onRowClick={(row) => handleRowClick(row)}

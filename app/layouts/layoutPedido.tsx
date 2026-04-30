@@ -14,11 +14,13 @@ import { useMemo } from "react";
 import { useModal } from "~/context/ModalContext";
 import { useNavigate } from "react-router";
 import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+import ButtonPrestamo from "~/components/specials/ButtonPrestamo";
+import { Button } from "flowbite-react";
 export default function PedidosLayout() {
   const location = useLocation();
   const { pedidoId } = useParams();
-  const { pedidos, deletePedido } = usePedido();
-  const { openModal } = useModal();
+  const { pedidos, deletePedido, updatePedido } = usePedido();
+  const { openModal, closeModal } = useModal();
   const navigate = useNavigate();
 
   const pedido = pedidos?.find((p) => String(p.id) === pedidoId);
@@ -70,8 +72,9 @@ export default function PedidosLayout() {
         icon: LuLayoutPanelTop,
         show: MODE_DEV && pedido?.tipo === "usada",
         alert: {
-          showAlert: Object.entries(pedido?.carroceria_usada ?? {}).length === 0,
-          alertMessage: "El pedido no tiene información de la carrocería usada.",
+          showAlert: !pedido?.carroceria_usada_id,
+          alertMessage:
+            "El pedido no tiene información de la carrocería usada.",
         },
       },
       {
@@ -85,18 +88,21 @@ export default function PedidosLayout() {
         name: "Datos de Colocación",
         href: `/pedidos/datos-colocacion/${id}`,
         icon: LuTruck,
+        show: pedido?.tipo === "nueva",
       },
       {
         key: "ordenes-trabajo",
         name: "Órdenes de Trabajo",
         href: `/pedidos/ordenes-trabajo/${id}`,
         icon: LuFileBox,
+        show: pedido?.tipo === "nueva",
       },
       {
         key: "controles-calidad",
         name: "Controles de Calidad",
         href: `/pedidos/controles-calidad/${id}`,
         icon: LuShieldCheck,
+        show: pedido?.tipo === "nueva",
       },
     ];
   };
@@ -138,23 +144,36 @@ export default function PedidosLayout() {
     });
   };
   return (
-    <div
-      className="container mx-auto flex h-full pb-4 max-w-7xl"
-      style={{ minHeight: "calc(100vh - 90px)" }}
-    >
+    <div className="flex h-full" style={{ minHeight: "calc(100vh - 110px)" }}>
       <Sidebar
         submenu={menu}
         activeTab={activeTab}
         collapsible
         title={`Pedido #${pedido.numero_pedido}`}
-        dangerZone
-        propsDangerZone={{
-          itemName: "Pedido",
-          description:
-            "Una vez eliminado, este pedido y todos sus datos asociados se perderán permanentemente.",
-          onDelete: handleDeletePedido,
-        }}
-      />
+      >
+        <ButtonPrestamo pedido={pedido} />
+        <div className="mt-6 p-3 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <h4 className="text-sm font-semibold text-red-700 dark:text-red-400">
+              Zona de Peligro
+            </h4>
+          </div>
+          <p className="text-xs text-red-600 dark:text-red-300 mb-3 leading-relaxed">
+            Una vez eliminado, este pedido y todos sus datos asociados se
+            perderán permanentemente.
+          </p>
+          <Button
+            type="button"
+            color="red"
+            size="sm"
+            onClick={handleDeletePedido}
+            className="w-full text-xs"
+          >
+            {`Eliminar ${pedido.numero_pedido}`}
+          </Button>
+        </div>
+      </Sidebar>
       <Outlet context={pedido} />
     </div>
   );

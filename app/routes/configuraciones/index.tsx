@@ -15,7 +15,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Configuraciones() {
   const { configItems } = useNavItems();
   return (
-    <div className="container mx-auto px-6 lg:px-0 mt-10">
+    <>
       <SubTitles
         title="Configuraciones"
         back_path="/"
@@ -41,6 +41,6 @@ export default function Configuraciones() {
           ),
         )}
       </div>
-    </div>
+    </>
   );
 }

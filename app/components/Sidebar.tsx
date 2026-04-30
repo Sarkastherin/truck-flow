@@ -16,8 +16,6 @@ export function Sidebar({
   activeTab,
   setActiveTab,
   collapsible = false,
-  dangerZone = false,
-  propsDangerZone,
   ...props
 }: {
   submenu: {
@@ -34,11 +32,10 @@ export function Sidebar({
   activeTab: string;
   setActiveTab?: (tab: string) => void;
   collapsible?: boolean;
-  dangerZone?: boolean;
-  propsDangerZone?: {
-    itemName?: string;
-    description?: string;
-    onDelete?: () => void;
+
+  btnAction?: {
+    text: string | React.ReactNode;
+    onClick: () => void;
   };
 } & SidebarProps) {
   const navigate = useNavigate();
@@ -119,30 +116,7 @@ export function Sidebar({
                 );
               })}
             </SidebarItemGroup>
-            {/* Zona de peligro */}
-            {dangerZone && !collapsed && (
-              <div className="mt-6 mb-16 p-3 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <h4 className="text-sm font-semibold text-red-700 dark:text-red-400">
-                    Zona de Peligro
-                  </h4>
-                </div>
-                <p className="text-xs text-red-600 dark:text-red-300 mb-3 leading-relaxed">
-                  {propsDangerZone?.description ||
-                    "Ten cuidado al realizar esta acción, no se puede deshacer."}
-                </p>
-                <Button
-                  type="button"
-                  color="red"
-                  size="sm"
-                  onClick={propsDangerZone?.onDelete}
-                  className="w-full text-xs"
-                >
-                  {`Eliminar ${propsDangerZone?.itemName || "Pedido"}`}
-                </Button>
-              </div>
-            )}
+            {!collapsed && props.children}
           </SidebarItems>
         </FlowbiteSidebar>
       </div>

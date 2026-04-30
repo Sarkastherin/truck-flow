@@ -153,8 +153,6 @@ export default function CarroceriaForm({
           throw new Error(`Error al crear la carroceria: ${error}`);
         }
       } else {
-        console.log("Datos a actualizar:", data.corte_guardabarros);
-        console.log("Campos modificados:", dirtyFields);
         const { error } = await updateCarroceria(
           data as Carroceria & { documentos: Documentos[] },
           dirtyFields,
@@ -197,7 +195,9 @@ export default function CarroceriaForm({
       (vp) => vp.carrozado_id === id,
     );
     if (valoresRelacionados.length === 0) return;
-    openModal("loading", "Cargando datos del carrozado...");
+    openModal("loading", {
+      props: { title: "Cargando datos del carrozado..." },
+    });
     for (const item of valoresRelacionados) {
       const { atributo, valor, tipo } = item;
       setValue(atributo as any, valor);
@@ -444,7 +444,7 @@ export default function CarroceriaForm({
                 />
                 <ToggleSwitch
                   id="cumbreras"
-                  label="Cumbreras"
+                  label={`${watch("cumbreras") ? "Con cumbreras" : "Sin cumbreras"}`}
                   value={watch("cumbreras")}
                   onCustumChange={(checked) =>
                     setValue("cumbreras", checked, {

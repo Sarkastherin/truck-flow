@@ -24,10 +24,7 @@ export default function ProductosSettings() {
   const navigate = useNavigate();
   const { carrozados } = useConfiguracion();
   return (
-    <div
-      className="container mx-auto h-full py-4 px-4 md:px-6"
-      style={{ minHeight: "calc(100vh - 90px)" }}
-    >
+    <>
       <SubTitles
         title="Configuraciones Avanzadas"
         icon={{ component: LuWrench, color: "white" }}
@@ -43,7 +40,7 @@ export default function ProductosSettings() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-5 mx-auto gap-6 p-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-5 mx-auto gap-6 mt-8 w-full">
           {carrozados.map((carrozado) => (
             <Card
               key={carrozado.id}
@@ -62,6 +59,6 @@ export default function ProductosSettings() {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

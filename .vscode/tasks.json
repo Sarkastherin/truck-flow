@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Instalar flowbite",
+			"type": "shell",
+			"command": "npm install flowbite",
+			"group": "build"
+		}
+	]
+}

@@ -66,6 +66,22 @@ export default function PedidosControlesCalidad() {
       controlCarrozado: controlCarrozadoData,
     });
   };
+  if (pedido?.carroceria_usada_id) {
+    return (
+      <section className="ps-4 w-full">
+        <div
+          className="flex items-center justify-center"
+          style={{ minHeight: "calc(100vh - 115px)" }}
+        >
+          <div className="flex flex-col gap-6">
+            <p className="text-center text-gray-500 dark:text-gray-400">
+              No aplica.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
   if (!pedido?.carroceria?.id) {
     return (
       <section className="ps-4 w-full">

@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import { useUser } from "~/context/UserContext";
 import type { IconType } from "react-icons";
-import { FiDownload, FiUpload } from "react-icons/fi";
-import { FaBoxesStacked } from "react-icons/fa6";
+import { FiDownload } from "react-icons/fi";
 import { LuFileCog, LuSettings2, LuUserRoundCog } from "react-icons/lu";
 import { TbSitemap } from "react-icons/tb";
 import type { Role } from "~/types/users";
@@ -34,22 +33,27 @@ const allNavItems: (NavItem & { allowedRoles: Role[] })[] = [
   {
     name: "Inicio",
     to: "/",
-    allowedRoles: ["USER", "SUPERVISOR", "ADMIN", "SELLER"],
+    allowedRoles: ["DEV","USER", "ADMIN", "SELLER"],
   },
   {
     name: "Pedidos",
     to: "/pedidos",
-    allowedRoles: ["USER", "SUPERVISOR", "ADMIN", "SELLER"],
+    allowedRoles: ["DEV","USER", "ADMIN"],
   },
   {
     name: "Administración",
     to: "/administracion",
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["DEV","SUPERVISOR", "ADMIN"],
   },
   {
     name: "Configuraciones",
     to: "/configuraciones",
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["DEV","ADMIN"],
+  },
+  {
+    name: "Stock Usadas",
+    to: "/carrocerias-usadas",
+    allowedRoles: ["DEV"],
   },
 ];
 
@@ -65,7 +69,7 @@ const allConfigItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: LuUserRoundCog,
       color: "text-green-600 dark:text-green-400",
     },
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Parámetros generales",
@@ -73,7 +77,7 @@ const allConfigItems: (ConfigItem & { allowedRoles: Role[] })[] = [
     description:
       "Configura los parámetros generales del sistema, como unidades de medida, moneda, etc.",
     icon: { component: LuSettings2, color: "text-blue-600 dark:text-blue-400" },
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Carrozados",
@@ -81,7 +85,7 @@ const allConfigItems: (ConfigItem & { allowedRoles: Role[] })[] = [
     description:
       "Configuraciones específicas para carrozados, valores predefinidas, controles de calidad, etc.",
     icon: { component: LuFileCog, color: "text-red-600 dark:text-red-400" },
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
 ];
 const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
@@ -94,7 +98,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: TbSitemap,
       color: "text-yellow-600 dark:text-yellow-400",
     },
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Cheques",
@@ -105,7 +109,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: FiDownload,
       color: "text-purple-600 dark:text-purple-400",
     },
-    allowedRoles: ["SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
 ];
 

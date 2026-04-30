@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -22,6 +21,7 @@ import type {
   Carroceria,
   TrabajoChasis,
   OrdenesTrabajo,
+  CarroceriaUsada,
 } from "~/types/pedido";
 import type { DirtyMap } from "~/utils/prepareUpdatePayload";
 import { useSociosComercial } from "./SociosComercialesContext";
@@ -41,7 +41,9 @@ import {
   useGlobal,
   type CreateGlobalResponse,
   type CrudGlobalResponse,
+  type UpdateGlobalMethod,
 } from "./GlobalContext";
+import { useCarroceriasUsadas } from "./CarroceriasUsadasContext";
 type PedidoDirtyFields = DirtyMap<PedidoFormValues>;
 
 type Response = {
@@ -113,6 +115,21 @@ type PedidoContextType = {
     existingCarroceria: Carroceria,
     dirtyFields: DirtyMap<Carroceria>,
   ) => Promise<Response>;
+  asignedCarroceriaUsada: (
+    idPedido: string,
+    idCarroceriaUsada: string,
+  ) => Promise<Response>;
+  createCarroceriaUsadaBase: (
+    newCarroceriaUsada: CarroceriaUsada,
+  ) => Promise<Response>;
+  updateCarroceriaUsadaBase: (
+    existingCarroceriaUsada: CarroceriaUsada,
+    dirtyFields: DirtyMap<CarroceriaUsada>,
+  ) => Promise<Response>;
+  updatePedidoBase: (
+    existingPedido: Pedido,
+    dirtyFields: PedidoDirtyFields,
+  ) => Promise<Response>;
 };
 type HeadersType = {
   pedidos: SheetCellValue[] | null;
@@ -122,6 +139,7 @@ type HeadersType = {
   trabajo_chasis: SheetCellValue[] | null;
   ordenes_trabajo: SheetCellValue[] | null;
   documentos: SheetCellValue[] | null;
+  carrocerias_usadas: SheetCellValue[] | null;
 };
 const PedidoContext = createContext<PedidoContextType | undefined>(undefined);
 export const PedidosProvider = ({
@@ -138,6 +156,8 @@ export const PedidosProvider = ({
   const SHEETS = useMemo(() => getCompleteSheetRange(SHEET_NAMES_PEDIDOS), []);
   const { socios } = useSociosComercial();
   const { activeUser } = useUser();
+  const { carroceriasUsadas, changeStatusCarroceriaUsada } =
+    useCarroceriasUsadas();
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null);
   const [paramsFromSheets, setParamsFromSheets] = useState<{
     headers: HeadersType;
@@ -146,6 +166,7 @@ export const PedidosProvider = ({
   const getPedidosData = useCallback(async () => {
     try {
       if (!socios || socios.length === 0) return;
+      if (!carroceriasUsadas) return;
       const { data, error } = await getAllSheets(SHEET_ID_PEDIDO, SHEETS);
       if (error) {
         throw new Error(
@@ -165,6 +186,7 @@ export const PedidosProvider = ({
           trabajo_chasis: data[4]?.[0] || null,
           ordenes_trabajo: data[5]?.[0] || null,
           documentos: data[6]?.[0] || null,
+          carrocerias_usadas: data[7]?.[0] || null,
         },
         values: {
           pedidos: data[0] || [],
@@ -174,6 +196,7 @@ export const PedidosProvider = ({
           trabajo_chasis: data[4] || [],
           ordenes_trabajo: data[5] || [],
           documentos: data[6] || [],
+          carrocerias_usadas: data[7] || [],
         },
       });
 
@@ -184,7 +207,7 @@ export const PedidosProvider = ({
       const trabajoChasisData = getDataInJSONFormat(data[4]);
       const ordenesTrabajoData = getDataInJSONFormat(data[5]);
       const documentosData = getDataInJSONFormat(data[6]);
-
+      const carroceriasUsadasData = getDataInJSONFormat(data[7]);
       const combinedData = pedidosData.map((pedido) => {
         const cliente =
           socios.find((socio) => socio.id === pedido.cliente_id) || null;
@@ -204,12 +227,17 @@ export const PedidosProvider = ({
           ordenesTrabajoData.filter((wo) => wo.pedido_id === pedido.id) || [];
         const documentosForThisPedido =
           documentosData.filter((doc) => doc.pedido_id === pedido.id) || [];
+        const carroceriaUsadaForThisPedido =
+          carroceriasUsadasData.find(
+            (carroceria) => carroceria.pedido_id === pedido.id,
+          ) || {};
         return {
           ...pedido,
           cliente: cliente,
           formas_pago: formasPagoForThisPedido,
           camion: camionForThisPedido,
           carroceria: carroceriaForThisPedido,
+          carroceria_usada: carroceriaUsadaForThisPedido,
           trabajo_chasis: trabajoChasisForThisPedido,
           ordenes_trabajo: ordenesTrabajoForThisPedido,
           documentos: documentosForThisPedido,
@@ -227,7 +255,7 @@ export const PedidosProvider = ({
       console.error("Error fetching orders data:", error);
       return;
     }
-  }, [socios]);
+  }, [socios, carroceriasUsadas]);
   const generatePedidoNumber = () => {
     if (!pedidos) {
       return;
@@ -291,7 +319,17 @@ export const PedidosProvider = ({
     SHEET_NAMES_PEDIDOS.ordenes_trabajo,
     getPedidosData,
   );
-
+  const {
+    create: createCarroceriaUsadaBase,
+    update: updateCarroceriaUsadaBase,
+  } = createGlobalEntityCrud<CarroceriaUsada>(
+    "carrocerias_usadas",
+    "carroceria_usada",
+    paramsFromSheets,
+    SHEET_ID_PEDIDO,
+    SHEET_NAMES_PEDIDOS.carroceria_usada,
+    getPedidosData,
+  );
   /* PEDIDO */
   const CUDFormasPago = useCallback(
     async (data: FormasPago[], deletedIds: string[]) => {
@@ -498,6 +536,42 @@ export const PedidosProvider = ({
     },
     [paramsFromSheets, activeUser, uploadFiles, CUDDocumentos],
   );
+  const asignedCarroceriaUsada = useCallback(
+    async (idPedido: string, idCarroceriaUsada: string) => {
+      try {
+        const { error: errorCarroceriaUsada } =
+          await changeStatusCarroceriaUsada(idCarroceriaUsada, "vendida");
+        if (errorCarroceriaUsada) {
+          throw new Error(
+            `Error al cambiar el status de la carrocería usada: ${errorCarroceriaUsada}`,
+          );
+        }
+        const { error: errorPedido } = await updatePedidoBase(
+          { id: idPedido, carroceria_usada_id: idCarroceriaUsada } as Pedido,
+          { carroceria_usada_id: true },
+        );
+
+        if (errorPedido) {
+          throw new Error(
+            `Error al actualizar el status del pedido: ${errorPedido}`,
+          );
+        }
+        return {
+          success: true,
+          message: "Status del pedido actualizado exitosamente",
+          error: null,
+        };
+      } catch (error) {
+        console.error("Error al actualizar el status del pedido:", error);
+        return {
+          success: false,
+          message: "Error al actualizar el status del pedido",
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    },
+    [paramsFromSheets, activeUser],
+  );
   /* CAMION */
   const createNewCamion = useCallback(
     async (
@@ -508,7 +582,6 @@ export const PedidosProvider = ({
     ) => {
       try {
         const { documentos, ...camionData } = newCamion;
-        console.log("Datos del nuevo camión a crear:", camionData);
         const { data, error } = await createCamionBase(camionData);
 
         if (error || !data) {
@@ -910,6 +983,21 @@ export const PedidosProvider = ({
           };
           deletePayload.push(deleteRangeCarrocerias);
         }
+        const rowCarroceriasUsadas = findRowById(
+          idPedido,
+          SHEET_NAMES_PEDIDOS.carroceria_usada,
+          values,
+        );
+        if (rowCarroceriasUsadas) {
+          const dimensionCarroceriasUsadas = headers.carroceria_usada?.map(
+            () => "",
+          );
+          const deleteRangeCarroceriasUsadas = {
+            range: `${SHEET_NAMES_PEDIDOS.carroceria_usada}!A${rowCarroceriasUsadas}:ZZZ${rowCarroceriasUsadas}`,
+            values: [dimensionCarroceriasUsadas || []],
+          };
+          deletePayload.push(deleteRangeCarroceriasUsadas);
+        }
         const rowDocumentos = findRowById(
           idPedido,
           SHEET_NAMES_PEDIDOS.documentos,
@@ -993,7 +1081,11 @@ export const PedidosProvider = ({
         closeOrdenTrabajo,
         deletePedido,
         updateCamionBase,
-        updateCarroceriaBase
+        updateCarroceriaBase,
+        asignedCarroceriaUsada,
+        createCarroceriaUsadaBase,
+        updateCarroceriaUsadaBase,
+        updatePedidoBase
       }}
     >
       {children}

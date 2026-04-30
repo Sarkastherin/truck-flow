@@ -5,7 +5,7 @@ export function LogoComponent({ noTheme }: { noTheme?: boolean }) {
     >
       Truck
       <span
-        className={`font-logo-secondary text-3xl font-bold ${noTheme ? "text-violet-400" : "text-violet-700"}  dark:text-violet-500`}
+        className={`font-logo-secondary text-3xl font-bold ${noTheme ? "text-violet-400" : "text-violet-700"}  dark:text-violet-400`}
       >
         Flow
       </span>

@@ -23,16 +23,24 @@ export default function PedidosDatosColocacion() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No hay carrocería asociada a este pedido.
-            </p>
-            <Button
-              color={"violet"}
-              className="w-fit mx-auto"
-              onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
-            >
-              Agregar Carrocería
-            </Button>
+            {pedido.carroceria_usada_id ? (
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                No aplica.
+              </p>
+            ) : (
+              <>
+                <p className="text-center text-gray-500 dark:text-gray-400">
+                  No hay carrocería asociada a este pedido.
+                </p>
+                <Button
+                  color={"violet"}
+                  className="w-fit mx-auto"
+                  onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
+                >
+                  Agregar Carrocería
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

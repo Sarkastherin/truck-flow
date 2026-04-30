@@ -15,7 +15,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Administracion() {
   const { adminItems } = useNavItems();
   return (
-    <div className="container mx-auto px-6 lg:px-0 mt-10">
+    <>
       <SubTitles
         title="Administración"
         back_path="/"
@@ -41,6 +41,6 @@ export default function Administracion() {
           ),
         )}
       </div>
-    </div>
+    </>
   );
 }

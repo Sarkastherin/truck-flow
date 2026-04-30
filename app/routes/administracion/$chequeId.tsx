@@ -5,7 +5,7 @@ import {
   getChequeTransition,
   chequeStateMachine,
 } from "~/utils/chequeStateMachine";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import type {
   Cheque,
   ChequeConSociosYMovimiento,
@@ -56,6 +56,7 @@ export default function ChequeForm() {
         currentStatus,
         accion as AccionTypes,
       );
+      console.log(formData, dirtyFields);
       const { error } = await updateCheque(formData, dirtyFields);
       if (error) {
         throw new Error(error);
@@ -104,40 +105,40 @@ export default function ChequeForm() {
     const currentStatus = cheque?.status as any;
     const transition = getChequeTransition(currentStatus, actionType);
     if (!transition) return;
-
+    console.log(`Transición válida: ${currentStatus} -> ${transition.to} por acción ${actionType}`);
     const today = new Date().toISOString().split("T")[0];
     // Setea el nuevo estado y campos asociados según la acción
     switch (actionType) {
       case "depositar":
         setValue("fecha_deposito", today, { shouldDirty: true });
         setValue("status", "depositado", { shouldDirty: true });
-        setValue("fecha_endoso", undefined);
-        setValue("proveedor_id", undefined);
-        setValue("fecha_anulacion", undefined);
+        setValue("fecha_endoso", undefined, { shouldDirty: true });
+        setValue("proveedor_id", undefined, { shouldDirty: true });
+        setValue("fecha_anulacion", undefined, { shouldDirty: true });
         break;
       case "endosar":
         setValue("fecha_endoso", today, { shouldDirty: true });
         setValue("status", "endosado", { shouldDirty: true });
-        setValue("fecha_deposito", undefined);
-        setValue("fecha_anulacion", undefined);
+        setValue("fecha_deposito", undefined, { shouldDirty: true });
+        setValue("fecha_anulacion", undefined, { shouldDirty: true });
         break;
       case "anular":
         setValue("fecha_anulacion", today, { shouldDirty: true });
         setValue("status", "anulado", { shouldDirty: true });
-        setValue("fecha_deposito", undefined);
-        setValue("fecha_endoso", undefined);
-        setValue("proveedor_id", undefined);
+        setValue("fecha_deposito", undefined, { shouldDirty: true });
+        setValue("fecha_endoso", undefined, { shouldDirty: true });
+        setValue("proveedor_id", undefined, { shouldDirty: true });
         break;
       case "acreditar":
         setValue("fecha_acreditacion", today, { shouldDirty: true });
         setValue("status", "acreditado", { shouldDirty: true });
-        setValue("fecha_rechazo", undefined);
-        setValue("motivo_rechazo", undefined);
+        setValue("fecha_rechazo", undefined, { shouldDirty: true });
+        setValue("motivo_rechazo", undefined, { shouldDirty: true });
         break;
       case "rechazar":
         setValue("fecha_rechazo", today, { shouldDirty: true });
         setValue("status", "rechazado", { shouldDirty: true });
-        setValue("fecha_acreditacion", undefined);
+        setValue("fecha_acreditacion", undefined, { shouldDirty: true });
         break;
       case "anularEndoso":
         // Esta acción se maneja aparte (ver anularEndoso)
@@ -155,6 +156,13 @@ export default function ChequeForm() {
           "¿Está seguro que desea anular el endoso de este cheque? El cheque volverá a estar recibido/en cartera y se eliminarán los datos del endoso.",
         onConfirm: async () => {
           openModal("loading", { message: "Anulando endoso..." });
+          reset({
+            ...cheque,
+            fecha_endoso: "",
+            proveedor: undefined,
+            proveedor_id: "",
+            status: "en_cartera",
+          })
           const payload = {
             id: cheque?.id,
             fecha_endoso: "",

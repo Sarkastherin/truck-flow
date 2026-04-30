@@ -18,8 +18,7 @@ import {
   SHEET_ID_SOCIOS,
   SHEET_NAMES_SOCIOS,
 } from "~/backend/Database/SheetsConfig";
-import { type DirtyMap } from "~/utils/prepareUpdatePayload";
-import { useGlobal, type CreateGlobalMethod } from "./GlobalContext";
+import { useGlobal, type CreateGlobalMethod, type UpdateGlobalMethod } from "./GlobalContext";
 type SociosContextType = {
   getSociosData: () => Promise<void>;
   socios: SocioComercial[];
@@ -28,7 +27,7 @@ type SociosContextType = {
   provincias: Provincia[] | null;
   localidades: Localidades[] | null;
   createNewSocio: CreateGlobalMethod<SocioComercial>;
-  updateSocio: UpdateConfigMethod<SocioComercial>;
+  updateSocio: UpdateGlobalMethod<SocioComercial>;
   removeSocio: ToggleConfigMethod;
   reactivateSocio: ToggleConfigMethod;
   isCUITRegistered: (cuit: string, tipoSocio: string) => boolean;
@@ -39,19 +38,11 @@ type SociosContextType = {
 type HeadersType = {
   socios_comerciales: SheetCellValue[];
 };
-type BaseConfigEntity = {
-  id: string;
-  active: boolean;
-};
 type CrudResponse = {
   success: boolean;
   message: string;
   error: string | null;
 };
-type UpdateConfigMethod<T extends BaseConfigEntity> = (
-  existingEntity: T,
-  dirtyFields: DirtyMap<T>,
-) => Promise<CrudResponse>;
 type ToggleConfigMethod = (entityId: string) => Promise<CrudResponse>;
 const SociosContext = createContext<SociosContextType | undefined>(undefined);
 

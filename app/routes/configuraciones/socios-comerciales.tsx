@@ -78,7 +78,7 @@ const filterFields = [
 ];
 
 export default function SociosComerciales() {
-  const { socios, proveedores, clientes } = useSociosComercial();
+  const { socios } = useSociosComercial();
   const { openModal } = useModal();
   const { form, onCreate, onUpdate, onDelete, onReactivate } = useSocio({
     tipoSocio: "cliente",
@@ -149,8 +149,8 @@ export default function SociosComerciales() {
 
   return (
     <div
-      className="container mx-auto flex h-full pb-4"
-      style={{ minHeight: "calc(100vh - 100px)" }}
+      className="flex h-full"
+      style={{ minHeight: "calc(100vh - 110px)" }}
     >
       <Sidebar
         aria-label="Menu de socios comerciales"
@@ -175,7 +175,7 @@ export default function SociosComerciales() {
           columns={columns}
           data={filteredSocios}
           filterFields={filterFields}
-          scrollHeightOffset={405}
+          scrollHeightOffset={375}
           inactiveField="active"
           onRowClick={handleRowClicked}
           emptyState={{

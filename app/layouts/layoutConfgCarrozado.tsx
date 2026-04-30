@@ -48,8 +48,8 @@ export default function LayoutConfgCarrozado() {
   }, [carrozados, carrozadoId]);
   return (
     <div
-      className="container mx-auto flex h-full pb-4"
-      style={{ minHeight: "calc(100vh - 90px)" }}
+      className="flex h-full"
+      style={{ minHeight: "calc(100vh - 110px)" }}
     >
       <Sidebar submenu={menu} activeTab={activeTab} collapsible title={nombreCarrozado}/>
       <section className="w-full ps-6">

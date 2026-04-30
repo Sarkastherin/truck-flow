@@ -112,6 +112,7 @@ type SelectProps = Omit<
   options: { value: string; label: string; disabled?: boolean }[];
   emptyOption?: string;
   disabledEmptyOption?: boolean;
+  otro?: boolean;
 };
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
@@ -123,6 +124,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       requiredField = false,
       emptyOption = "Seleccione una opción",
       disabledEmptyOption = false,
+      otro = false,
       ...props
     },
     ref,
@@ -153,6 +155,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {option.label}
             </option>
           ))}
+          {otro && (
+            <option value="otro" className={"font-bold text-violet-500"}>
+            Otro...
+          </option>
+          )}
         </FlowbiteSelect>
         {error && (
           <HelperText className="text-red-500 dark:text-red-400">

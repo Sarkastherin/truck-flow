@@ -292,6 +292,8 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
               fields={fields}
               remove={remove}
               setDeletedIds={setDeletedIds}
+              clienteId={watch("cliente_id")}
+              setValue={setValue}
             />
           </AccordionContent>
         </AccordionPanel>

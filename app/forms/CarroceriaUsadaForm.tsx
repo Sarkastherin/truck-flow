@@ -1,26 +1,43 @@
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
+import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
 import {
   Accordion,
   AccordionContent,
   AccordionPanel,
   AccordionTitle,
+  Badge,
   Button,
+  Card,
 } from "flowbite-react";
 import {
   Input,
   InputNumberIcon,
-  Select,
   Textarea,
+  CurrencyInput,
   ToggleSwitch,
+  Select,
 } from "~/components/InputsForm";
-import type {
-  CarroceriaFormValues,
-  Carroceria,
-  Documentos,
-  PedidoFormValues,
-  CarroceriaUsadaFormValues,
-  CarroceriaUsada,
-} from "~/types/pedido";
+import { LuRuler, LuBanknote } from "react-icons/lu";
+import CuchetinForm from "~/forms/CuchetinForm";
+import AlarguesForm from "~/forms/AlarguesForm";
+import AccesoriosForm from "~/forms/AccesoriosForm";
+import { BsCalendar2Week } from "react-icons/bs";
+import { TbDimensions } from "react-icons/tb";
+import { SocioComponentForm } from "~/components/specials/SocioComponent";
+import type { SocioComercial } from "~/types/socios";
+import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
+import { useModal } from "~/context/ModalContext";
+import { useNavigate } from "react-router";
+import { capitalize } from "~/utils/functions";
+import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
+import { usePedido } from "~/context/PedidoContext";
+import ImageGallery from "react-image-gallery";
+import type { GalleryItem } from "react-image-gallery";
+import ImageFileComponent from "~/components/ImageFileComponent";
+import type { dataToPayload } from "~/components/ImageFileComponent";
+import type { Fotos } from "~/types/carroceria-usada";
+import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import {
   materialOptions,
   espesorOptions,
@@ -31,385 +48,578 @@ import {
   tiposArcosOptions,
   zocaloOptions,
 } from "~/types/pedido";
-import { useModal } from "~/context/ModalContext";
-import { useEffect, useMemo, useState } from "react";
-import { LuRuler } from "react-icons/lu";
-import { BsCalendar2Week } from "react-icons/bs";
-import {
-  FileInputComponent,
-  type FileTypeActions,
-} from "~/components/FileInputComponent";
+import { useState } from "react";
+import { LuRotateCcw } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
-import AccesoriosForm from "./AccesoriosForm";
-import AlarguesForm from "./AlarguesForm";
-import { usePedido } from "~/context/PedidoContext";
-import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
-import { MODE_DEV } from "~/backend/Database/SheetsConfig";
-import CuchetinForm from "./CuchetinForm";
-export default function CarroceriaUsadaForm({
-  pedido,
-}: {
-  pedido: PedidoFormValues;
-}) {
-  type FormValues = CarroceriaUsadaFormValues & {
-    documentos: Documentos[];
-  };
-  const {
-    carroceria_usada: carroceria,
-    documentos,
-    id: idPedido,
-    numero_pedido: numeroPedido,
-  } = pedido;
-  const documentosCarroceria = useMemo(
-    () =>
-      documentos?.filter((doc) => doc.tipo_documento === "carroceria") ?? [],
-    [documentos],
-  );
-  const {} = usePedido();
-  const { openModal, closeModal } = useModal();
-  const [files, setFiles] = useState<FileTypeActions<Documentos>>({
-    add: null,
-    remove: null,
-  });
-  const defaultValues =
-    Object.keys(carroceria || {}).length > 0
-      ? {
-          ...carroceria,
-          documentos: documentosCarroceria,
-        }
-      : {
-          pedido_id: idPedido as string,
-          tipo_carrozado_id: "",
-          material: "",
-          espesor_chapa: undefined,
-          largo_int: undefined,
-          largo_ext: undefined,
-          ancho_ext: undefined,
-          alto: undefined,
-          alt_baranda: undefined,
-          ptas_por_lado: undefined,
-          puerta_trasera_id: "",
-          arcos_por_puerta: undefined,
-          tipos_arcos: "",
-          corte_guardabarros: false,
-          cumbreras: false,
-          lineas_refuerzo: undefined,
-          tipo_zocalo: "",
-          tipo_piso: "",
-          cuchetin: false,
-          med_cuchetin: null,
-          alt_pta_cuchetin: null,
-          alt_techo_cuchetin: null,
-          notas_cuchetin: "",
-          alargue_tipo_1: "N/A",
-          cant_alargue_1: null,
-          med_alargue_1: null,
-          quiebre_alargue_1: false,
-          alargue_tipo_2: "N/A",
-          cant_alargue_2: null,
-          med_alargue_2: null,
-          quiebre_alargue_2: false,
-          documentos: documentosCarroceria,
-        };
-  const { carrozadosOptions, puertasOptions } = useConfiguracion();
+type FormValues = Omit<
+  CarroceriaUsadaData,
+  "id" | "created_at" | "updated_at"
+> & {
+  id?: string;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+};
 
+export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
+  const { createCarroceriaUsadaBase, updateCarroceriaUsadaBase, CUDFotos } =
+    useCarroceriasUsadas();
+  const { getPedidosData } = usePedido();
+  const { openModal } = useModal();
+  const navigate = useNavigate();
+  const { carrozadosOptions, puertasOptions } = useConfiguracion();
   const {
-    register,
     handleSubmit,
+    register,
     watch,
     setValue,
+    control,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
   } = useForm<FormValues>({
-    defaultValues: defaultValues as FormValues,
+    defaultValues: data || {
+      duenno: null,
+      duenno_id: "",
+      fecha_recepcion: "",
+      precio_lista: undefined,
+      marca_carroceria: "",
+      status: "disponible",
+      tipo_carrozado: "",
+      material: "",
+      espesor_chapa: undefined,
+      largo: undefined,
+      ancho: undefined,
+      alto: undefined,
+      alt_baranda: undefined,
+      ptas_por_lado: undefined,
+      arcos_por_puerta: "",
+      tipos_arcos: "",
+      puerta_trasera: "",
+      lineas_refuerzo: "",
+      tipo_zocalo: "",
+      tipo_piso: "",
+      corte_guardabarros: false,
+      cumbreras: false,
+      notas: "",
+      /* Datos del camión */
+      tara_camion: undefined,
+      marca_camion: "",
+      modelo_camion: "",
+      /* Cuchetin */
+      cuchetin: false,
+      med_cuchetin: undefined,
+      alt_pta_cuchetin: undefined,
+      alt_techo_cuchetin: undefined,
+      notas_cuchetin: "",
+      /* Accesorios */
+      luces: undefined,
+      guardabarros: false,
+      dep_agua: false,
+      ubicacion_dep_agua: "",
+      cintas_reflectivas: "",
+      /* Accesorios - Boquillas */
+      boquillas: undefined,
+      tipo_boquillas: "",
+      ubicacion_boquillas: "",
+      /* Accesorios - Cajon de herramientas */
+      med_cajon_herramientas: undefined,
+      ubicacion_cajon_herramientas: "",
+      /* Alargue */
+      alargue_tipo_1: "",
+      cant_alargue_1: undefined,
+      med_alargue_1: undefined,
+      quiebre_alargue_1: false,
+      alargue_tipo_2: "",
+      cant_alargue_2: undefined,
+      med_alargue_2: undefined,
+      quiebre_alargue_2: false,
+    },
   });
-
-  useEffect(() => {
-    setValue("documentos", documentosCarroceria || [], {
-      shouldDirty: false,
-      shouldTouch: false,
-      shouldValidate: false,
-    });
-  }, [documentosCarroceria, setValue]);
-
   const isEditMode = Boolean(watch("id"));
-  const guardaBarrosEnabled = watch("corte_guardabarros");
   const onSubmit = async (data: FormValues) => {
-    openModal("loading", {
-      props: {
-        title: isEditMode ? "Actualizando pedido..." : "Creando pedido...",
-      },
-    });
+    console.log("Datos a enviar:", data.material);
+    openModal("loading", { message: "Guardando carrocería usada..." });
+    const { duenno, ...carroceriaData } = data;
     try {
-      if (!isEditMode) {
+      if (isEditMode) {
+        const { duenno, ...dirtyFieldsData } = dirtyFields;
+        const hasdirtyFields = Object.keys(dirtyFields).length > 0;
+        if (!hasdirtyFields) {
+          openModal("info", {
+            message: "No se han realizado cambios para guardar",
+          });
+          return;
+        }
+        const { error } = await updateCarroceriaUsadaBase(
+          carroceriaData as CarroceriaUsadaData,
+          dirtyFieldsData,
+        );
+        if (error) {
+          throw new Error("Error al actualizar la carrocería usada: " + error);
+        }
+        if (data.status === "vendida") {
+          await getPedidosData();
+        }
+        openModal("success", {
+          message: "Carrocería usada actualizada con éxito",
+        });
       } else {
+        const { error } = await createCarroceriaUsadaBase(
+          carroceriaData as Omit<CarroceriaUsadaData, "id">,
+        );
+        if (error) {
+          throw new Error("Error al crear la carrocería usada: " + error);
+        }
+        openModal("success", {
+          message: "Carrocería usada guardada con éxito",
+        });
+        navigate("/carrocerias-usadas");
       }
-      openModal("success", {
-        props: {
-          title: isEditMode ? "Carrocería actualizada" : "Carrocería creada",
-          message: isEditMode
-            ? "La carroceria ha sido actualizada exitosamente."
-            : "La carroceria ha sido creada exitosamente.",
-        },
-      });
-      setFiles({
-        add: null,
-        remove: null,
-      });
     } catch (error) {
-      console.error("Error en onSubmit de CarroceriaForm:", error);
+      console.error("Error al guardar la carrocería usada:", error);
       openModal("error", {
-        props: {
-          title: "Error al guardar",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Ha ocurrido un error desconocido al guardar la carroceria.",
-        },
+        message:
+          "Hubo un error al guardar la carrocería usada. Por favor, inténtalo de nuevo.",
       });
     }
   };
-
-  const handleChangeArcosField = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedArcos = e.target.value;
-    setValue("tipos_arcos", selectedArcos === "0" ? "N/A" : "");
-  };
-
-  const handleToggleCuchetinSection = (checked: boolean) => {
-    setValue("cuchetin", checked, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-
-    if (!checked) {
-      setValue("med_cuchetin", null, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-      setValue("alt_pta_cuchetin", null, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-      setValue("alt_techo_cuchetin", null, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-      setValue("notas_cuchetin", "", {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    }
-  };
-
-  const onError = (formErrors: unknown) => {
-    console.log("Errores de validación:", formErrors);
-  };
-  useFormNavigationBlock<PedidoFormValues>({
+  const guardaBarrosEnabled = watch("corte_guardabarros");
+  useFormNavigationBlock<FormValues>({
     isDirty,
     isSubmitSuccessful,
     dirtyFields,
   });
-  const newCarrozadoOptions = useMemo(() => {
-    return [
-      { value: "otro", label: "OTRO" },
-      ...carrozadosOptions.map((carrozado) => ({
-        value: carrozado.label,
-        label: carrozado.label,
-      })),
-    ];
-  }, [carrozadosOptions]);
-  return (
-    <form
-      onSubmit={handleSubmit(onSubmit, onError)}
-      className="w-full space-y-6"
-    >
-      <Accordion alwaysOpen>
-        <AccordionPanel>
-          <AccordionTitle>Datos de la carroceria</AccordionTitle>
-          <AccordionContent>
-            <fieldset className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 items-end">
-              <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-2 flex gap-2">
-                <div className="flex-1">
-                  <Select
-                    requiredField
-                    label="Carrozado"
-                    {...register("tipo_carrozado", {
-                      required: "Este campo es obligatorio",
-                    })}
-                    error={errors.tipo_carrozado?.message}
-                    options={newCarrozadoOptions}
-                  />
-                </div>
-                <div
-                  className="flex-2"
-                  hidden={watch("tipo_carrozado") !== "otro"}
-                >
-                  <Input
-                    label="Describa el tipo de carrozado"
-                    placeholder="Describa el tipo de carrozado"
-                    {...register("tipo_carrozado_otro", {
-                      required:
-                        watch("tipo_carrozado") === "otro"
-                          ? "Este campo es obligatorio"
-                          : false,
-                    })}
-                    error={errors.tipo_carrozado_otro?.message}
-                    disabled={watch("tipo_carrozado") !== "otro"}
-                  />
-                </div>
-              </div>
-              <Input
-                label="Marca"
-                {...register("marca")}
-                placeholder="Nombre del fabricante"
-              />
-              <InputNumberIcon
-                label="Año de fabricación"
-                placeholder="Ingrese un valor"
-                {...register("anio_fabricacion")}
-                icon={BsCalendar2Week}
-              />
-              <InputNumberIcon
-                label="Largo"
-                placeholder="Ingrese un valor"
-                {...register("largo")}
-                icon={LuRuler}
-              />
-              <InputNumberIcon
-                label="Alto"
-                placeholder="Ingrese un valor"
-                {...register("alto")}
-                icon={LuRuler}
-              />
-              <Select
-                label="Ancho"
-                {...register("ancho")}
-                options={anchoOptions}
-              />
-              <InputNumberIcon
-                label="Alt. baranda"
-                placeholder="Ingrese un valor"
-                {...register("alt_baranda")}
-                icon={LuRuler}
-              />
-              <Select
-                label="Tipo piso"
-                {...register("tipo_piso")}
-                options={pisoOptions}
-              />
-              <Select
-                label="Arcos por puerta"
-                {...register("arcos_por_puerta")}
-                options={arcosOptions}
-              />
-              <Select
-                label="Tipo de arcos"
-                {...register("tipos_arcos")}
-                disabled={String(watch("arcos_por_puerta")) === "0"}
-                options={tiposArcosOptions}
-              />
-              <div className="md:col-span-3">
-                <Input
-                  label="Color"
-                  placeholder="Describa como esta pintada la carrocería"
-                  {...register("color", {
-                    required: watch("color")
-                      ? "Este campo es obligatorio"
-                      : false,
-                  })}
-                />
-              </div>
+  const InfoField = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value?: string | number;
+  }) => (
+    <div className="flex flex-col">
+      <span className="text-xs text-gray-500 dark:text-gray-400 tracking-widest uppercase mb-1">
+        {label}
+      </span>
+      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+        {value || "-"}
+      </span>
+    </div>
+  );
+  const images: GalleryItem[] =
+    data?.fotos?.map((foto) => ({
+      original: foto.url,
+      thumbnail: foto.url,
+    })) || [];
+  const onUpload = async (data: dataToPayload[]) => {
+    if (!data || data.length === 0) return;
+    openModal("loading", {
+      props: {
+        title: "Subiendo imágenes",
+        message:
+          "Las imágenes se están guardando en el servidor, por favor espera.",
+      },
+    });
+    const newData = data.map((item) => ({
+      ...item,
+      carroceria_usada_id: watch("id")!,
+    }));
+    const result = await CUDFotos(newData as Fotos[], []);
+    if (!result.success) {
+      openModal("error", {
+        message:
+          "Hubo un error al subir las fotos. Por favor, inténtalo de nuevo.",
+      });
+    } else {
+      openModal("success", {
+        message: "Fotos subidas con éxito",
+      });
+    }
+  };
 
-              <InputNumberIcon
-                label="Ptas. por lado"
-                placeholder="Ingrese un valor"
-                {...register("ptas_por_lado")}
-                icon={LuRuler}
-              />
+  const MorphingInput = ({
+    options,
+    label,
+    keyAttribute,
+    required = false,
+  }: {
+    options: { value: string; label: string }[];
+    label: string;
+    keyAttribute: keyof FormValues;
+    required?: boolean;
+  }) => {
+    const [isCustom, setIsCustom] = useState(false);
+    const [custmOptions, setCustomOptions] = useState(options);
+    if (isCustom) {
+      return (
+        <div className="flex flex-col gap-2 transition-all duration-300">
+          <div className="relative flex items-center">
+            <Input
+              autoFocus
+              type="text"
+              label={`Especificar ${label}`}
+              placeholder="Escribe tu opción..."
+              onChange={(e) => {
+                setValue(keyAttribute, e.target.value);
+                setCustomOptions([
+                  ...options,
+                  {
+                    value: e.target.value,
+                    label: e.target.value,
+                  },
+                ]);
+              }}
+              requiredField={required}
+              error={errors[keyAttribute]?.message}
+            />
+            <button
+              onClick={() => {
+                setIsCustom(false);
+                setValue(keyAttribute, "");
+              }}
+              className="absolute top-9 right-2 p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+              title="Volver a la lista"
+            >
+              <LuRotateCcw size={18} />
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-              <div className="col-span-1 md:col-span-2 xl:col-span-2">
-                <Select
-                  label="Puerta trasera"
-                  {...register("puerta_trasera_id")}
-                  options={puertasOptions}
-                />
-              </div>
-              <div className="flex gap-4 col-span-3 mt-2">
-                <ToggleSwitch
-                  id="corte_guardabarros"
-                  label={`${guardaBarrosEnabled ? "Con corte de guardabarros" : "Sin corte de guardabarros"}`}
-                  value={guardaBarrosEnabled}
-                  disabled={watch("tipo_zocalo") === "gross_nuevo"}
-                  onCustumChange={(checked) =>
-                    setValue("corte_guardabarros", checked, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                <ToggleSwitch
-                  id="cumbreras"
-                  label="Cumbreras"
-                  value={watch("cumbreras")}
-                  onCustumChange={(checked) =>
-                    setValue("cumbreras", checked, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    })
-                  }
-                />
-              </div>
-            </fieldset>
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
-      <CuchetinForm
-        register={register}
-        watch={watch}
-        setValue={setValue}
-        errors={errors}
-        withAccordion
-      />
-
-      <AccesoriosForm
-        register={register}
-        watch={watch}
-        setValue={setValue}
-        errors={errors}
-        withAccordion
-        isOptional={true}
-      />
-
-      <AlarguesForm
-        register={register}
-        watch={watch}
-        setValue={setValue}
-        errors={errors}
-        withAccordion
-      />
-
-      <FileInputComponent
-        tipoDocumento="carroceria_usada"
-        documentos={watch("documentos")}
-        setFiles={setFiles}
-        files={files}
-      />
-      <Textarea
-        label="Condición"
-        placeholder="Describa la condición general de la carrocería usada, detalles de golpes, reparaciones previas, estado de pintura, etc."
-        {...register("notas")}
-        error={errors.notas?.message}
-      />
-      <Textarea
-        label="Observaciones"
-        placeholder="Observaciones adicionales sobre el pedido"
-        {...register("notas")}
-        error={errors.notas?.message}
-      />
-      <div className="space-y-2">
-        <Button type="submit" className="ml-auto block" disabled={false}>
-          Guardar pedido
-        </Button>
+    return (
+      <div className="flex flex-col gap-2">
+        <Select
+          label={label}
+          {...register(keyAttribute,{ required: required ? `El campo ${label} es requerido` : false })}
+          onChange={(e) => {
+            if (e.target.value === "otro") {
+              setIsCustom(true);
+            } else {
+              setValue(keyAttribute, e.target.value);
+            }
+          }}
+          options={custmOptions}
+          otro
+          requiredField={required}
+          error={errors[keyAttribute]?.message}
+        />
       </div>
-    </form>
+    );
+  };
+  return (
+    <>
+      {isEditMode && (
+        <Card className="w-full mb-4">
+          <div className="flex justify-between items-center md:items-end mb-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 tracking-widest uppercase">
+                Tipo de carrozado
+              </p>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-600 dark:text-white">
+                {data?.tipo_carrozado}
+              </h2>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <ImageFileComponent onUpload={onUpload} />
+              <BadgeStatusCarroceriaUsada status={data?.status || "-"} />
+            </div>
+          </div>
+          {/* Carrusel de fotos */}
+
+          {data?.fotos && data.fotos.length > 0 && (
+            <div className="max-w-2xl mx-auto rounded-lg mb-6">
+              <ImageGallery
+                items={images}
+                showBullets={true}
+                showPlayButton={false}
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">
+            <InfoField label="Color" value={data?.color} />
+            <InfoField
+              label="Precio lista"
+              value={
+                data?.precio_lista
+                  ? data.precio_lista.toLocaleString("es-AR", {
+                      style: "currency",
+                      currency: "ARS",
+                    })
+                  : "-"
+              }
+            />
+            <InfoField
+              label="Propietario anterior"
+              value={data?.duenno?.razon_social}
+            />
+            <InfoField
+              label="Fecha de recepción"
+              value={
+                data?.fecha_recepcion
+                  ? formatDateUStoES(data.fecha_recepcion)
+                  : "-"
+              }
+            />
+            <InfoField
+              label="Marca de carrocería"
+              value={data?.marca_carroceria}
+            />
+            <InfoField
+              label="Año de fabricación"
+              value={data?.anno_fabricacion || "-"}
+            />
+          </div>
+        </Card>
+      )}
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+        <Accordion alwaysOpen>
+          <AccordionPanel>
+            <AccordionTitle>Datos de la Toma</AccordionTitle>
+            <AccordionContent>
+              <fieldset className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <div className="md:col-span-2">
+                  <SocioComponentForm
+                    tipoSocio="cliente"
+                    customLabel="Propietario anterior"
+                    error={errors.duenno_id?.message}
+                    value={watch(`duenno.razon_social`) || ""}
+                    onSelect={(duenno: SocioComercial) => {
+                      setValue("duenno_id", duenno.id, { shouldDirty: true });
+                      setValue("duenno", duenno, { shouldDirty: true });
+                    }}
+                  />
+                </div>
+                <Input
+                  type="date"
+                  label="Fecha de recepción"
+                  {...register("fecha_recepcion")}
+                />
+                <CurrencyInput
+                  label="Precio lista"
+                  name="precio_lista"
+                  control={control}
+                  rules={{
+                    required: "Este campo es requerido",
+                    min: {
+                      value: 0.01,
+                      message: "El precio lista debe ser mayor a cero",
+                    },
+                  }}
+                  error={errors.precio_lista?.message}
+                  requiredField={true}
+                  placeholder="$ 0,00"
+                  icon={LuBanknote}
+                  currencySymbol="$"
+                  locale="es-AR"
+                />
+                <Input
+                  label="Marca de carrocería"
+                  {...register("marca_carroceria")}
+                  placeholder="Ej: Hermann, Gross, Sola y Brusa, etc."
+                />
+                <InputNumberIcon
+                  label="Año de fabricación"
+                  placeholder="Ej: 2019"
+                  {...register("anno_fabricacion")}
+                  icon={BsCalendar2Week}
+                />
+
+                <div className="md:col-span-4 mt-4 border-t pt-4 border-gray-300">
+                  <h6 className="mb-2 font-semibold tracking-widest uppercase text-gray-500 text-sm">
+                    Datos del camión donde estaba instalada
+                  </h6>
+                  <div className="grid md:grid-cols-4 gap-2">
+                    <InputNumberIcon
+                      label="Tara"
+                      placeholder="Ej: 7500"
+                      icon={TbDimensions}
+                      {...register("tara_camion")}
+                    />
+                    <Input
+                      label="Marca"
+                      placeholder="Ej: Scania, Volvo, Mercedes, etc."
+                      {...register("marca_camion")}
+                    />
+                    <Input
+                      label="Modelo"
+                      placeholder="Ej: R 450, FH 540, Actros 2651, etc."
+                      {...register("modelo_camion")}
+                    />
+                  </div>
+                </div>
+              </fieldset>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
+        <Accordion alwaysOpen>
+          <AccordionPanel>
+            <AccordionTitle>Características y dimensiones</AccordionTitle>
+            <AccordionContent>
+              <fieldset className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 items-end">
+                <div className="col-span-1 md:col-span-3 lg:col-span-3">
+                  <MorphingInput
+                    options={carrozadosOptions}
+                    label="Carrozado"
+                    keyAttribute="tipo_carrozado"
+                    required
+                  />
+                </div>
+                <MorphingInput
+                  options={materialOptions}
+                  label="Material"
+                  keyAttribute="material"
+                />
+
+                <MorphingInput
+                  options={espesorOptions}
+                  label="Espesor chapa"
+                  keyAttribute="espesor_chapa"
+                />
+                <InputNumberIcon
+                  label="Largo"
+                  placeholder="Ej: 5400"
+                  {...register("largo")}
+                  icon={LuRuler}
+                />
+                <MorphingInput
+                  options={anchoOptions}
+                  label="Ancho"
+                  keyAttribute="ancho"
+                />
+                <InputNumberIcon
+                  label="Alto"
+                  placeholder="Ej: 1700"
+                  {...register("alto")}
+                  icon={LuRuler}
+                />
+                <InputNumberIcon
+                  label="Alt. baranda"
+                  placeholder="Ej: 900"
+                  {...register("alt_baranda")}
+                  icon={LuRuler}
+                />
+                <InputNumberIcon
+                  label="Ptas. por lado"
+                  placeholder="Ej: 2"
+                  {...register("ptas_por_lado")}
+                  icon={LuRuler}
+                />
+                <MorphingInput
+                  options={arcosOptions}
+                  label="Arcos por puerta"
+                  keyAttribute="arcos_por_puerta"
+                />
+                <MorphingInput
+                  options={tiposArcosOptions}
+                  label="Tipo de arcos"
+                  keyAttribute="tipos_arcos"
+                />
+                <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                  <MorphingInput
+                    options={puertasOptions}
+                    label="Puerta trasera"
+                    keyAttribute="puerta_trasera"
+                  />
+                </div>
+                <MorphingInput
+                  options={lineasRefOptions}
+                  label="Líneas de refuerzo"
+                  keyAttribute="lineas_refuerzo"
+                />
+                <MorphingInput
+                  options={zocaloOptions}
+                  label="Tipo zócalo"
+                  keyAttribute="tipo_zocalo"
+                />
+                <MorphingInput
+                  options={pisoOptions}
+                  label="Tipo piso"
+                  keyAttribute="tipo_piso"
+                />
+                <div className="flex gap-4 md:col-span-2 mt-2">
+                  <ToggleSwitch
+                    id="corte_guardabarros"
+                    label={`${guardaBarrosEnabled ? "Con corte de guardabarros" : "Sin corte de guardabarros"}`}
+                    value={guardaBarrosEnabled}
+                    disabled={watch("tipo_zocalo") === "gross_nuevo"}
+                    onCustumChange={(checked) =>
+                      setValue("corte_guardabarros", checked, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                  <ToggleSwitch
+                    id="cumbreras"
+                    label={`${watch("cumbreras") ? "Con cumbreras" : "Sin cumbreras"}`}
+                    value={watch("cumbreras")}
+                    onCustumChange={(checked) =>
+                      setValue("cumbreras", checked, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                </div>
+                <div className="col-span-1 md:col-span-3 lg:col-span-4">
+                  <Textarea
+                    label="Color"
+                    {...register("color")}
+                    placeholder="Detalle el color de la carrocería usada. Ej: Bermellón con zócalo negro y puerta trasera blanca"
+                  />
+                </div>
+                <div className="col-span-1 md:col-span-3 lg:col-span-4">
+                  <Textarea
+                    label="Condición"
+                    {...register("condicion")}
+                    placeholder="Detalle la condición de la carrocería usada. Ej: Buen estado, con algunos rayones, etc."
+                  />
+                </div>
+              </fieldset>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
+        <CuchetinForm
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+          withAccordion
+          isOptional
+        />
+        <AlarguesForm
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+          withAccordion
+        />
+        <AccesoriosForm
+          register={register}
+          watch={watch}
+          setValue={setValue}
+          errors={errors}
+          withAccordion
+          isOptional
+        />
+        <Textarea
+          label="Observaciones"
+          placeholder="Observaciones adicionales sobre el pedido"
+          {...register("notas")}
+        />
+        {!isEditMode && <ImageFileComponent onUpload={onUpload} />}
+        <div className="space-y-2">
+          <Button
+            type="submit"
+            className="ml-auto block"
+            disabled={false}
+            color={"cyan"}
+          >
+            Guardar carrocería usada
+          </Button>
+        </div>
+      </form>
+    </>
   );
 }

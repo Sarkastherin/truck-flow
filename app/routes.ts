@@ -17,7 +17,10 @@ export default [
         route(":pedidoId", "routes/pedidos/$pedidoId.tsx"),
         route("camion/:pedidoId", "routes/pedidos/$camionId.tsx"),
         route("carroceria/:pedidoId", "routes/pedidos/$carroceriaId.tsx"),
-        route("carroceria-usada/:pedidoId", "routes/pedidos/$carroceriaUsadaId.tsx"),
+        route(
+          "carroceria-usada/:pedidoId",
+          "routes/pedidos/$carroceriaUsadaId.tsx",
+        ),
         route(
           "trabajos-chasis/:pedidoId",
           "routes/pedidos/$trabajosChasisId.tsx",
@@ -70,6 +73,11 @@ export default [
       ),
       route("cheques", "routes/administracion/cheques.tsx"),
       route("cheques/:chequeId", "routes/administracion/$chequeId.tsx"),
+    ]),
+    ...prefix("carrocerias-usadas", [
+      index("routes/carrocerias-usadas/index.tsx"),
+      route(":carroceriaUsadaId", "routes/carrocerias-usadas/$carroceriaUsadaId.tsx"),
+      route("nueva", "routes/carrocerias-usadas/nueva.tsx"),
     ]),
   ]),
 ] satisfies RouteConfig;

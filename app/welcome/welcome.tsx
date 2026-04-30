@@ -156,7 +156,7 @@ export function Welcome() {
   }).format(new Date());
 
   return (
-    <main className="min-h-[calc(100vh-7rem)] py-4 md:py-6">
+    <main className="mt-8">
       <section className="overflow-hidden rounded-4xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <div className="border-b border-gray-200 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_28%)] p-6 dark:border-gray-800 md:p-8">
           <span className="inline-flex items-center rounded-full border border-gray-300 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gray-500 backdrop-blur dark:border-gray-700 dark:bg-gray-900/70 dark:text-gray-300">
@@ -336,13 +336,12 @@ export function Welcome() {
           </section>
         </div>
       </section>
-      <footer></footer>
       <footer>
         <div className="flex items-center justify-center gap-2 mt-6 text-center text-sm text-gray-500 dark:text-gray-400 scale-75">
           <LogoComponent />
           <span>- Versión {appVersion}</span>
         </div>
-        <div className="text-sm text-center">
+        <div className="text-xs text-center">
           <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
             Política de Privacidad
           </a>

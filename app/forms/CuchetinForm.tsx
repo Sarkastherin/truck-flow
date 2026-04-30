@@ -34,12 +34,14 @@ export default function CuchetinForm<T extends FieldValues & CuchetinFields>({
   setValue,
   errors,
   withAccordion,
+  isOptional = false,
 }: {
   register: UseFormRegister<T>;
   watch: UseFormWatch<T>;
   setValue: UseFormSetValue<T>;
   errors: FieldErrors<T>;
   withAccordion: boolean;
+  isOptional?: boolean;
 }) {
   const cuchetinEnabled = watch("cuchetin" as Path<T>);
 
@@ -90,44 +92,44 @@ export default function CuchetinForm<T extends FieldValues & CuchetinFields>({
 
       {cuchetinEnabled ? (
         <div className="space-y-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
             <InputNumberIcon
               label="Medida (mm)"
               {...register("med_cuchetin" as Path<T>, {
-                required: "Este campo es obligatorio",
+                required: !isOptional ? "Este campo es obligatorio" : false,
                 min: {
                   value: 0.1,
                   message: "La medida debe ser mayor a 0",
                 },
               })}
               icon={LuRuler}
-              requiredField
+              requiredField={!isOptional}
               error={errors.med_cuchetin?.message as string | undefined}
             />
             <InputNumberIcon
               label="Altura puerta (mm)"
               {...register("alt_pta_cuchetin" as Path<T>, {
-                required: "Este campo es obligatorio",
+                required: !isOptional ? "Este campo es obligatorio" : false,
                 min: {
                   value: 0.1,
                   message: "La medida debe ser mayor a 0",
                 },
               })}
               icon={LuRuler}
-              requiredField
+              requiredField={!isOptional}
               error={errors.alt_pta_cuchetin?.message as string | undefined}
             />
             <InputNumberIcon
               label="Altura techo (mm)"
               {...register("alt_techo_cuchetin" as Path<T>, {
-                required: "Este campo es obligatorio",
+                required: !isOptional ? "Este campo es obligatorio" : false,
                 min: {
                   value: 0.1,
                   message: "La medida debe ser mayor a 0",
                 },
               })}
               icon={LuRuler}
-              requiredField
+              requiredField={!isOptional}
               error={errors.alt_techo_cuchetin?.message as string | undefined}
             />
           </div>

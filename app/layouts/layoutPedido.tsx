@@ -151,7 +151,9 @@ export default function PedidosLayout() {
         collapsible
         title={`Pedido #${pedido.numero_pedido}`}
       >
-        <ButtonPrestamo pedido={pedido} />
+        {MODE_DEV && (
+          <ButtonPrestamo pedido={pedido} />
+        )}
         <div className="mt-6 p-3 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>

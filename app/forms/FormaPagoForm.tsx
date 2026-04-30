@@ -120,7 +120,7 @@ export default function FormaPagoForm({
     remove(index);
   };
   const handleAddCarroceria = (index: number) => {
-    if (MODE_DEV) {
+    if (!MODE_DEV) {
       openModal("info", {
         title: "Funcionalidad en desarrollo",
         message:

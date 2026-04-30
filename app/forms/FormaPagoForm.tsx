@@ -122,9 +122,11 @@ export default function FormaPagoForm({
   const handleAddCarroceria = (index: number) => {
     if (!MODE_DEV) {
       openModal("info", {
-        title: "Funcionalidad en desarrollo",
+        props: {
+          title: "Funcionalidad en desarrollo",
         message:
           "La funcionalidad de registrar carrocerías usadas está en desarrollo y no está disponible por el momento.",
+        }
       });
     } else {
       const newForm = form;

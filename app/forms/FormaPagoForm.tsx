@@ -22,6 +22,7 @@ import { useCarroceriaUsada } from "~/hooks/useCarroceriaUsada";
 import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
 import { useNavigate } from "react-router";
 import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+import { useUser } from "~/context/UserContext";
 
 export default function FormaPagoForm({
   watchedPrecio,
@@ -64,6 +65,7 @@ export default function FormaPagoForm({
   clienteId: string;
   setValue: UseFormSetValue<PedidoFormValues>;
 }) {
+  const { activeUser} = useUser()
   const { openModal } = useModal();
   const navigate = useNavigate();
   const { form, onCreate } = useCarroceriaUsada();
@@ -120,7 +122,7 @@ export default function FormaPagoForm({
     remove(index);
   };
   const handleAddCarroceria = (index: number) => {
-    if (!MODE_DEV) {
+    if (activeUser?.role!== "DEV") {
       openModal("info", {
         props: {
           title: "Funcionalidad en desarrollo",

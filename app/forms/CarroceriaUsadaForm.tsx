@@ -291,7 +291,9 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       <div className="flex flex-col gap-2">
         <Select
           label={label}
-          {...register(keyAttribute,{ required: required ? `El campo ${label} es requerido` : false })}
+          {...register(keyAttribute, {
+            required: required ? `El campo ${label} es requerido` : false,
+          })}
           onChange={(e) => {
             if (e.target.value === "otro") {
               setIsCustom(true);
@@ -459,7 +461,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
               <fieldset className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 items-end">
                 <div className="col-span-1 md:col-span-3 lg:col-span-3">
                   <MorphingInput
-                    options={carrozadosOptions}
+                    options={carrozadosOptions.map((tipo) => ({
+                      value: tipo.label,
+                      label: tipo.label,
+                    }))}
                     label="Carrozado"
                     keyAttribute="tipo_carrozado"
                     required
@@ -517,7 +522,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                 />
                 <div className="col-span-1 md:col-span-2 lg:col-span-3">
                   <MorphingInput
-                    options={puertasOptions}
+                    options={puertasOptions.map((puerta) => ({
+                      value: puerta.label,
+                      label: puerta.label,
+                    }))}
                     label="Puerta trasera"
                     keyAttribute="puerta_trasera"
                   />

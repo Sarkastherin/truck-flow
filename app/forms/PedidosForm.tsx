@@ -245,7 +245,7 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
                 requiredField={true}
                 options={tipoPedidoOptions}
                 emptyOption="Tipo de pedido"
-                disabled={!MODE_DEV}
+                disabled={isEditMode}
               />
             </fieldset>
           </AccordionContent>

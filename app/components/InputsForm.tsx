@@ -92,6 +92,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         pattern={isNumberLike ? "[0-9]*" : pattern}
         color={error ? "failure" : "gray"}
         onInput={handleInput}
+        autoComplete="off"
       />
       {error && (
         <HelperText className="text-red-500 dark:text-red-400">
@@ -394,6 +395,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           {...props}
           color={error ? "failure" : "gray"}
+          autoComplete="off"
         />
         {error && (
           <HelperText className="text-red-500 dark:text-red-400">
@@ -455,6 +457,7 @@ export const InputGroupWithIcon = forwardRef<
         rightIcon={icon}
         color={error ? "failure" : "gray"}
         onInput={handleInput}
+        autoComplete="off"
       />
       {error && (
         <HelperText className="text-red-500 dark:text-red-400">

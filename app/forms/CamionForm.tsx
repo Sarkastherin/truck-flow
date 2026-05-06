@@ -215,14 +215,10 @@ export default function CamionForm({ pedido }: { pedido: PedidoFormValues }) {
                 error={errors.centro_eje?.message}
               />
               <InputNumberIcon
-                requiredField={true}
                 placeholder="Ingrese un valor"
                 label="Voladizo Trasero (mm)"
-                {...register("voladizo_trasero", {
-                  required: "Este campo es obligatorio",
-                })}
+                {...register("voladizo_trasero")}
                 icon={LuRuler}
-                error={errors.voladizo_trasero?.message}
               />
             </fieldset>
           </AccordionContent>

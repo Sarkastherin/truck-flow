@@ -98,7 +98,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: TbSitemap,
       color: "text-yellow-600 dark:text-yellow-400",
     },
-    allowedRoles: ["ADMIN"],
+    allowedRoles: ["ADMIN", "DEV"],
   },
   {
     name: "Cheques",
@@ -109,7 +109,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: FiDownload,
       color: "text-purple-600 dark:text-purple-400",
     },
-    allowedRoles: ["ADMIN"],
+    allowedRoles: ["ADMIN", "DEV"],
   },
 ];
 

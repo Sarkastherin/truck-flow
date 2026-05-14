@@ -81,7 +81,6 @@ export function NavBar() {
               color="purple"
             />
           }
-          className=""
         >
           <DropdownHeader>
             <span className="block text-sm">{fullName}</span>

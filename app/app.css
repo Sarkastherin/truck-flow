@@ -2,7 +2,7 @@
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 @import "react-image-gallery/styles/image-gallery.css";
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 .font-logo-primary {
   font-family: "Sansation", sans-serif;
 }

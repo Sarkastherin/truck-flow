@@ -124,6 +124,7 @@ export const findRowById = (
   const sheetData = dataFromSheets[sheetName];
   if (!sheetData) {
     console.error(`No se encontraron datos para la hoja ${sheetName}.`);
+    console.error("Datos disponibles:", sheetData);
     return null;
   }
   const index = sheetData.findIndex((row) => row[0] === id);

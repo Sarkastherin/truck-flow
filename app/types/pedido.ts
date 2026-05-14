@@ -606,6 +606,10 @@ export type FormaPagoFormValues = Omit<
 };
 export type CarroceriaUsada = CommonTypes & {
   pedido_id: string;
+  modificar_larguero: boolean;
+  tipo_larguero?: string;
+  med_larguero?: number;
+  nota_larguero?: string;
   cambio_color?: string;
   modificaciones?: string;
 };

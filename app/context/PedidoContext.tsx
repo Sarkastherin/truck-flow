@@ -139,7 +139,7 @@ type HeadersType = {
   trabajo_chasis: SheetCellValue[] | null;
   ordenes_trabajo: SheetCellValue[] | null;
   documentos: SheetCellValue[] | null;
-  carrocerias_usadas: SheetCellValue[] | null;
+  carroceria_usada: SheetCellValue[] | null;
 };
 const PedidoContext = createContext<PedidoContextType | undefined>(undefined);
 export const PedidosProvider = ({
@@ -186,7 +186,7 @@ export const PedidosProvider = ({
           trabajo_chasis: data[4]?.[0] || null,
           ordenes_trabajo: data[5]?.[0] || null,
           documentos: data[6]?.[0] || null,
-          carrocerias_usadas: data[7]?.[0] || null,
+          carroceria_usada: data[7]?.[0] || null,
         },
         values: {
           pedidos: data[0] || [],
@@ -196,7 +196,7 @@ export const PedidosProvider = ({
           trabajo_chasis: data[4] || [],
           ordenes_trabajo: data[5] || [],
           documentos: data[6] || [],
-          carrocerias_usadas: data[7] || [],
+          carroceria_usada: data[7] || [],
         },
       });
 
@@ -323,7 +323,7 @@ export const PedidosProvider = ({
     create: createCarroceriaUsadaBase,
     update: updateCarroceriaUsadaBase,
   } = createGlobalEntityCrud<CarroceriaUsada>(
-    "carrocerias_usadas",
+    "carroceria_usada",
     "carroceria_usada",
     paramsFromSheets,
     SHEET_ID_PEDIDO,

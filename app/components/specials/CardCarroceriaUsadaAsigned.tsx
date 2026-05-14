@@ -225,7 +225,7 @@ export default function CardCarroceriaUsadaAsigned({
   );
 
   return (
-    <Card className="w-full max-w-4xl mx-auto mt-4 shadow-lg border border-violet-200 bg-white dark:bg-gray-800">
+    <Card className="w-full mx-auto mt-4 shadow-lg border border-violet-200 bg-white dark:bg-gray-800">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
         <div>
           <p className="text-xs text-violet-700 dark:text-violet-300 tracking-widest uppercase font-semibold">

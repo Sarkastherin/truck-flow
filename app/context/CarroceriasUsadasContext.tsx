@@ -43,7 +43,7 @@ type Response = {
 type CarroceriasUsadasContextType = {
   getCarroceriasUsadasData: () => Promise<void>;
   carroceriasUsadas: CarroceriaUsadaData[] | null;
-  createCarroceriaUsadaBase: CreateGlobalMethod<CarroceriaUsadaData>;
+  createNewCarroceriaUsada: (newCarroceria: CarroceriaUsadaData) => Promise<CrudGlobalResponse & { data: CarroceriaUsadaData | null }>;
   updateCarroceriaUsadaBase: UpdateGlobalMethod<CarroceriaUsadaData>;
   changeStatusCarroceriaUsada: (
     idCarroceriaUsada: string,
@@ -137,9 +137,9 @@ export const CarroceriasUsadasProvider = ({
       });
       setCarroceriasUsadas(
         combinedData.sort((a, b) => {
-          //ordenear por fecha de creación desc
-          const numA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const numB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          //ordenear por número de carrocería desc
+          const numA = parseInt(a.numero_carroceria.slice(4));
+          const numB = parseInt(b.numero_carroceria.slice(4));
           return numB - numA;
         }),
       );
@@ -148,6 +148,38 @@ export const CarroceriasUsadasProvider = ({
       return;
     }
   }, [socios]);
+  const generateCarroceriaNumber = () => {
+    if (!carroceriasUsadas) {
+      return;
+    }
+    if (carroceriasUsadas.length === 0) {
+      return "USA-0001";
+    }
+    try {
+      const lastCarroceria = carroceriasUsadas.reduce((prev, current) => {
+        const prevNum = parseInt(prev.numero_carroceria.slice(4));
+        const currentNum = parseInt(current.numero_carroceria.slice(4));
+        return currentNum > prevNum ? current : prev;
+      });
+      if (!lastCarroceria) {
+        throw new Error(
+          "No se pudo determinar el último número de carrocería. ",
+        );
+      }
+      if(!lastCarroceria.numero_carroceria) {
+        return "USA-0001";
+      }
+      const lastCarroceriaNumber = parseInt(
+        lastCarroceria.numero_carroceria.slice(4),
+      );
+      const newCarroceriaNumber = lastCarroceriaNumber + 1;
+      return `USA-${String(newCarroceriaNumber).padStart(4, "0")}`;
+    } catch (error) {
+      console.error("Error generating new carroceria number:", error);
+      return;
+    }
+  };
+  
   const {
     create: createCarroceriaUsadaBase,
     update: updateCarroceriaUsadaBase,
@@ -158,6 +190,39 @@ export const CarroceriasUsadasProvider = ({
     SHEET_ID_INVENTARIO,
     SHEET_NAMES_INVENTARIO.inventario,
     getCarroceriasUsadasData,
+  );
+  const createNewCarroceriaUsada = useCallback(
+    async (newCarroceria: CarroceriaUsadaData) => {
+      try {
+        const numeroCarroceria = generateCarroceriaNumber();
+        if (!numeroCarroceria) {
+          throw new Error("No se pudo generar el número de carrocería.");
+        }
+        const payload = {
+          ...newCarroceria,
+          numero_carroceria: numeroCarroceria,
+        };
+        const {data, error} = await createCarroceriaUsadaBase(payload);
+        if (error || !data) {
+          throw new Error(`Error al crear la nueva carrocería usada: ${error}`);
+        }
+        return {
+          success: true,
+          message: "Carrocería usada creada exitosamente",
+          error: null,
+          data,
+        };
+      } catch (error) {
+        console.error("Error al crear la nueva carrocería usada:", error);
+        return {
+          success: false,
+          message: "Error al crear la nueva carrocería usada",
+          error: error instanceof Error ? error.message : String(error),
+          data: null,
+        };
+      }
+    },
+    [paramsFromSheets, activeUser, getCarroceriasUsadasData, createCarroceriaUsadaBase, carroceriasUsadas],
   );
   const { create: createPrestamoBase, update: updatePrestamoBase } =
     createGlobalEntityCrud<PrestamoCarroceria>(
@@ -219,12 +284,12 @@ export const CarroceriasUsadasProvider = ({
       value={{
         getCarroceriasUsadasData,
         carroceriasUsadas,
-        createCarroceriaUsadaBase,
         updateCarroceriaUsadaBase,
         changeStatusCarroceriaUsada,
         CUDFotos,
         createPrestamoBase,
         updatePrestamoBase,
+        createNewCarroceriaUsada
       }}
     >
       {children}

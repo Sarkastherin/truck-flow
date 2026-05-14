@@ -24,6 +24,11 @@ export function meta({}: Route.MetaArgs) {
 
 const columns: TableColumn<CarroceriaUsadaData>[] = [
   {
+    name: "Numero",
+    selector: (row) => row.numero_carroceria || "",
+    sortable: true,
+  },
+  {
     name: "Modelo",
     selector: (row) => row.tipo_carrozado || "",
     sortable: true,

@@ -19,6 +19,7 @@ export type CarroceriaUsada = CommonTypes & {
   marca_camion?: string;
   modelo_camion?: string;
   status: StatusCarroceriaUsada;
+  numero_carroceria: string;
   /* Datos y caracteristicas */
   tipo_carrozado: string;
   tipo_carrozado_otro?: string;

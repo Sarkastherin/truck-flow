@@ -64,7 +64,7 @@ type FormValues = Omit<
 };
 
 export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
-  const { createCarroceriaUsadaBase, updateCarroceriaUsadaBase, CUDFotos } =
+  const { createNewCarroceriaUsada, updateCarroceriaUsadaBase, CUDFotos } =
     useCarroceriasUsadas();
   const { getPedidosData } = usePedido();
   const { openModal } = useModal();
@@ -138,7 +138,6 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
   });
   const isEditMode = Boolean(watch("id"));
   const onSubmit = async (data: FormValues) => {
-    console.log("Datos a enviar:", data.material);
     openModal("loading", { message: "Guardando carrocería usada..." });
     const { duenno, ...carroceriaData } = data;
     try {
@@ -165,16 +164,23 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
           message: "Carrocería usada actualizada con éxito",
         });
       } else {
-        const { error } = await createCarroceriaUsadaBase(
-          carroceriaData as Omit<CarroceriaUsadaData, "id">,
+        const { error, success } = await createNewCarroceriaUsada(
+          carroceriaData as CarroceriaUsadaData,
         );
         if (error) {
           throw new Error("Error al crear la carrocería usada: " + error);
         }
-        openModal("success", {
-          message: "Carrocería usada guardada con éxito",
-        });
-        navigate("/carrocerias-usadas");
+        if (success) {
+          openModal("success", {
+            props: {
+              title: "Carrocería usada guardada",
+              message: "Carrocería usada guardada con éxito.",
+              onClose: () => {
+                navigate("/carrocerias-usadas");
+              },
+            },
+          });
+        }
       }
     } catch (error) {
       console.error("Error al guardar la carrocería usada:", error);

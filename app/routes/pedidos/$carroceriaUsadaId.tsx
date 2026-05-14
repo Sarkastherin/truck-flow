@@ -11,6 +11,7 @@ import CardCarroceriaUsadaAsigned from "~/components/specials/CardCarroceriaUsad
 import { Textarea } from "~/components/InputsForm";
 import { useForm } from "react-hook-form";
 import type { CommonTypes } from "~/types/commonTypes";
+import ModificarLargueroForm from "~/forms/ModificarLargueroForm";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Editar Carrocería Usada" },
@@ -50,7 +51,8 @@ export default function PedidosCarroceriaUsada() {
     register,
     handleSubmit,
     watch,
-    formState: { dirtyFields, isDirty, isSubmitSuccessful },
+    setValue,
+    formState: { dirtyFields, isDirty, isSubmitSuccessful, errors },
   } = useForm<FormValues>({
     defaultValues: defaultValues as FormValues,
   });
@@ -155,6 +157,7 @@ export default function PedidosCarroceriaUsada() {
             className="mt-4 flex flex-col gap-2"
             onSubmit={handleSubmit(onSubmit)}
           >
+            <ModificarLargueroForm register={register} watch={watch} setValue={setValue} errors={errors} withAccordion={true} />
             <Textarea label="Cambio de color" {...register("cambio_color")} />
             <Textarea label="Modificaciones" {...register("modificaciones")} />
             <div className="space-y-2 mt-4">

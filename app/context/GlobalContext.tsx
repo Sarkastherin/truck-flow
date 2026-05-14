@@ -192,6 +192,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
           dirtyFields,
           formData: existingEntity,
         });
+        console.log(values)
         const row = findRowById(existingEntity.id, sheetName, values);
         if (row === null) {
           throw new Error(

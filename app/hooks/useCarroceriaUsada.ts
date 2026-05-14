@@ -11,13 +11,13 @@ export const useCarroceriaUsada = () => {
   });
   const {
     updateCarroceriaUsadaBase,
-    createCarroceriaUsadaBase,
+    createNewCarroceriaUsada,
     changeStatusCarroceriaUsada,
   } = useCarroceriasUsadas();
   const { updatePedidoBase } = usePedido();
   const onCreate = async (data: CarroceriaUsadaData) => {
     try {
-      const result = await createCarroceriaUsadaBase(data);
+      const result = await createNewCarroceriaUsada(data);
       if (result.error) {
         throw new Error(result.error);
       }

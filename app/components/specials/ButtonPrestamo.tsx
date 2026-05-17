@@ -16,6 +16,8 @@ export default function ButtonPrestamo({ pedido }: { pedido: Pedido }) {
     openModal("custom", {
       title: "Seleccionar Carrocería Usada",
       component: SeleccionarCarroceriaModal,
+      mode: "prestamo",
+      clienteId: pedido.cliente_id,
       onSelect: (item: CarroceriaUsadaData) => {
         handleSelectCarroceriaUsada(item);
       },

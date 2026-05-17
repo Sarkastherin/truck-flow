@@ -72,7 +72,7 @@ export default function PedidosLayout() {
         name: "Carrocería Usada",
         href: `/pedidos/carroceria-usada/${id}`,
         icon: LuLayoutPanelTop,
-        show: activeUser?.role === "DEV" && pedido?.tipo === "usada",
+        show: pedido?.tipo === "usada",
         alert: {
           showAlert: !pedido?.carroceria_usada_id,
           alertMessage:
@@ -153,7 +153,7 @@ export default function PedidosLayout() {
         collapsible
         title={`Pedido #${pedido.numero_pedido}`}
       >
-        {activeUser?.role === "DEV" && <ButtonPrestamo pedido={pedido} />}
+        {pedido?.tipo === "nueva" && <ButtonPrestamo pedido={pedido} />}
         <div className="mt-6 p-3 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-red-500 rounded-full"></div>

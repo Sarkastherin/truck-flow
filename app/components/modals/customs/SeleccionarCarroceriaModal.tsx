@@ -5,19 +5,43 @@ import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
 import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
 export function SeleccionarCarroceriaModal({
   onSelect,
+  mode,
+  clienteId,
 }: {
   onSelect: (item: CarroceriaUsadaData) => void;
+  mode?: "prestamo" | "asignacion";
+  clienteId?: string;
 }) {
   const { carroceriasUsadas, getCarroceriasUsadasData } =
     useCarroceriasUsadas();
   const [searchTerm, setSearchTerm] = useState("");
   const carroceriasDisponibles = useMemo(() => {
-    return (
-      carroceriasUsadas?.filter(
-        (carroceria) => carroceria.status === "disponible",
-      ) || []
-    );
-  }, [carroceriasUsadas]);
+    if (mode === "prestamo") {
+      return (
+        carroceriasUsadas?.filter(
+          (carroceria) =>
+            carroceria.status === "disponible" &&
+            carroceria.duenno_id !== clienteId,
+        ) || []
+      );
+    } 
+    else if (mode === "asignacion") {
+      return (
+        carroceriasUsadas?.filter(
+          (carroceria) =>
+            carroceria.status === "disponible" &&
+            carroceria.duenno_id === clienteId,
+        ) || []
+      );
+    }
+    else {
+      return (
+        carroceriasUsadas?.filter(
+          (carroceria) => carroceria.status === "disponible",
+        ) || []
+      );
+    }
+  }, [carroceriasUsadas, clienteId]);
   const [filteredData, setFilteredData] = useState<CarroceriaUsadaData[]>(
     carroceriasDisponibles || [],
   );
@@ -39,6 +63,26 @@ export function SeleccionarCarroceriaModal({
     );
     setFilteredData(filtered || []);
   };
+  const ListItemComponent = ({
+    label,
+    item,
+    className,
+  }: {
+    label: string;
+    item: string | number;
+    className?: string;
+  }) => {
+    return (
+      <div
+        className={`flex flex-col justify-start items-start ${className && className}`}
+      >
+        <span className="font-bold text-[0.8rem] text-violet-500 dark:text-violet-400">
+          {label}:{" "}
+        </span>
+        <span className="text-gray-700 dark:text-gray-300">{item}</span>
+      </div>
+    );
+  };
   return (
     <div>
       <TextInput
@@ -57,38 +101,27 @@ export function SeleccionarCarroceriaModal({
           {filteredData.length === 0 ? (
             <ListGroupItem disabled>Sin resultados</ListGroupItem>
           ) : (
-            filteredData.map((item) => (
-              <ListGroupItem key={item.id} onClick={() => onSelect(item)}>
-                <div className="flex flex-wrap flex-col md:flex-row md:justify-between items-start gap-2 w-full font-mono">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Modelo:{" "}
-                    <span className="font-bold text-violet-500 dark:text-violet-400">
-                      {item.tipo_carrozado}
-                    </span>
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Año:{" "}
-                    <span className="font-bold text-violet-500 dark:text-violet-400">
-                      {item.anno_fabricacion}
-                    </span>
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Marca:{" "}
-                    <span className="font-bold text-violet-500 dark:text-violet-400">
-                      {item.marca_carroceria}
-                    </span>
-                  </span>
-                  <span className="text-gray-600 dark:text-gray-300">
-                    Precio lista:{" "}
-                    <span className="font-bold text-violet-500 dark:text-violet-400">
-                      {item.precio_lista?.toLocaleString("es-AR", {
-                        style: "currency",
-                        currency: "ARS",
-                      })}
-                    </span>
-                  </span>
-                </div>
-              </ListGroupItem>
+            filteredData.map((item, index) => (
+              <div
+                key={item.id}
+                onClick={() => onSelect(item)}
+                className={`${index % 2 === 0 ? "bg-gray-100/80 dark:bg-gray-950/30" : ""} flex flex-col md:flex-row font-mono gap-2 rounded p-2 hover:bg-violet-200/50 dark:hover:bg-violet-950/50 cursor-pointer`}
+              >
+                <ListItemComponent
+                  label="Número"
+                  item={item.numero_carroceria}
+                  className="w-18"
+                />
+                <ListItemComponent
+                  label="Propietario anterior"
+                  item={item.duenno?.razon_social || ""}
+                  className="min-w-50 max-w-50"
+                />
+                <ListItemComponent
+                  label="Modelo"
+                  item={`${item.tipo_carrozado} | marca: ${item.marca_carroceria || "N/A"} | año: ${item.anno_fabricacion || "N/A"}`}
+                />
+              </div>
             ))
           )}
         </ListGroup>

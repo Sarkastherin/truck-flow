@@ -60,6 +60,3 @@ export default function ProtectedRoute({
 
   return <>{children}</>;
 }
-{/* <ProtectedRoute allowedRoles={["ADMIN", "SUPERVISOR"]}>
-  <Outlet />
-</ProtectedRoute> */}

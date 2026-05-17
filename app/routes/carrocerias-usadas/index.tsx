@@ -27,6 +27,12 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
     name: "Numero",
     selector: (row) => row.numero_carroceria || "",
     sortable: true,
+    width: "100px",
+  },
+  {
+    name: "Propietario anterior",
+    selector: (row) => row.duenno?.razon_social || "",
+    sortable: true,
   },
   {
     name: "Modelo",
@@ -34,21 +40,16 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
     sortable: true,
   },
   {
-    name: "Color",
-    selector: (row) => row.color || "",
-    sortable: true,
-  },
-  {
     name: "Marca",
     selector: (row) => row.marca_carroceria || "",
     sortable: true,
-    width: "150px",
+    width: "120px",
   },
   {
     name: "Año",
     selector: (row) => row.anno_fabricacion || "",
     sortable: true,
-    width: "150px",
+    width: "80px",
   },
 
   {
@@ -58,14 +59,14 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
         style: "currency",
         currency: "ARS",
       }),
-    width: "150px",
+    width: "130px",
     sortable: true,
   },
   {
     name: "Status",
     cell: (row) => <BadgeStatusCarroceriaUsada status={row.status} />,
     sortable: true,
-    width: "150px",
+    width: "110px",
   },
 ];
 export default function CarroceriasUsadasHome() {

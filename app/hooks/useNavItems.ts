@@ -33,27 +33,27 @@ const allNavItems: (NavItem & { allowedRoles: Role[] })[] = [
   {
     name: "Inicio",
     to: "/",
-    allowedRoles: ["DEV","USER", "ADMIN", "SELLER"],
+    allowedRoles: ["ADMIN", "SELLER"],
   },
   {
     name: "Pedidos",
     to: "/pedidos",
-    allowedRoles: ["DEV","USER", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Administración",
     to: "/administracion",
-    allowedRoles: ["DEV","SUPERVISOR", "ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Configuraciones",
     to: "/configuraciones",
-    allowedRoles: ["DEV","ADMIN"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Stock Usadas",
     to: "/carrocerias-usadas",
-    allowedRoles: ["DEV"],
+    allowedRoles: ["ADMIN", "SELLER"],
   },
 ];
 
@@ -98,7 +98,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: TbSitemap,
       color: "text-yellow-600 dark:text-yellow-400",
     },
-    allowedRoles: ["ADMIN", "DEV"],
+    allowedRoles: ["ADMIN"],
   },
   {
     name: "Cheques",
@@ -109,7 +109,7 @@ const allAdminItems: (ConfigItem & { allowedRoles: Role[] })[] = [
       component: FiDownload,
       color: "text-purple-600 dark:text-purple-400",
     },
-    allowedRoles: ["ADMIN", "DEV"],
+    allowedRoles: ["ADMIN"],
   },
 ];
 

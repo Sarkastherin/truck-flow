@@ -8,7 +8,8 @@ export const statusOptionsCarroceriaUsada = [
 export type StatusCarroceriaUsada = "disponible" | "vendida" | "prestada";
 export type CarroceriaUsada = CommonTypes & {
   pedido_id?: string;
-  precio_lista: number | null;
+  precio_lista?: number | null;
+  tasacion: number;
   duenno_id: string;
   fecha_recepcion?: string;
   condicion?: string;
@@ -55,7 +56,6 @@ export type CarroceriaUsada = CommonTypes & {
   /* Accesorios - Boquillas */
   boquillas?: number | null;
   tipo_boquillas?: string;
-  ubicacion_boquillas?: string;
   /* Accesorios - Cajon de herramientas */
   med_cajon_herramientas?: number | null;
   ubicacion_cajon_herramientas?: string;

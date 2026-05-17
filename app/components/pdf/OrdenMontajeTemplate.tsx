@@ -117,11 +117,6 @@ export const OrdenMontajeTemplate: React.FC<OrdenMontajeProps> = ({
                   title="Tipo"
                   value={pedidoData?.carroceria?.tipo_boquillas}
                 />
-                <Cell
-                  title="Ubicación"
-                  value={pedidoData?.carroceria?.ubicacion_boquillas}
-                  flex={1.565}
-                />
               </Row>
               <Row>
                 <Cell

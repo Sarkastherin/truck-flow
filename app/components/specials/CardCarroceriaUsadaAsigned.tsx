@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { PedidoFormValues } from "~/types/pedido";
 import { Card } from "flowbite-react";
 import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
+import { NavLink } from "react-router";
 export default function CardCarroceriaUsadaAsigned({
   pedido,
 }: {
@@ -89,17 +90,28 @@ export default function CardCarroceriaUsadaAsigned({
             ? "Sí"
             : "No"
           : undefined,
+      customRender: true,
     },
-    { label: "Medida cuchetin", value: carroceriaUsada?.med_cuchetin },
+    {
+      label: "Medida cuchetin",
+      value: carroceriaUsada?.med_cuchetin,
+      customRender: true,
+    },
     {
       label: "Altura puerta cuchetin",
       value: carroceriaUsada?.alt_pta_cuchetin,
+      customRender: true,
     },
     {
       label: "Altura techo cuchetin",
       value: carroceriaUsada?.alt_techo_cuchetin,
+      customRender: true,
     },
-    { label: "Notas cuchetin", value: carroceriaUsada?.notas_cuchetin },
+    {
+      label: "Notas cuchetin",
+      value: carroceriaUsada?.notas_cuchetin,
+      customRender: true,
+    },
     // Accesorios
     {
       label: "Guardabarros",
@@ -130,10 +142,7 @@ export default function CardCarroceriaUsadaAsigned({
     // Boquillas
     { label: "Boquillas", value: carroceriaUsada?.boquillas },
     { label: "Tipo boquillas", value: carroceriaUsada?.tipo_boquillas },
-    {
-      label: "Ubicación boquillas",
-      value: carroceriaUsada?.ubicacion_boquillas,
-    },
+
     // Cajón herramientas
     {
       label: "Medida cajón herramientas",
@@ -144,14 +153,20 @@ export default function CardCarroceriaUsadaAsigned({
       value: carroceriaUsada?.ubicacion_cajon_herramientas,
     },
     // Alargues
-    { label: "Alargue tipo 1", value: carroceriaUsada?.alargue_tipo_1 },
+    {
+      label: "Alargue tipo 1",
+      value: carroceriaUsada?.alargue_tipo_1,
+      customRender: true,
+    },
     {
       label: "Cantidad alargue 1",
       value: carroceriaUsada?.cant_alargue_1,
+      customRender: true,
     },
     {
       label: "Medida alargue 1",
       value: carroceriaUsada?.med_alargue_1,
+      customRender: true,
     },
     {
       label: "Quiebre alargue 1",
@@ -161,15 +176,22 @@ export default function CardCarroceriaUsadaAsigned({
             ? "Sí"
             : "No"
           : undefined,
+      customRender: true,
     },
-    { label: "Alargue tipo 2", value: carroceriaUsada?.alargue_tipo_2 },
+    {
+      label: "Alargue tipo 2",
+      value: carroceriaUsada?.alargue_tipo_2,
+      customRender: true,
+    },
     {
       label: "Cantidad alargue 2",
       value: carroceriaUsada?.cant_alargue_2,
+      customRender: true,
     },
     {
       label: "Medida alargue 2",
       value: carroceriaUsada?.med_alargue_2,
+      customRender: true,
     },
     {
       label: "Quiebre alargue 2",
@@ -179,6 +201,7 @@ export default function CardCarroceriaUsadaAsigned({
             ? "Sí"
             : "No"
           : undefined,
+      customRender: true,
     },
     // Observaciones
     {
@@ -244,60 +267,111 @@ export default function CardCarroceriaUsadaAsigned({
           </button>
         </div>
       </div>
-      <div
-        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 ${collapse ? "hidden" : "block"}`}
-      >
-        {caracteristicasFields
-          .filter((field) => !field.customRender)
-          .map((field) => (
+      <div className={`flex flex-col gap-4 ${collapse ? "hidden" : "block"}`}>
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 ${collapse ? "hidden" : "block"}`}
+        >
+          {caracteristicasFields
+            .filter((field) => !field.customRender)
+            .map((field) => (
+              <InfoField
+                key={field.label}
+                label={field.label}
+                value={field.value}
+              />
+            ))}
+        </div>
+        <p className="col-span-full border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+          Cuchetín
+        </p>
+        {carroceriaUsada.cuchetin ? null : (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No hay cuchetín agregado.
+          </p>
+        )}
+        {carroceriaUsada.cuchetin && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <InfoField
-              key={field.label}
-              label={field.label}
-              value={field.value}
+              label="Medida"
+              value={`${carroceriaUsada.med_cuchetin} mm`}
             />
-          ))}
+            <InfoField
+              label="Altura puerta"
+              value={`${carroceriaUsada.alt_pta_cuchetin} mm`}
+            />
+            <InfoField
+              label="Altura techo"
+              value={`${carroceriaUsada.alt_techo_cuchetin} mm`}
+            />
+          </div>
+        )}
+        <p className="col-span-full border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+          Alargues
+        </p>
+        {carroceriaUsada.alargue_tipo_1 ||
+        carroceriaUsada.alargue_tipo_2 ? null : (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No hay alargues agregados.
+          </p>
+        )}
+        {(carroceriaUsada.alargue_tipo_1 || carroceriaUsada.alargue_tipo_2) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <InfoField
+              label="Baranda a cumbrera"
+              value={`${carroceriaUsada.cant_alargue_1} x ${carroceriaUsada.med_alargue_1} mm${carroceriaUsada.quiebre_alargue_1 ? " (con quiebre)" : ""}`}
+            />
+            <InfoField
+              label="Sobre cumbrera"
+              value={`${carroceriaUsada.cant_alargue_2} x ${carroceriaUsada.med_alargue_2} mm${carroceriaUsada.quiebre_alargue_2 ? " (con quiebre)" : ""}`}
+            />
+          </div>
+        )}
         {carroceriaUsada.condicion && (
           <div className="col-span-full">
             {/* Condición */}
-            <InfoField
-              label="Condición"
-              value={carroceriaUsada.condicion}
-            />
+            <InfoField label="Condición" value={carroceriaUsada.condicion} />
           </div>
         )}
         {carroceriaUsada.notas && (
           <div className="col-span-full">
             {/* Observaciones */}
-            <InfoField
-              label="Observaciones"
-              value={carroceriaUsada.notas}
-            />
+            <InfoField label="Observaciones" value={carroceriaUsada.notas} />
           </div>
         )}
-        <p className="col-span-full border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+        <p className="border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
           Datos del camión donde estaba instalada:
         </p>
         {carroceriaUsada.tara_camion ||
         carroceriaUsada.marca_camion ||
         carroceriaUsada.modelo_camion ? null : (
-          <p className="col-span-full text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             No hay datos del camión donde estaba instalada esta carrocería.
           </p>
         )}
-        <div className="col-span-full grid grid-cols-3 gap-4">
-          <InfoField
-            label="Tara camión"
-            value={carroceriaUsada.tara_camion}
-          />
-          <InfoField
-            label="Marca camión"
-            value={carroceriaUsada.marca_camion}
-          />
-          <InfoField
-            label="Modelo camión"
-            value={carroceriaUsada.modelo_camion}
-          />
-        </div>
+        {(carroceriaUsada.tara_camion ||
+          carroceriaUsada.marca_camion ||
+          carroceriaUsada.modelo_camion) && (
+          <div className="grid grid-cols-3 gap-2">
+            <InfoField
+              label="Tara camión"
+              value={carroceriaUsada.tara_camion}
+            />
+            <InfoField
+              label="Marca camión"
+              value={carroceriaUsada.marca_camion}
+            />
+            <InfoField
+              label="Modelo camión"
+              value={carroceriaUsada.modelo_camion}
+            />
+          </div>
+        )}
+        <NavLink
+          to={`/carrocerias-usadas/${carroceriaUsada.id}`}
+          className="mt-4 inline-block text-sm text-violet-700 dark:text-violet-300 underline"
+        >
+          Ir al registro de esta carrocería usada
+        </NavLink>
       </div>
     </Card>
   );

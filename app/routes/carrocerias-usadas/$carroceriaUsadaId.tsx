@@ -21,9 +21,5 @@ export default function CarroceriaUsadaDetalle() {
   if (!carroceriaUsada) {
     return <LoadingComponent />;
   }
-  return (
-    <>
-      <CarroceriaUsadaForm data={carroceriaUsada} />
-    </>
-  );
+  return <CarroceriaUsadaForm data={carroceriaUsada} />;
 }

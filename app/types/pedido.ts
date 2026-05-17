@@ -130,7 +130,6 @@ export const atributosConMetadata: AtributoMetadata[] = [
     fieldType: "select",
     placeholder: "Seleccione tipo de carrozado",
     disabledDefaultValues: true,
-    // Las opciones se configurarán dinámicamente desde el contexto
   },
   {
     value: "largo_int",
@@ -324,12 +323,6 @@ export const atributosConMetadata: AtributoMetadata[] = [
     fieldType: "select",
     options: tiposBoquillasOptions,
   },
-  {
-    value: "ubicacion_boquillas",
-    label: "Ubicación de boquillas",
-    fieldType: "select",
-    options: ubicacionOptions,
-  },
   /* Cajon de herramientas */
   {
     value: "med_cajon_herramientas",
@@ -444,6 +437,7 @@ export const atributosConMetadata: AtributoMetadata[] = [
     placeholder: "Medida en metros",
     min: 0,
     unit: "mm",
+    disabledDefaultValues: true,
   },
   {
     value: "marca",
@@ -475,6 +469,7 @@ export const atributosConMetadata: AtributoMetadata[] = [
       { value: "recto", label: "Recto" },
       { value: "curvo", label: "Curvo" },
     ],
+    disabledDefaultValues: true,
   },
   {
     value: "med_larguero",
@@ -482,12 +477,14 @@ export const atributosConMetadata: AtributoMetadata[] = [
     fieldType: "text",
     placeholder: "medida del larguero",
     unit: "mm",
+    disabledDefaultValues: true,
   },
   {
     value: "voladizo_trasero",
     label: "Medida de voladizo trasero",
     fieldType: "text",
     placeholder: "medida del voladizo trasero",
+    disabledDefaultValues: true,
   },
 ];
 export type Camion = CommonTypes & {
@@ -537,7 +534,6 @@ export type Carroceria = CommonTypes & {
   /* Boquillas */
   boquillas: number | null;
   tipo_boquillas: (typeof tiposBoquillasOptions)[number]["value"];
-  ubicacion_boquillas: (typeof ubicacionOptions)[number]["value"];
   /* Cajon de herramientas */
   med_cajon_herramientas: number | null;
   ubicacion_cajon_herramientas: (typeof ubicacionOptions)[number]["value"];
@@ -606,12 +602,45 @@ export type FormaPagoFormValues = Omit<
 };
 export type CarroceriaUsada = CommonTypes & {
   pedido_id: string;
+  modificaciones?: string;
+} & ModificarLargueroFields &
+  ModificarColorFields &
+  AccesoriosUsadosFields;
+export type ModificarLargueroFields = {
   modificar_larguero: boolean;
   tipo_larguero?: string;
   med_larguero?: number;
   nota_larguero?: string;
-  cambio_color?: string;
-  modificaciones?: string;
+};
+export type ModificarColorFields = {
+  cambio_color: boolean;
+  color_carrozado?: string;
+  color_zocalo?: string;
+  notas_color?: string;
+};
+export type AccesoriosUsadosFields = {
+  /* Boquillas */
+  boquillas: number | null;
+  tipo_boquillas: (typeof tiposBoquillasOptions)[number]["value"];
+  /* Cajon de herramientas */
+  med_cajon_herramientas: number | null;
+  ubicacion_cajon_herramientas: (typeof ubicacionOptions)[number]["value"];
+  /* Accesorios */
+  guardabarros: boolean;
+  dep_agua: boolean;
+  ubicacion_dep_agua: (typeof ubicacionOptions)[number]["value"];
+  cintas_reflectivas: (typeof cintasOptions)[number]["value"];
+  /* Alargue */
+  alargue_tipo_1: "baranda a cumbrera" | "N/A" | "";
+  cant_alargue_1: number | null;
+  med_alargue_1: number | null;
+  quiebre_alargue_1: boolean;
+  alargue_tipo_2: "sobre cumbrera" | "N/A" | "";
+  cant_alargue_2: number | null;
+  med_alargue_2: number | null;
+  quiebre_alargue_2: boolean;
+  arcos_por_puerta?: (typeof arcosOptions)[number]["value"] | null;
+  tipos_arcos?: (typeof tiposArcosOptions)[number]["value"];
 };
 export type Pedido = PedidoCreate & {
   cliente: SocioComercial;
@@ -723,7 +752,6 @@ export type CarroceriaUsadaRecepcion = CommonTypes & {
   /* Boquillas */
   boquillas?: number | null;
   tipo_boquillas?: (typeof tiposBoquillasOptions)[number]["value"];
-  ubicacion_boquillas?: (typeof ubicacionOptions)[number]["value"];
   /* Cajon de herramientas */
   med_cajon_herramientas?: number | null;
   ubicacion_cajon_herramientas?: (typeof ubicacionOptions)[number]["value"];

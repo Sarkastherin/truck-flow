@@ -12,6 +12,9 @@ import { Textarea } from "~/components/InputsForm";
 import { useForm } from "react-hook-form";
 import type { CommonTypes } from "~/types/commonTypes";
 import ModificarLargueroForm from "~/forms/ModificarLargueroForm";
+import ModificarColorForm from "~/forms/ModificarColorForm";
+import AccesoriosUsadosForm from "~/forms/AccesoriosUsadosForm";
+import AlarguesForm from "~/forms/AlarguesForm";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Editar Carrocería Usada" },
@@ -43,7 +46,10 @@ export default function PedidosCarroceriaUsada() {
       ? carroceria_usada
       : {
           pedido_id: pedido.id!,
-          cambio_color: "",
+          cambio_color: false,
+          color_carrozado: "",
+          color_zocalo: "",
+          notas_color: "",
           modificaciones: "",
         };
 
@@ -154,11 +160,13 @@ export default function PedidosCarroceriaUsada() {
         <>
           <CardCarroceriaUsadaAsigned pedido={pedido} />
           <form
-            className="mt-4 flex flex-col gap-2"
+            className="mt-4 flex flex-col gap-6"
             onSubmit={handleSubmit(onSubmit)}
           >
+            <ModificarColorForm register={register} watch={watch} setValue={setValue} withAccordion={true} />
             <ModificarLargueroForm register={register} watch={watch} setValue={setValue} errors={errors} withAccordion={true} />
-            <Textarea label="Cambio de color" {...register("cambio_color")} />
+            <AccesoriosUsadosForm register={register} watch={watch} setValue={setValue} withAccordion={true} />
+            <AlarguesForm register={register} watch={watch} setValue={setValue} errors={errors} withAccordion={true} />
             <Textarea label="Modificaciones" {...register("modificaciones")} />
             <div className="space-y-2 mt-4">
               <Button type="submit" className="ml-auto block" disabled={false}>

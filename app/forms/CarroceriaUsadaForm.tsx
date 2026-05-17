@@ -51,6 +51,7 @@ import {
 import { useState } from "react";
 import { LuRotateCcw } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
+import { useSociosComercial } from "~/context/SociosComercialesContext";
 type FormValues = Omit<
   CarroceriaUsadaData,
   "id" | "created_at" | "updated_at"
@@ -64,6 +65,7 @@ type FormValues = Omit<
 };
 
 export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
+  const { clientes } = useSociosComercial();
   const { createNewCarroceriaUsada, updateCarroceriaUsadaBase, CUDFotos } =
     useCarroceriasUsadas();
   const { getPedidosData } = usePedido();
@@ -83,6 +85,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       duenno_id: "",
       fecha_recepcion: "",
       precio_lista: undefined,
+      tasacion: undefined,
       marca_carroceria: "",
       status: "disponible",
       tipo_carrozado: "",
@@ -121,7 +124,6 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       /* Accesorios - Boquillas */
       boquillas: undefined,
       tipo_boquillas: "",
-      ubicacion_boquillas: "",
       /* Accesorios - Cajon de herramientas */
       med_cajon_herramientas: undefined,
       ubicacion_cajon_herramientas: "",
@@ -378,15 +380,44 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
               value={data?.anno_fabricacion || "-"}
             />
           </div>
+          {/* datos de préstamo */}
+          {data?.status === "prestada" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">
+              <p className="col-span-full text-gray-500 dark:text-gray-400 tracking-widest uppercase text-xs">Datos de préstamo</p>
+              <InfoField label="Cliente" value={clientes.find(cliente => cliente.id === data?.prestamo?.cliente_id)?.razon_social || "-"} />
+              <InfoField
+                label="Fecha de préstamo"
+                value={
+                  data?.prestamo?.fecha_prestamo
+                    ? formatDateUStoES(data.prestamo.fecha_prestamo)
+                    : "-"
+                }
+              />
+              <InfoField
+                label="Fecha de devolución"
+                value={
+                  data?.prestamo?.fecha_devolucion_estimada
+                    ? formatDateUStoES(data.prestamo.fecha_devolucion_estimada)
+                    : "-"
+                }
+              />
+            </div>
+          )}
         </Card>
       )}
       <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
         <Accordion alwaysOpen>
           <AccordionPanel>
-            <AccordionTitle>Datos de la Toma</AccordionTitle>
+            <AccordionTitle>Datos principales de la toma</AccordionTitle>
             <AccordionContent>
-              <fieldset className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-2">
+              <fieldset className="grid grid-cols-1 md:grid-cols-4 gap-y-4 gap-x-2">
+                <div className="col-span-1 md:col-span-2">
+                  <input
+                    type="hidden"
+                    {...register("duenno_id", {
+                      required: "El propietario anterior es requerido",
+                    })}
+                  />
                   <SocioComponentForm
                     tipoSocio="cliente"
                     customLabel="Propietario anterior"
@@ -398,24 +429,44 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                     }}
                   />
                 </div>
+                <div className="col-span-1 md:col-span-2">
+                  <MorphingInput
+                    options={carrozadosOptions.map((tipo) => ({
+                      value: tipo.label,
+                      label: tipo.label,
+                    }))}
+                    label="Carrozado"
+                    keyAttribute="tipo_carrozado"
+                    required
+                  />
+                </div>
                 <Input
                   type="date"
                   label="Fecha de recepción"
                   {...register("fecha_recepcion")}
                 />
                 <CurrencyInput
-                  label="Precio lista"
-                  name="precio_lista"
+                  label="Tasación"
+                  name="tasacion"
                   control={control}
                   rules={{
                     required: "Este campo es requerido",
                     min: {
                       value: 0.01,
-                      message: "El precio lista debe ser mayor a cero",
+                      message: "La tasación debe ser mayor a cero",
                     },
                   }}
-                  error={errors.precio_lista?.message}
+                  error={errors.tasacion?.message}
                   requiredField={true}
+                  placeholder="$ 0,00"
+                  icon={LuBanknote}
+                  currencySymbol="$"
+                  locale="es-AR"
+                />
+                <CurrencyInput
+                  label="Precio lista"
+                  name="precio_lista"
+                  control={control}
                   placeholder="$ 0,00"
                   icon={LuBanknote}
                   currencySymbol="$"
@@ -423,21 +474,29 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                 />
                 <Input
                   label="Marca de carrocería"
-                  {...register("marca_carroceria")}
+                  {...register("marca_carroceria", {
+                    required: "La marca de carrocería es requerida",
+                  })}
                   placeholder="Ej: Hermann, Gross, Sola y Brusa, etc."
+                  requiredField
+                  error={errors.marca_carroceria?.message}
                 />
                 <InputNumberIcon
                   label="Año de fabricación"
                   placeholder="Ej: 2019"
-                  {...register("anno_fabricacion")}
+                  {...register("anno_fabricacion", {
+                    required: "El año de fabricación es requerido",
+                  })}
                   icon={BsCalendar2Week}
+                  requiredField
+                  error={errors.anno_fabricacion?.message}
                 />
 
                 <div className="md:col-span-4 mt-4 border-t pt-4 border-gray-300">
                   <h6 className="mb-2 font-semibold tracking-widest uppercase text-gray-500 text-sm">
                     Datos del camión donde estaba instalada
                   </h6>
-                  <div className="grid md:grid-cols-4 gap-2">
+                  <div className="grid md:grid-cols-3 gap-2">
                     <InputNumberIcon
                       label="Tara"
                       placeholder="Ej: 7500"
@@ -465,15 +524,11 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
             <AccordionTitle>Características y dimensiones</AccordionTitle>
             <AccordionContent>
               <fieldset className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-2 items-end">
-                <div className="col-span-1 md:col-span-3 lg:col-span-3">
-                  <MorphingInput
-                    options={carrozadosOptions.map((tipo) => ({
-                      value: tipo.label,
-                      label: tipo.label,
-                    }))}
+                <div className="md:col-span-3">
+                  <Input
                     label="Carrozado"
-                    keyAttribute="tipo_carrozado"
-                    required
+                    value={watch("tipo_carrozado")}
+                    disabled
                   />
                 </div>
                 <MorphingInput

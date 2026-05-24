@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useUser } from "../context/UserContext";
 import { useNavItems } from "~/hooks/useNavItems";
 import { LuLogOut, LuShieldCheck, LuUserRound } from "react-icons/lu";
+import {optionsRoles} from "~/types/users";
 import {
   Avatar,
   Dropdown,
@@ -89,7 +90,7 @@ export function NavBar() {
             </span>
             <span className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2">
               <LuShieldCheck className="h-3.5 w-3.5 text-violet-500" />
-              {isLoading ? "Sincronizando" : (activeUser?.role ?? "Usuario")}
+              {isLoading ? "Sincronizando" : (optionsRoles.find((r) => r.value === activeUser?.role)?.label || "Rol desconocido")}
             </span>
           </DropdownHeader>
           <DropdownDivider />

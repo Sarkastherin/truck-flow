@@ -60,6 +60,7 @@ export default [
           "routes/configuraciones/$controlesCalidadId.tsx",
         ),
       ]),
+      route("usuarios-roles", "routes/configuraciones/usuarios-roles.tsx"),
     ]),
     ...prefix("administracion", [
       index("routes/administracion/index.tsx"),

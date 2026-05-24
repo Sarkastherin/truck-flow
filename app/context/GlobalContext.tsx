@@ -10,13 +10,13 @@ import {
   prepareDataToCreate,
   prepareDataToUpdate,
 } from "~/backend/Database/helperTransformData";
-import { useUser } from "./UserContext";
 import {
   prepareUpdatePayload,
   type DirtyMap,
 } from "~/utils/prepareUpdatePayload";
 import { useAuth } from "./AuthContext";
 import { uploadFileToDrive } from "~/backend/Database/apiDrive";
+import type { UsersTable } from "~/types/users";
 export type CrudGlobalResponse = {
   success: boolean;
   message: string;
@@ -40,10 +40,10 @@ type GlobalContextType = {
   assertReady: <H extends Record<string, string>>(
     operacion: string,
     paramsFromSheets: ParamsFromSheetsType<H>,
+    activeUser: UsersTable,
   ) => {
     headers: Record<keyof H, SheetCellValue[] | null>;
     values: Record<string, SheetCellValue[][]>;
-    activeUser: NonNullable<ReturnType<typeof useUser>["activeUser"]>;
   };
   createGlobalEntityCrud: <T extends BaseGlobalEntity>(
     sheetKey: ConfigSheetKey,
@@ -52,6 +52,7 @@ type GlobalContextType = {
     sheetId: string,
     sheetName: string,
     onGetData: () => Promise<void>,
+    activeUser: UsersTable,
   ) => {
     create: (entityData: Omit<T, "id">) => Promise<CreateGlobalResponse<T>>;
     update: (
@@ -72,6 +73,7 @@ type GlobalContextType = {
     sheetName,
     successMessage,
     onGetData,
+    activeUser,
   }: {
     entities: T[];
     deletedIds: string[];
@@ -82,6 +84,7 @@ type GlobalContextType = {
     sheetName: string;
     successMessage: string;
     onGetData: () => Promise<void>;
+    activeUser: UsersTable;
   }) => Promise<CrudGlobalResponse>;
   uploadFiles: (
     file: File | Blob,
@@ -107,10 +110,10 @@ type ParamsFromSheetsType<H extends Record<string, string>> = {
 } | null;
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-  const { activeUser } = useUser();
   const assertReady = <H extends Record<string, string>>(
     operacion: string,
     paramsFromSheets: ParamsFromSheetsType<H>,
+    activeUser: UsersTable,
   ) => {
     if (!paramsFromSheets?.headers || !paramsFromSheets?.values) {
       throw new Error(
@@ -134,19 +137,21 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     sheetId: string,
     sheetName: string,
     onGetData: () => Promise<void>,
+    activeUser: UsersTable,
   ) => {
     const rangeComplete = `${sheetName}!A:ZZZ`;
     const create = async (
       entityData: Omit<T, "id">,
     ): Promise<CreateGlobalResponse<T>> => {
       try {
-        const { headers, activeUser: user } = assertReady(
+        const { headers } = assertReady(
           `crear ${entityLabel}`,
           paramsFromSheets,
+          activeUser,
         );
         const payload = prepareDataToCreate(
           entityData,
-          user.id,
+          activeUser.id,
           headers[sheetKey] || [],
         );
         const { data, error } = await insertDataToSheet(
@@ -187,7 +192,11 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
           headers,
           activeUser: user,
           values,
-        } = assertReady(`actualizar ${entityLabel}`, paramsFromSheets);
+        } = assertReady(
+          `actualizar ${entityLabel}`,
+          paramsFromSheets,
+          activeUser,
+        );
         const payload = prepareUpdatePayload({
           dirtyFields,
           formData: existingEntity,
@@ -293,14 +302,16 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       paramsFromSheets: ParamsFromSheetsType<Record<string, string>>,
       sheetId: string,
       sheetName: string,
+      activeUser: UsersTable,
     ) => {
       const rangeComplete = `${sheetName}!A:ZZZ`;
-      const { headers, activeUser: user } = assertReady(
+      const { headers } = assertReady(
         `crear ${entityLabel}`,
         paramsFromSheets,
+        activeUser,
       );
       const payload = data.map((item) =>
-        prepareDataToCreate(item, user.id, headers[sheetKey] || []),
+        prepareDataToCreate(item, activeUser.id, headers[sheetKey] || []),
       );
       const { error } = await insertManyDataToSheet(
         sheetId,
@@ -311,7 +322,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error(`Error al crear ${entityLabel}: ${error.message}`);
       }
     },
-    [activeUser],
+    [],
   );
   const updateGlobalFieldsArrayEntities = useCallback(
     async <T extends GlobalFieldsArrayEntity>(
@@ -321,12 +332,13 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       paramsFromSheets: ParamsFromSheetsType<Record<string, string>>,
       sheetId: string,
       sheetName: string,
+      activeUser: UsersTable,
     ) => {
       const {
         headers,
         values,
         activeUser: user,
-      } = assertReady(`actualizar ${entityLabel}`, paramsFromSheets);
+      } = assertReady(`actualizar ${entityLabel}`, paramsFromSheets, activeUser);
       const updates = data
         .filter((item): item is T & { id: string } => Boolean(item.id))
         .map((item) => {
@@ -352,7 +364,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error(`Error al actualizar ${entityLabel}: ${error.message}`);
       }
     },
-    [activeUser],
+    [],
   );
   const deleteGlobalFieldsArrayEntities = useCallback(
     async (
@@ -362,11 +374,13 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       paramsFromSheets: ParamsFromSheetsType<Record<string, string>>,
       sheetId: string,
       sheetName: string,
+      activeUser: UsersTable,
     ) => {
       const rangeComplete = `${sheetName}!A:ZZZ`;
       const { headers, values } = assertReady(
         `eliminar ${entityLabel}`,
         paramsFromSheets,
+        activeUser,
       );
       if (deletedIds.length === 0) {
         return;
@@ -388,7 +402,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error(`Error al eliminar ${entityLabel}: ${error.message}`);
       }
     },
-    [activeUser],
+    [],
   );
   const cudGlobalFieldsArrayEntities = useCallback(
     async <T extends GlobalFieldsArrayEntity>({
@@ -401,6 +415,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       sheetName,
       successMessage,
       onGetData,
+      activeUser,
     }: {
       entities: T[];
       deletedIds: string[];
@@ -411,6 +426,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       sheetName: string;
       successMessage: string;
       onGetData: () => Promise<void>;
+      activeUser: UsersTable;
     }): Promise<CrudGlobalResponse> => {
       try {
         if (entities.length > 0) {
@@ -424,6 +440,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
               paramsFromSheets,
               sheetId,
               sheetName,
+              activeUser,
             );
           }
           if (toUpdate.length > 0) {
@@ -434,6 +451,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
               paramsFromSheets,
               sheetId,
               sheetName,
+              activeUser
             );
           }
         }
@@ -445,6 +463,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
             paramsFromSheets,
             sheetId,
             sheetName,
+            activeUser
           );
         }
         await onGetData();

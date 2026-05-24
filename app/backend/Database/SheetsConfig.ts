@@ -32,6 +32,9 @@ export const SHEET_NAMES_CTAS_CORRIENTES = {
   cheques: "cheques",
   documentos: "documentos",
 };
+export const SHEET_NAMES_USUARIOS = {
+  usuarios: "usuarios",
+};
 
 export const SHEET_ID_PEDIDO = MODE_DEV
   ? import.meta.env.VITE_SHEET_ID_PEDIDOS_DEV
@@ -48,5 +51,8 @@ export const SHEET_ID_CTAS_CORRIENTES = MODE_DEV
 export const SHEET_ID_INVENTARIO = MODE_DEV
   ? import.meta.env.VITE_SHEET_ID_INVENTARIO_DEV
   : import.meta.env.VITE_SHEET_ID_INVENTARIO;
+export const SHEET_ID_USUARIOS = MODE_DEV
+  ? import.meta.env.VITE_SHEET_ID_USERS_DEV
+  : import.meta.env.VITE_SHEET_ID_USERS;
 export const getCompleteSheetRange = (sheetNames: Record<string, string>) =>
   Object.values(sheetNames).map((name) => `${name}!A:ZZZ`);

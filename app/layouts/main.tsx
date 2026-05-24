@@ -5,7 +5,6 @@ import ModalManager from "~/components/modals/ModalManager";
 import { PedidosProvider } from "~/context/PedidoContext";
 import { ConfiguracionesProvider } from "~/context/ConfiguracionesContext";
 import { AdministracionProvider } from "~/context/AdministracionContext";
-import { GlobalProvider } from "~/context/GlobalContext";
 import { CarroceriasUsadasProvider } from "~/context/CarroceriasUsadasContext";
 import { SociosProvider } from "~/context/SociosComercialesContext";
 import { useAuth } from "~/context/AuthContext";
@@ -24,7 +23,6 @@ export default function Layout() {
       <NavBar />
       <div className="">
         <ProtectedRoute>
-          <GlobalProvider>
             <SociosProvider>
               <ConfiguracionesProvider>
                 <AdministracionProvider>
@@ -39,7 +37,6 @@ export default function Layout() {
                 </AdministracionProvider>
               </ConfiguracionesProvider>
             </SociosProvider>
-          </GlobalProvider>
         </ProtectedRoute>
       </div>
     </main>

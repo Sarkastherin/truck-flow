@@ -41,6 +41,7 @@ import AlarguesForm from "./AlarguesForm";
 import { usePedido } from "~/context/PedidoContext";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 import CuchetinForm from "./CuchetinForm";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 const modeDev = import.meta.env.MODE === "development";
 export default function CarroceriaForm({
   pedido,
@@ -120,6 +121,7 @@ export default function CarroceriaForm({
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
   } = useForm<FormValues>({
     defaultValues: defaultValues as FormValues,
@@ -539,6 +541,12 @@ export default function CarroceriaForm({
         placeholder="Observaciones adicionales sobre el pedido"
         {...register("notas")}
         error={errors.notas?.message}
+      />
+      <InfoFieldsComponent
+        created_at={getValues("created_at")}
+        created_by={getValues("created_by")}
+        updated_at={getValues("updated_at")}
+        updated_by={getValues("updated_by")}
       />
       <div className="space-y-2">
         <Button type="submit" className="ml-auto block" disabled={false}>

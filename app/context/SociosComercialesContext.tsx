@@ -18,7 +18,8 @@ import {
   SHEET_ID_SOCIOS,
   SHEET_NAMES_SOCIOS,
 } from "~/backend/Database/SheetsConfig";
-import { useGlobal, type CreateGlobalMethod, type UpdateGlobalMethod } from "./GlobalContext";
+import { useGlobal, type CreateGlobalMethod, type CrudGlobalResponse, type UpdateGlobalMethod } from "./GlobalContext";
+import {useUser} from "~/context/UserContext";
 type SociosContextType = {
   getSociosData: () => Promise<void>;
   socios: SocioComercial[];
@@ -38,15 +39,11 @@ type SociosContextType = {
 type HeadersType = {
   socios_comerciales: SheetCellValue[];
 };
-type CrudResponse = {
-  success: boolean;
-  message: string;
-  error: string | null;
-};
-type ToggleConfigMethod = (entityId: string) => Promise<CrudResponse>;
+type ToggleConfigMethod = (entityId: string) => Promise<CrudGlobalResponse>;
 const SociosContext = createContext<SociosContextType | undefined>(undefined);
 
 export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
+  const {activeUser} = useUser();
   const SHEETS = useMemo(() => getCompleteSheetRange(SHEET_NAMES_SOCIOS), []);
   const { auth } = useAuth();
   const { createGlobalEntityCrud } = useGlobal();
@@ -110,7 +107,7 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await fetch(`/localidades.json`)
         .then((res) => res.json())
         .then((data) => {
-          return data.localidades;
+          return data.localidades; 
         });
       setLocalidades(data);
     } catch (error) {
@@ -129,6 +126,7 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
     SHEET_ID_SOCIOS,
     SHEET_NAMES_SOCIOS.socios_comerciales,
     getSociosData,
+    activeUser!!
   );
   const isCUITRegistered = useCallback(
     (cuit: string, tipoSocio: string) => {

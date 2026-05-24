@@ -252,6 +252,7 @@ export const AdministracionProvider = ({
       SHEET_ID_CTAS_CORRIENTES,
       SHEET_NAMES_CTAS_CORRIENTES.movimientos,
       getAdministracionData,
+      activeUser!!
     );
   const {
     create: createNewCheque,
@@ -265,6 +266,7 @@ export const AdministracionProvider = ({
     SHEET_ID_CTAS_CORRIENTES,
     SHEET_NAMES_CTAS_CORRIENTES.cheques,
     getAdministracionData,
+    activeUser!!
   );
 
   const CUDCheques = useCallback(
@@ -279,6 +281,7 @@ export const AdministracionProvider = ({
         sheetName: SHEET_NAMES_CTAS_CORRIENTES.cheques,
         successMessage: "Cheques actualizados exitosamente",
         onGetData: getAdministracionData,
+        activeUser: activeUser!!
       });
     },
     [cudGlobalFieldsArrayEntities, getAdministracionData, paramsFromSheets],
@@ -295,6 +298,7 @@ export const AdministracionProvider = ({
         sheetName: SHEET_NAMES_CTAS_CORRIENTES.documentos,
         successMessage: "Documentos actualizados exitosamente",
         onGetData: getAdministracionData,
+        activeUser: activeUser!!
       });
     },
     [cudGlobalFieldsArrayEntities, getAdministracionData, paramsFromSheets],

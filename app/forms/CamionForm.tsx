@@ -28,6 +28,7 @@ import {
 } from "~/components/FileInputComponent";
 import { usePedido } from "~/context/PedidoContext";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 export default function CamionForm({ pedido }: { pedido: PedidoFormValues }) {
   type FormValues = CamionFormValues & {
     documentos: Documentos[];
@@ -74,6 +75,7 @@ export default function CamionForm({ pedido }: { pedido: PedidoFormValues }) {
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
   } = useForm<FormValues>({
     defaultValues: defaultValues,
@@ -241,6 +243,12 @@ export default function CamionForm({ pedido }: { pedido: PedidoFormValues }) {
         placeholder="Observaciones adicionales sobre el pedido"
         {...register("notas")}
         error={errors.notas?.message}
+      />
+      <InfoFieldsComponent
+        created_at={getValues("created_at")}
+        created_by={getValues("created_by")}
+        updated_at={getValues("updated_at")}
+        updated_by={getValues("updated_by")}
       />
       <div className="space-y-2">
         <Button type="submit" className="ml-auto block" disabled={false}>

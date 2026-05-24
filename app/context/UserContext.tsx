@@ -3,33 +3,55 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
-import { getAllSheets } from "~/backend/Database/apiGoogleSheets";
+import {
+  getAllSheets,
+  type SheetCellValue,
+} from "~/backend/Database/apiGoogleSheets";
 import { getDataInJSONFormat } from "~/backend/Database/helperTransformData";
 import { useAuth } from "~/context/AuthContext";
+import { useGlobal } from "~/context/GlobalContext";
 import type { UsersTable } from "~/types/users";
-const SHEET_ID =
-  import.meta.env.MODE === "development"
-    ? import.meta.env.VITE_SHEET_ID_USERS_DEV
-    : import.meta.env.VITE_SHEET_ID_USERS;
-const SHEETS = ["usuarios!A:J"];
+import {
+  SHEET_ID_USUARIOS,
+  SHEET_NAMES_USUARIOS,
+  getCompleteSheetRange,
+} from "~/backend/Database/SheetsConfig";
+import type { CreateGlobalMethod, UpdateGlobalMethod, CrudGlobalResponse } from "./GlobalContext";
+
+type ToggleConfigMethod = (entityId: string) => Promise<CrudGlobalResponse>;
 type UserContextType = {
-  getUserData: () => Promise<UsersTable[]>;
+  getUsersData: () => Promise<void>;
   activeUser: UsersTable | null;
-  getUser: (email: string) => Promise<UsersTable | null>;
   isLoading: boolean;
+  users: UsersTable[];
+  createUser: CreateGlobalMethod<UsersTable>;
+  updateUser: UpdateGlobalMethod<UsersTable>;
+  deleteUser: ToggleConfigMethod;
+  reactivateUser: ToggleConfigMethod;
+};
+type HeadersType = {
+  usuarios: SheetCellValue[];
 };
 const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const { createGlobalEntityCrud } = useGlobal();
+  const SHEETS = useMemo(() => getCompleteSheetRange(SHEET_NAMES_USUARIOS), []);
   const { auth, email } = useAuth();
   const [users, setUsers] = useState<UsersTable[]>([]);
-  const [activeUser, setActiveUser] = useState<UsersTable | null>(null);
+  //const [activeUser, setActiveUser] = useState<UsersTable | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [paramsFromSheets, setParamsFromSheets] = useState<{
+    headers: HeadersType;
+    values: Record<string, SheetCellValue[][]>;
+  } | null>(null);
 
-  const getUserData = useCallback(async (): Promise<UsersTable[]> => {
+  const getUsersData = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
     try {
-      const { data, error } = await getAllSheets(SHEET_ID, SHEETS);
+      const { data, error } = await getAllSheets(SHEET_ID_USUARIOS, SHEETS);
       if (error) {
         throw new Error(
           `Error al obtener los datos de la hoja de usuarios: ${error.message}`,
@@ -37,53 +59,57 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       }
       if (!data || data.length === 0) {
         console.warn("No se encontraron datos en la hoja de usuarios.");
-        return [];
-      }
-      const normalizedUsers = getDataInJSONFormat<UsersTable>(data[0]);
-      setUsers(normalizedUsers);
-      return normalizedUsers;
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      return [];
-    }
-  }, []);
-
-  const getUser = useCallback(
-    async (userEmail: string): Promise<UsersTable | null> => {
-      const cachedUsers = users.length > 0 ? users : await getUserData();
-      if (cachedUsers.length === 0) {
-        setActiveUser(null);
-        return null;
-      }
-
-      const user = cachedUsers.find((item) => item.email === userEmail) || null;
-      setActiveUser(user);
-      return user;
-    },
-    [getUserData, users],
-  );
-
-  useEffect(() => {
-    const syncActiveUser = async () => {
-      if (!auth || !email) {
-        setActiveUser(null);
+        setUsers([]);
         return;
       }
+      setParamsFromSheets({
+        headers: {
+          usuarios: data[0]?.[0] || null,
+        },
+        values: {
+          usuarios: data[0] || [],
+        },
+      });
+      const normalizedUsers = getDataInJSONFormat<UsersTable>(data[0]);
+      setUsers(normalizedUsers);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [SHEETS]);
 
-      setIsLoading(true);
-      try {
-        await getUser(email);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const activeUser = useMemo(() => {
+    if (!email) return null;
+    return users.find((item) => item.email === email) || null;
+  }, [users, email]);
 
-    void syncActiveUser();
-  }, [auth, email, getUser]);
+  useEffect(() => {
+    if (auth) {
+      void getUsersData();
+    }
+  }, [auth, getUsersData]);
+ 
+
+  const {
+    create: createUser,
+    update: updateUser,
+    remove: deleteUser,
+    reactivate: reactivateUser,
+  } = createGlobalEntityCrud<UsersTable>(
+    "usuarios",
+    "usuario",
+    paramsFromSheets,
+    SHEET_ID_USUARIOS,
+    SHEET_NAMES_USUARIOS.usuarios,
+    getUsersData,
+    activeUser!!
+  );
 
   return (
     <UserContext.Provider
-      value={{ getUserData, activeUser, getUser, isLoading }}
+      value={{ getUsersData, activeUser, isLoading, users, createUser, updateUser, deleteUser, reactivateUser }}
     >
       {children}
     </UserContext.Provider>

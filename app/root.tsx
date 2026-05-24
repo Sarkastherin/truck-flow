@@ -14,6 +14,7 @@ import { AuthContextProvider } from "./context/AuthContext";
 import { flowbiteTheme } from "./theme/flowbite";
 import { UserProvider } from "./context/UserContext";
 import { ModalProvider } from "./context/ModalContext";
+import { GlobalProvider } from "./context/GlobalContext";
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -66,9 +67,11 @@ export default function App() {
     <ThemeProvider theme={flowbiteTheme} root>
       <ModalProvider>
         <AuthContextProvider>
-          <UserProvider>
-            <Outlet />
-          </UserProvider>
+          <GlobalProvider>
+            <UserProvider>
+              <Outlet />
+            </UserProvider>
+          </GlobalProvider>
         </AuthContextProvider>
       </ModalProvider>
     </ThemeProvider>

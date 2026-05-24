@@ -190,6 +190,7 @@ export const CarroceriasUsadasProvider = ({
     SHEET_ID_INVENTARIO,
     SHEET_NAMES_INVENTARIO.inventario,
     getCarroceriasUsadasData,
+    activeUser!!
   );
   const createNewCarroceriaUsada = useCallback(
     async (newCarroceria: CarroceriaUsadaData) => {
@@ -232,6 +233,7 @@ export const CarroceriasUsadasProvider = ({
       SHEET_ID_INVENTARIO,
       SHEET_NAMES_INVENTARIO.prestamo,
       getCarroceriasUsadasData,
+      activeUser!!
     );
   const CUDFotos = useCallback(
     async (fotos: Fotos[], deletedIds: string[]) => {
@@ -245,6 +247,7 @@ export const CarroceriasUsadasProvider = ({
         sheetName: SHEET_NAMES_INVENTARIO.fotos,
         successMessage: "Fotos actualizadas correctamente",
         onGetData: getCarroceriasUsadasData,
+        activeUser: activeUser!!
       });
     },
     [paramsFromSheets, getCarroceriasUsadasData],

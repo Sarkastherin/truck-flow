@@ -1,5 +1,5 @@
 import { type UseFormReturn, useWatch } from "react-hook-form";
-import type { SocioComercialFormValues } from "~/types/socios";
+import type { SocioComercialFormValues, SocioComercial } from "~/types/socios";
 import {
   CuitInput,
   Input,
@@ -11,13 +11,14 @@ import {
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import { useMemo } from "react";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 
 export function SocioModal({
   props,
 }: {
   props: {
     title: string;
-    form: UseFormReturn<SocioComercialFormValues>;
+    form: UseFormReturn<SocioComercial>;
     onDelete?: () => void;
     onReactivate?: () => void;
     tipoSocio?: "cliente" | "proveedor";
@@ -253,6 +254,12 @@ export function SocioModal({
           error={errors.notas?.message}
         />
       </div>
+      <InfoFieldsComponent
+        created_at={form.getValues("created_at")}
+        created_by={form.getValues("created_by")}
+        updated_at={form.getValues("updated_at")}
+        updated_by={form.getValues("updated_by")}
+      />
     </fieldset>
   );
 }

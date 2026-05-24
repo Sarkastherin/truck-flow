@@ -288,6 +288,7 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.pedidos,
       getPedidosData,
+      activeUser!!
     );
   const { create: createCamionBase, update: updateCamionBase } =
     createGlobalEntityCrud<Camion>(
@@ -297,6 +298,7 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.camiones,
       getPedidosData,
+      activeUser!!
     );
   const { create: createCarroceriaBase, update: updateCarroceriaBase } =
     createGlobalEntityCrud<Carroceria>(
@@ -306,6 +308,7 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.carroceria,
       getPedidosData,
+      activeUser!!
     );
   const {
     create: createOrdenTrabajoBase,
@@ -318,6 +321,7 @@ export const PedidosProvider = ({
     SHEET_ID_PEDIDO,
     SHEET_NAMES_PEDIDOS.ordenes_trabajo,
     getPedidosData,
+    activeUser!!
   );
   const {
     create: createCarroceriaUsadaBase,
@@ -329,6 +333,7 @@ export const PedidosProvider = ({
     SHEET_ID_PEDIDO,
     SHEET_NAMES_PEDIDOS.carroceria_usada,
     getPedidosData,
+    activeUser!!
   );
   /* PEDIDO */
   const CUDFormasPago = useCallback(
@@ -343,6 +348,7 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.formas_pago,
         successMessage: "Formas de pago actualizadas exitosamente",
         onGetData: getPedidosData,
+        activeUser: activeUser!!
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -455,6 +461,7 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.documentos,
         successMessage: "Documentos actualizados exitosamente",
         onGetData: getPedidosData,
+        activeUser: activeUser!!
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -744,6 +751,7 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.trabajo_chasis,
         successMessage: "Trabajos en chasis actualizados exitosamente",
         onGetData: getPedidosData,
+        activeUser: activeUser!!
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -928,6 +936,7 @@ export const PedidosProvider = ({
         const { headers, values } = assertReady(
           "eliminar pedido",
           paramsFromSheets,
+          activeUser!!
         );
         const rowPedido = findRowById(
           idPedido,

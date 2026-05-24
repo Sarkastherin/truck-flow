@@ -3,6 +3,7 @@ import { type UseFormReturn } from "react-hook-form";
 import type { FieldsForm } from "~/hooks/useItemsConfig";
 //import InfoFormCommons from "~/components/forms/InfoFormCommons";
 import { Button } from "flowbite-react";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 
 export function ItemConfigModal({
   props,
@@ -16,7 +17,10 @@ export function ItemConfigModal({
   };
 }) {
   return (
-    <fieldset className="space-y-4" disabled={props.form.formState.isSubmitting}>
+    <fieldset
+      className="space-y-4"
+      disabled={props.form.formState.isSubmitting}
+    >
       {props.fieldsForm.map((field) => {
         if (field.type === "text") {
           return (
@@ -51,28 +55,29 @@ export function ItemConfigModal({
           );
         }
       })}
-      {/* Sección de información de solo lectura */}
-      {/* {(props.form.watch("created_at") || props.form.watch("updated_at")) && (
-        <InfoFormCommons
-          createdAt={props.form.watch("created_at")}
-          updatedAt={props.form.watch("updated_at")}
-          active={props.form.watch("active")}
-          createdBy={props.form.watch("creator")}
-          updatedBy={props.form.watch("updater")}
-        />
-      )} */}
+
       {/* Botón de dar de baja/reactivar */}
       {props.onDelete && props.form.watch("created_at") && (
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             color={props.form.watch("active") ? "red" : "green"}
-            onClick={props.form.watch("active") ? props.onDelete : props.onReactivate}
+            onClick={
+              props.form.watch("active") ? props.onDelete : props.onReactivate
+            }
             fullSized
           >
-            {props.form.watch("active") ? "Dar de baja producto" : "Reactivar producto"}
+            {props.form.watch("active")
+              ? "Dar de baja producto"
+              : "Reactivar producto"}
           </Button>
         </div>
       )}
+      <InfoFieldsComponent
+        created_at={props.form.getValues("created_at")}
+        created_by={props.form.getValues("created_by")}
+        updated_at={props.form.getValues("updated_at")}
+        updated_by={props.form.getValues("updated_by")}
+      />
     </fieldset>
   );
 }

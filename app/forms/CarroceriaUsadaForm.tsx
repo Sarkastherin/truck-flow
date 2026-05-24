@@ -52,6 +52,7 @@ import { useState } from "react";
 import { LuRotateCcw } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 type FormValues = Omit<
   CarroceriaUsadaData,
   "id" | "created_at" | "updated_at"
@@ -77,6 +78,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
     register,
     watch,
     setValue,
+    getValues,
     control,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
   } = useForm<FormValues>({
@@ -383,8 +385,17 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
           {/* datos de préstamo */}
           {data?.status === "prestada" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">
-              <p className="col-span-full text-gray-500 dark:text-gray-400 tracking-widest uppercase text-xs">Datos de préstamo</p>
-              <InfoField label="Cliente" value={clientes.find(cliente => cliente.id === data?.prestamo?.cliente_id)?.razon_social || "-"} />
+              <p className="col-span-full text-gray-500 dark:text-gray-400 tracking-widest uppercase text-xs">
+                Datos de préstamo
+              </p>
+              <InfoField
+                label="Cliente"
+                value={
+                  clientes.find(
+                    (cliente) => cliente.id === data?.prestamo?.cliente_id,
+                  )?.razon_social || "-"
+                }
+              />
               <InfoField
                 label="Fecha de préstamo"
                 value={
@@ -678,6 +689,12 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
           {...register("notas")}
         />
         {!isEditMode && <ImageFileComponent onUpload={onUpload} />}
+        <InfoFieldsComponent
+          created_at={getValues("created_at")}
+          created_by={getValues("created_by")}
+          updated_at={getValues("updated_at")}
+          updated_by={getValues("updated_by")}
+        />
         <div className="space-y-2">
           <Button
             type="submit"

@@ -3,6 +3,7 @@ import { useUser } from "~/context/UserContext";
 import type { IconType } from "react-icons";
 import { FiDownload } from "react-icons/fi";
 import { LuFileCog, LuSettings2, LuUserRoundCog } from "react-icons/lu";
+import { FaBuildingUser } from "react-icons/fa6";
 import { TbSitemap } from "react-icons/tb";
 import type { Role } from "~/types/users";
 
@@ -66,7 +67,7 @@ const allConfigItems: (ConfigItem & { allowedRoles: Role[] })[] = [
     description:
       "Gestiona tus clientes, proveedores y otros socios comerciales en un solo lugar.",
     icon: {
-      component: LuUserRoundCog,
+      component: FaBuildingUser,
       color: "text-green-600 dark:text-green-400",
     },
     allowedRoles: ["ADMIN"],
@@ -85,6 +86,14 @@ const allConfigItems: (ConfigItem & { allowedRoles: Role[] })[] = [
     description:
       "Configuraciones específicas para carrozados, valores predefinidas, controles de calidad, etc.",
     icon: { component: LuFileCog, color: "text-red-600 dark:text-red-400" },
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    name: "Usuarios y Roles",
+    path: "/configuraciones/usuarios-roles",
+    description:
+      "Gestiona los usuarios y roles del sistema, asigna permisos y controla el acceso a las diferentes funcionalidades.",
+    icon: { component: LuUserRoundCog, color: "text-orange-600 dark:text-orange-400" },
     allowedRoles: ["ADMIN"],
   },
 ];

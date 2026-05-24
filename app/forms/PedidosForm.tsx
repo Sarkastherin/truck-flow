@@ -24,7 +24,7 @@ import { statusOptionsPedidos, tipoPedidoOptions } from "~/types/pedido";
 import { LuBanknote } from "react-icons/lu";
 import { SocioComponentForm } from "~/components/specials/SocioComponent";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
-import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
   const { vendedoresOptions } = useConfiguracion();
   const { openModal } = useModal();
@@ -303,6 +303,12 @@ export default function PedidosForm({ data }: { data?: PedidoFormValues }) {
         placeholder="Observaciones adicionales sobre el pedido"
         {...register("notas")}
         error={errors.notas?.message}
+      />
+      <InfoFieldsComponent
+        created_at={data?.created_at}
+        created_by={data?.created_by}
+        updated_at={data?.updated_at}
+        updated_by={data?.updated_by}
       />
       <div className="space-y-2">
         {!isDraftStatus && !paymentsMatchTotal && (

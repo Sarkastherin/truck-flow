@@ -15,6 +15,7 @@ import ModificarLargueroForm from "~/forms/ModificarLargueroForm";
 import ModificarColorForm from "~/forms/ModificarColorForm";
 import AccesoriosUsadosForm from "~/forms/AccesoriosUsadosForm";
 import AlarguesForm from "~/forms/AlarguesForm";
+import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Editar Carrocería Usada" },
@@ -58,6 +59,7 @@ export default function PedidosCarroceriaUsada() {
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { dirtyFields, isDirty, isSubmitSuccessful, errors },
   } = useForm<FormValues>({
     defaultValues: defaultValues as FormValues,
@@ -163,11 +165,39 @@ export default function PedidosCarroceriaUsada() {
             className="mt-4 flex flex-col gap-6"
             onSubmit={handleSubmit(onSubmit)}
           >
-            <ModificarColorForm register={register} watch={watch} setValue={setValue} withAccordion={true} />
-            <ModificarLargueroForm register={register} watch={watch} setValue={setValue} errors={errors} withAccordion={true} />
-            <AccesoriosUsadosForm register={register} watch={watch} setValue={setValue} withAccordion={true} />
-            <AlarguesForm register={register} watch={watch} setValue={setValue} errors={errors} withAccordion={true} />
+            <ModificarColorForm
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              withAccordion={true}
+            />
+            <ModificarLargueroForm
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              withAccordion={true}
+            />
+            <AccesoriosUsadosForm
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              withAccordion={true}
+            />
+            <AlarguesForm
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              errors={errors}
+              withAccordion={true}
+            />
             <Textarea label="Modificaciones" {...register("modificaciones")} />
+            <InfoFieldsComponent
+              created_at={getValues("created_at")}
+              created_by={getValues("created_by")}
+              updated_at={getValues("updated_at")}
+              updated_by={getValues("updated_by")}
+            />
             <div className="space-y-2 mt-4">
               <Button type="submit" className="ml-auto block" disabled={false}>
                 Guardar pedido

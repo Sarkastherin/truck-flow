@@ -54,9 +54,18 @@ export default function ProtectedRoute({
     );
   }
 
+  if(activeUser && !activeUser.active) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="bg-red-100 text-red-700 dark:bg-red-500/50 dark:text-red-400 px-4 py-2 rounded">
+          {"El usuario está desactivado. Por favor, contacte al administrador."}
+        </div>
+      </div>
+    );
+  }
+
   if (allowedRoles && activeUser && !allowedRoles.includes(activeUser.role)) {
     return <Navigate to="/" replace />;
   }
-
   return <>{children}</>;
 }

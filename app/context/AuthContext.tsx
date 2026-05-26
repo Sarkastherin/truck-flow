@@ -16,6 +16,7 @@ import {
 } from "~/backend/Database/SheetsConfig";
 import { getDataInJSONFormat } from "~/backend/Database/helperTransformData";
 import type { UsersTable } from "~/types/users";
+import {useNavigate} from "react-router";
 const apiKey =
   import.meta.env.MODE === "development"
     ? import.meta.env.VITE_API_KEY_DEV
@@ -40,6 +41,7 @@ type AuthProviderProps = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
+  const navigate = useNavigate();
   const [auth, setAuth] = useState<boolean | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -73,14 +75,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       setEmail(null);
     }
   }, []);
-  useEffect(() => {
+  /* useEffect(() => {
     if (auth === null) {
       void getAuth();
     }
-  }, [auth, getAuth]);
+  }, [auth, getAuth]); */
     return (
     <AuthContext.Provider value={{ auth, isLoading, getAuth, logout, email, errorMessage }}>
-      {isLoading || auth === null ? <div>Cargando autenticación...</div> : children}
+      {children}
     </AuthContext.Provider>
   );
 };

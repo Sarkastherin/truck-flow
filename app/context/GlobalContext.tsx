@@ -535,9 +535,9 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
 export const useGlobal = () => {
   const { auth } = useAuth();
   const context = useContext(GlobalContext);
-  if (!auth) {
+  /* if (!auth) {
     throw new Error("useGlobal is not available while auth is false");
-  }
+  } */
   if (context === undefined) {
     throw new Error("useGlobal must be used within a GlobalProvider");
   }

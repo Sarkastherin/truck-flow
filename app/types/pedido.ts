@@ -48,6 +48,7 @@ export type StatusPedido =
 export const materialOptions = [
   { value: "chapa", label: "Chapa" },
   { value: "fibra", label: "Fibra" },
+  { value: "ultraliviano strenx", label: "Ultraliviano Strenx" },
 ];
 export const anchoOptions = [
   { value: "2000", label: "2000 mm" },
@@ -553,6 +554,8 @@ export type Carroceria = CommonTypes & {
   med_alargue_2: number | null;
   quiebre_alargue_2: boolean;
   notas?: string;
+  //---
+  notas_colocacion?: string;
 };
 export type TrabajoChasis = CommonTypes & {
   pedido_id: string;

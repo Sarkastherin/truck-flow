@@ -213,12 +213,18 @@ export const OrdenMontajeTemplate: React.FC<OrdenMontajeProps> = ({
                   <TitleBox title="Trabajos en Chasis" />
                   {pedidoData?.trabajo_chasis.map((trabajo, index) => (
                     <Row
-                      isLast={index === (pedidoData?.trabajo_chasis?.length ?? 0) - 1}
+                      isLast={
+                        index === (pedidoData?.trabajo_chasis?.length ?? 0) - 1
+                      }
                       key={trabajo.id}
                     >
                       <Cell
                         title={`# ${index + 1}`}
-                        value={trabajosChasis.find((tipo) => tipo.id === trabajo.tipo_trabajo_id)?.nombre || "—"}
+                        value={
+                          trabajosChasis.find(
+                            (tipo) => tipo.id === trabajo.tipo_trabajo_id,
+                          )?.nombre || "—"
+                        }
                         isFirst
                       />
                       <Cell title="Detalle" value={trabajo.descripcion} />
@@ -229,6 +235,20 @@ export const OrdenMontajeTemplate: React.FC<OrdenMontajeProps> = ({
           </View>
         </View>
         <View>
+          <Subtitle>Notas de Colocación</Subtitle>
+          <View>
+            <Box>
+              <TitleBox title="Observaciones Generales" />
+              <Row isLast>
+                <Cell
+                  value={pedidoData?.carroceria?.notas_colocacion}
+                  isFirst
+                />
+              </Row>
+            </Box>
+          </View>
+        </View>
+        <View>
           <Subtitle>Observaciones</Subtitle>
           <View
             style={{
@@ -236,7 +256,7 @@ export const OrdenMontajeTemplate: React.FC<OrdenMontajeProps> = ({
               fontFamily: "Helvetica",
               border: "1px solid #ccc",
               borderRadius: 4,
-              height: 60,
+              height: 30,
             }}
           ></View>
         </View>

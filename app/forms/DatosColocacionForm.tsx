@@ -19,6 +19,7 @@ import type {
 import { PhoneInput, Input } from "~/components/InputsForm";
 import { useModal } from "~/context/ModalContext";
 import { usePedido } from "~/context/PedidoContext";
+import { Textarea } from "~/components/InputsForm";
 
 type FormValues = {
   carroceria: Carroceria;
@@ -76,6 +77,7 @@ export default function DatosColocacion({
         }
       }
       if (dirtyFields.carroceria) {
+        console.log(carroceria)
         const { error } = await updateCarroceriaBase(
           carroceria,
           dirtyFields.carroceria,
@@ -165,6 +167,12 @@ export default function DatosColocacion({
           </AccordionContent>
         </AccordionPanel>
       </Accordion>
+      <Textarea
+        label="Notas de colocación"
+        placeholder="Notas adicionales sobre la colocación"
+        {...register("carroceria.notas_colocacion")}
+        error={errors.carroceria?.notas_colocacion?.message}
+      />
       <div className="space-y-2">
         <Button type="submit" className="ml-auto block" disabled={false}>
           Guardar pedido

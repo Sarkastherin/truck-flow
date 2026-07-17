@@ -69,6 +69,7 @@ export const espesorOptions = [
   { value: "2.9", label: "2.9 mm" },
   { value: "2.6", label: "2.6 mm" },
   { value: "2.2", label: "2.2 mm" },
+  { value: "0", label: "no aplica" },
 ];
 export const zocaloOptions = [
   { value: "recto", label: "Recto" },

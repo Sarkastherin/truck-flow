@@ -41,7 +41,7 @@ import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import {
   materialOptions,
   espesorOptions,
-  anchoOptions,
+  anchoOptionsExt,
   arcosOptions,
   lineasRefOptions,
   pisoOptions,
@@ -560,7 +560,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   icon={LuRuler}
                 />
                 <MorphingInput
-                  options={anchoOptions}
+                  options={anchoOptionsExt}
                   label="Ancho"
                   keyAttribute="ancho"
                 />

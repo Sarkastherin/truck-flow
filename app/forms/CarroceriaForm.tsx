@@ -21,7 +21,8 @@ import type {
 import {
   materialOptions,
   espesorOptions,
-  anchoOptions,
+  anchoOptionsExt,
+  anchoOptionsInt,
   arcosOptions,
   lineasRefOptions,
   pisoOptions,
@@ -82,6 +83,7 @@ export default function CarroceriaForm({
           largo_int: undefined,
           largo_ext: undefined,
           ancho_ext: undefined,
+          ancho_int: undefined,
           alto: undefined,
           alt_baranda: undefined,
           ptas_por_lado: undefined,
@@ -331,7 +333,17 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.ancho_ext?.message}
-                options={anchoOptions}
+                options={anchoOptionsExt}
+              />
+              <Select
+                label="Ancho interno"
+                {...register("ancho_int", {
+                  required: "Este campo es obligatorio",
+                  valueAsNumber: true,
+                })}
+                requiredField
+                error={errors.ancho_int?.message}
+                options={anchoOptionsInt}
               />
               <InputNumberIcon
                 label="Alto"

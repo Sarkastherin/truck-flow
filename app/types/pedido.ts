@@ -50,7 +50,15 @@ export const materialOptions = [
   { value: "fibra", label: "Fibra" },
   { value: "ultraliviano strenx", label: "Ultraliviano Strenx" },
 ];
-export const anchoOptions = [
+export const anchoOptionsExt = [
+  { value: "2000", label: "2000 mm" },
+  { value: "2200", label: "2200 mm" },
+  { value: "2300", label: "2300 mm" },
+  { value: "2400", label: "2400 mm" },
+  { value: "2500", label: "2500 mm" },
+  { value: "2600", label: "2600 mm" },
+];
+export const anchoOptionsInt = [
   { value: "2000", label: "2000 mm" },
   { value: "2200", label: "2200 mm" },
   { value: "2300", label: "2300 mm" },
@@ -160,7 +168,7 @@ export const atributosConMetadata: AtributoMetadata[] = [
     value: "ancho_ext",
     label: "Ancho exterior",
     fieldType: "select",
-    options: anchoOptions,
+    options: anchoOptionsExt,
     unit: "mm",
   },
   {
@@ -509,7 +517,8 @@ export type Carroceria = CommonTypes & {
   largo_int: number | null;
   largo_ext: number | null;
   material: (typeof materialOptions)[number]["value"];
-  ancho_ext: (typeof anchoOptions)[number]["value"] | null;
+  ancho_ext: (typeof anchoOptionsExt)[number]["value"] | null;
+  ancho_int: number | null;
   alto: number | null;
   alt_baranda: number | null;
   ptas_por_lado: number | null;
@@ -536,6 +545,7 @@ export type Carroceria = CommonTypes & {
   /* Boquillas */
   boquillas: number | null;
   tipo_boquillas: (typeof tiposBoquillasOptions)[number]["value"];
+  ubic_boquillas: string | null
   /* Cajon de herramientas */
   med_cajon_herramientas: number | null;
   ubicacion_cajon_herramientas: (typeof ubicacionOptions)[number]["value"];

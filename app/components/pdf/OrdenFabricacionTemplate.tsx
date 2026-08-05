@@ -85,6 +85,11 @@ export const OrdenFabricacionTemplate: React.FC<OrdenFabricacionProps> = ({
                   value={pedidoData?.carroceria?.ancho_ext}
                   unit="mm"
                 />
+                <Cell
+                  title="Ancho Int."
+                  value={pedidoData?.carroceria?.ancho_int}
+                  unit="mm"
+                />
               </Row>
               <Row>
                 <Cell

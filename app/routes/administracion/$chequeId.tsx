@@ -18,6 +18,8 @@ import { capitalize } from "~/utils/functions";
 import { useModal } from "~/context/ModalContext";
 import { useAdministracion } from "~/context/AdministracionContext";
 import { useParams } from "react-router";
+import { SubTitles } from "~/components/SubTitles";
+import { HiOutlineBanknotes } from "react-icons/hi2";
 type AccionTypes =
   | "depositar"
   | "endosar"
@@ -209,6 +211,7 @@ export default function ChequeForm() {
   const isEditable = validActions.length > 0;
   return (
     <div className="container mx-auto px-6 lg:px-0">
+      <SubTitles title={`${cheque?.cliente.razon_social} - Cheque N° ${cheque?.numero}, - `} back_path="/administracion/cheques" icon={{ component: HiOutlineBanknotes, color: "text-green-500" }} />
       <div className="w-full pt-6 flex flex-col items-center max-w-7xl space-y-6 mx-auto">
         <Card className="w-full">
           <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">

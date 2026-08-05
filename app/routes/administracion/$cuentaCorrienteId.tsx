@@ -9,6 +9,8 @@ import ButtonsActionsCtaCte from "~/components/specials/ButtonsActionsCtaCte";
 import TableMovimientos from "~/components/specials/TableMovimientos";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import { useModal } from "~/context/ModalContext";
+import { SubTitles } from "~/components/SubTitles";
+import { LuBookUser } from "react-icons/lu";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuenta Corriente" },
@@ -25,11 +27,13 @@ export default function CuentaCorriente() {
   const { socios } = useSociosComercial();
   const { closeModal } = useModal();
 
-  useEffect(() => { closeModal(); }, []);
+  useEffect(() => {
+    closeModal();
+  }, []);
 
   const ctaCte =
     ctasCorrientesData?.find((s) => String(s.cliente.id) === socioId) || null;
-  
+
   const socio = useMemo(() => {
     if (ctaCte) return ctaCte.cliente;
     return socios?.find((s) => String(s.id) === socioId) || null;
@@ -46,6 +50,11 @@ export default function CuentaCorriente() {
 
   return (
     <div className="container mx-auto px-6 lg:px-0">
+      <SubTitles
+        title={`Cta Cte: ${ctaCte?.cliente.razon_social}`}
+        back_path="/administracion/cuentas-corrientes"
+        icon={{ component: LuBookUser, color: "text-orange-500" }}
+      />
       <div className="px-6 py-8 w-full flex flex-col items-center max-w-7xl mx-auto">
         <Card className="w-full mb-4">
           <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -86,7 +95,13 @@ export default function CuentaCorriente() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white my-4">
             Movimientos
           </h2>
-          {ctaCte ? <TableMovimientos movimientos={ctaCte.movimientos} /> : <p className="text-gray-500 italic">No hay movimientos registrados.</p>}
+          {ctaCte ? (
+            <TableMovimientos movimientos={ctaCte.movimientos} />
+          ) : (
+            <p className="text-gray-500 italic">
+              No hay movimientos registrados.
+            </p>
+          )}
         </div>
       </div>
     </div>

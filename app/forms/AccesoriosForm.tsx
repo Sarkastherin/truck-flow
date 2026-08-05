@@ -4,7 +4,12 @@ import {
   AccordionPanel,
   AccordionTitle,
 } from "flowbite-react";
-import { InputNumberIcon, Select, ToggleSwitch } from "~/components/InputsForm";
+import {
+  Input,
+  InputNumberIcon,
+  Select,
+  ToggleSwitch,
+} from "~/components/InputsForm";
 import { buildFieldPath, getFieldError } from "~/utils/formFieldHelpers";
 
 import {
@@ -26,6 +31,7 @@ import type {
 type AccesoriosFieldName =
   | "tipo_boquillas"
   | "boquillas"
+  | "ubic_boquillas"
   | "ubicacion_cajon_herramientas"
   | "med_cajon_herramientas"
   | "luces"
@@ -145,6 +151,11 @@ export default function AccesoriosForm<
         icon={LuRuler}
         error={getErrorMessage("boquillas")}
         disabled={tipoBoquillas === "N/A"}
+      />
+      <Input
+        label="Ubicación boquillas"
+        {...register(buildFieldName("ubic_boquillas"))}
+        error={getErrorMessage("ubic_boquillas")}
       />
       <Select
         label="Ubic. cajón de herramientas"

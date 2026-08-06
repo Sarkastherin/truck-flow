@@ -50,6 +50,7 @@ export default function AccesoriosForm<
   namePrefix,
   withAccordion = true,
   isOptional = false,
+  fijoFields = new Set(),
 }: {
   register: UseFormRegister<TFieldValues>;
   watch: UseFormWatch<TFieldValues>;
@@ -58,6 +59,7 @@ export default function AccesoriosForm<
   namePrefix?: string;
   withAccordion?: boolean;
   isOptional?: boolean;
+  fijoFields?: Set<string>;
 }) {
   const buildFieldName = (fieldName: AccesoriosFieldName) => {
     return buildFieldPath<TFieldValues>(fieldName, namePrefix);
@@ -191,12 +193,14 @@ export default function AccesoriosForm<
         id={String(buildFieldName("guardabarros"))}
         label="Guardabarros"
         value={guardabarros}
+        disabled={fijoFields.has("guardabarros")}
         onCustumChange={(checked) => handleToggleField("guardabarros", checked)}
       />
       <ToggleSwitch
         id={String(buildFieldName("dep_agua"))}
         label="Depósito de agua"
         value={depositoAgua}
+        disabled={fijoFields.has("dep_agua")}
         onCustumChange={(checked) => handleToggleField("dep_agua", checked)}
       />
       <Select

@@ -2,7 +2,7 @@ import { useOutletContext } from "react-router";
 import type { ValoresPredefinidosFormValues, ValorPredefinido } from "~/types/Configuraciones";
 import { atributosConMetadata } from "~/types/pedido";
 import { Input, Select } from "~/components/InputsForm";
-import { LuTrash2 } from "react-icons/lu";
+import { LuTrash2, LuCircleAlert } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
 import { useMemo } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -41,7 +41,7 @@ export default function ValoresPredefinidos() {
         return { ...atributo };
       });
   }, [puertasOptions]);
-  const { register, handleSubmit, control, watch } = useForm<FormValues>({
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       valores_predefinidos: valoresPredefinidoData || [],
     },
@@ -206,8 +206,16 @@ export default function ValoresPredefinidos() {
                             {currentAtributoMetadata?.fieldType === "select" ? (
                               <Select
                                 sizing="sm"
+                                error={errors.valores_predefinidos?.[index]?.valor?.message}
                                 {...register(
                                   `valores_predefinidos.${index}.valor`,
+                                  {
+                                    validate: (value) => {
+                                      const hasAtributo = watchedValores[index]?.atributo;
+                                      if (hasAtributo && (value === "" || value === undefined || value === null)) return "Requerido";
+                                      return true;
+                                    },
+                                  },
                                 )}
                                 options={
                                   currentAtributoMetadata.options?.map(
@@ -218,13 +226,55 @@ export default function ValoresPredefinidos() {
                                   ) || []
                                 }
                               />
-                            ) : (
-                              <Input
+                            ) : currentAtributoMetadata?.fieldType === "boolean" ? (
+                              <Select
                                 sizing="sm"
+                                error={errors.valores_predefinidos?.[index]?.valor?.message}
                                 {...register(
                                   `valores_predefinidos.${index}.valor`,
+                                  {
+                                    validate: (value) => {
+                                      const hasAtributo = watchedValores[index]?.atributo;
+                                      if (hasAtributo && (value === "" || value === undefined || value === null)) return "Requerido";
+                                      return true;
+                                    },
+                                  },
                                 )}
+                                options={[
+                                  { value: "true", label: "Sí" },
+                                  { value: "false", label: "No" },
+                                ]}
                               />
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  sizing="sm"
+                                  type={currentAtributoMetadata?.fieldType === "number" ? "number" : undefined}
+                                  placeholder={currentAtributoMetadata?.placeholder}
+                                  error={errors.valores_predefinidos?.[index]?.valor?.message}
+                                  {...register(
+                                    `valores_predefinidos.${index}.valor`,
+                                    {
+                                      validate: (value) => {
+                                        const hasAtributo = watchedValores[index]?.atributo;
+                                        if (hasAtributo && (value === "" || value === undefined || value === null)) return "Requerido";
+                                        return true;
+                                      },
+                                      ...(currentAtributoMetadata?.fieldType === "number" && {
+                                        min: {
+                                          value: currentAtributoMetadata.min ?? 0,
+                                          message: `Mínimo: ${currentAtributoMetadata.min ?? 0}`,
+                                        },
+                                      }),
+                                    },
+                                  )}
+                                />
+                                {currentAtributoMetadata?.unit && (
+                                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                                    {currentAtributoMetadata.unit}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </TableCell>
                           <TableCell className="px-1">

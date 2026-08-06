@@ -18,6 +18,7 @@ import type {
   Documentos,
   PedidoFormValues,
 } from "~/types/pedido";
+import { atributosConMetadata } from "~/types/pedido";
 import {
   materialOptions,
   espesorOptions,
@@ -69,6 +70,7 @@ export default function CarroceriaForm({
     add: null,
     remove: null,
   });
+  const [fijoFields, setFijoFields] = useState<Set<string>>(new Set());
   const defaultValues =
     Object.keys(carroceria || {}).length > 0
       ? {
@@ -202,14 +204,20 @@ export default function CarroceriaForm({
     openModal("loading", {
       props: { title: "Cargando datos del carrozado..." },
     });
+    const newFijoFields = new Set<string>();
     for (const item of valoresRelacionados) {
       const { atributo, valor, tipo } = item;
-      setValue(atributo as any, valor);
-      const elements = document.getElementsByName(atributo);
-      elements.forEach((el) => {
-        (el as HTMLInputElement | HTMLSelectElement).disabled = tipo === "fijo";
-      });
+      const metadata = atributosConMetadata.find(a => a.value === atributo);
+      let parsedValor: any = valor;
+      if (metadata?.fieldType === "boolean") {
+        parsedValor = valor === "true";
+      }
+      setValue(atributo as any, parsedValor);
+      if (tipo === "fijo") {
+        newFijoFields.add(atributo);
+      }
     }
+    setFijoFields(newFijoFields);
     closeModal();
   };
 
@@ -293,6 +301,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.material?.message}
+                disabled={fijoFields.has("material")}
                 options={materialOptions}
               />
               <Select
@@ -302,7 +311,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.espesor_chapa?.message}
-                disabled={watch("material") === "fibra"}
+                disabled={fijoFields.has("espesor_chapa") || watch("material") === "fibra"}
                 options={espesorOptions}
               />
               <InputNumberIcon
@@ -314,6 +323,7 @@ export default function CarroceriaForm({
                 icon={LuRuler}
                 error={errors.largo_int?.message}
                 requiredField
+                disabled={fijoFields.has("largo_int")}
               />
               <InputNumberIcon
                 label="Largo ext"
@@ -324,6 +334,7 @@ export default function CarroceriaForm({
                 icon={LuRuler}
                 requiredField
                 error={errors.largo_ext?.message}
+                disabled={fijoFields.has("largo_ext")}
               />
               <Select
                 label="Ancho externo"
@@ -333,6 +344,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.ancho_ext?.message}
+                disabled={fijoFields.has("ancho_ext")}
                 options={anchoOptionsExt}
               />
               <Select
@@ -343,6 +355,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.ancho_int?.message}
+                disabled={fijoFields.has("ancho_int")}
                 options={anchoOptionsInt}
               />
               <InputNumberIcon
@@ -354,6 +367,7 @@ export default function CarroceriaForm({
                 icon={LuRuler}
                 requiredField
                 error={errors.alto?.message}
+                disabled={fijoFields.has("alto")}
               />
               <InputNumberIcon
                 label="Alt. baranda"
@@ -364,6 +378,7 @@ export default function CarroceriaForm({
                 icon={LuRuler}
                 requiredField
                 error={errors.alt_baranda?.message}
+                disabled={fijoFields.has("alt_baranda")}
               />
               <InputNumberIcon
                 label="Ptas. por lado"
@@ -374,6 +389,7 @@ export default function CarroceriaForm({
                 icon={LuRuler}
                 requiredField
                 error={errors.ptas_por_lado?.message}
+                disabled={fijoFields.has("ptas_por_lado")}
               />
               <Select
                 label="Arcos por puerta"
@@ -384,6 +400,7 @@ export default function CarroceriaForm({
                 })}
                 error={errors.arcos_por_puerta?.message}
                 requiredField
+                disabled={fijoFields.has("arcos_por_puerta")}
                 options={arcosOptions}
               />
               <Select
@@ -393,7 +410,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.tipos_arcos?.message}
-                disabled={String(watch("arcos_por_puerta")) === "0"}
+                disabled={fijoFields.has("tipos_arcos") || String(watch("arcos_por_puerta")) === "0"}
                 options={tiposArcosOptions}
               />
               <div className="col-span-1 md:col-span-2 xl:col-span-2">
@@ -404,6 +421,7 @@ export default function CarroceriaForm({
                   })}
                   requiredField
                   error={errors.puerta_trasera_id?.message}
+                  disabled={fijoFields.has("puerta_trasera_id")}
                   options={puertasOptions}
                 />
               </div>
@@ -415,6 +433,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.lineas_refuerzo?.message}
+                disabled={fijoFields.has("lineas_refuerzo")}
                 options={lineasRefOptions}
               />
               <Select
@@ -432,6 +451,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.tipo_zocalo?.message}
+                disabled={fijoFields.has("tipo_zocalo")}
                 options={zocaloOptions}
               />
               <Select
@@ -441,6 +461,7 @@ export default function CarroceriaForm({
                 })}
                 requiredField
                 error={errors.tipo_piso?.message}
+                disabled={fijoFields.has("tipo_piso")}
                 options={pisoOptions}
               />
               <div className="flex gap-4 col-span-3 mt-2">
@@ -448,7 +469,7 @@ export default function CarroceriaForm({
                   id="corte_guardabarros"
                   label={`${guardaBarrosEnabled ? "Con corte de guardabarros" : "Sin corte de guardabarros"}`}
                   value={guardaBarrosEnabled}
-                  disabled={watch("tipo_zocalo") === "gross_nuevo"}
+                  disabled={fijoFields.has("corte_guardabarros") || watch("tipo_zocalo") === "gross_nuevo"}
                   onCustumChange={(checked) =>
                     setValue("corte_guardabarros", checked, {
                       shouldDirty: true,
@@ -460,6 +481,7 @@ export default function CarroceriaForm({
                   id="cumbreras"
                   label={`${watch("cumbreras") ? "Con cumbreras" : "Sin cumbreras"}`}
                   value={watch("cumbreras")}
+                  disabled={fijoFields.has("cumbreras")}
                   onCustumChange={(checked) =>
                     setValue("cumbreras", checked, {
                       shouldDirty: true,
@@ -529,6 +551,7 @@ export default function CarroceriaForm({
           setValue={setValue}
           errors={errors}
           withAccordion
+          fijoFields={fijoFields}
         />
       )}
 

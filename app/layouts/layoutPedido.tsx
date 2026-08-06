@@ -125,7 +125,7 @@ export default function PedidosLayout() {
         onConfirm: async () => {
           openModal("loading", { title: "Eliminando Pedido..." });
           try {
-            const { error } = await deletePedido(pedido.id);
+            const { error } = await deletePedido(pedido.id, pedido.carroceria_usada_id);
             if (error) {
               throw new Error("Error al eliminar el pedido: " + error);
             }

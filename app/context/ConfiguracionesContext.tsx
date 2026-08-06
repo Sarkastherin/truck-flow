@@ -312,7 +312,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.carrozados,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const {
     create: createNewColor,
@@ -326,7 +327,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.colores,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const {
     create: createNewPuertaTrasera,
@@ -340,7 +342,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.puertas_traseras,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const {
     create: createNewTipoTrabajo,
@@ -354,7 +357,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.tipos_trabajos,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const {
     create: createNewPersonal,
@@ -368,7 +372,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.personal,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const {
     create: createNewItemControl,
@@ -382,7 +387,8 @@ export const ConfiguracionesProvider = ({
     SHEET_ID_CONFIGURACIONES,
     SHEET_NAMES_CONFIGURACIONES.items_control,
     getConfiguracionesData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const CUDValoresPredefinidos = useCallback(
     async (
@@ -399,7 +405,8 @@ export const ConfiguracionesProvider = ({
         sheetName: SHEET_NAMES_CONFIGURACIONES.valores_predefinidos,
         successMessage: "Valores predefinidos actualizados exitosamente",
         onGetData: getConfiguracionesData,
-        activeUser: activeUser!!
+        activeUser: activeUser!!,
+        nameColId: "id"
       });
     },
     [cudGlobalFieldsArrayEntities, paramsFromSheets, getConfiguracionesData],
@@ -416,7 +423,8 @@ export const ConfiguracionesProvider = ({
         sheetName: SHEET_NAMES_CONFIGURACIONES.control_carrozado,
         successMessage: "Controles de carrozado actualizados exitosamente",
         onGetData: getConfiguracionesData,
-        activeUser: activeUser!!
+        activeUser: activeUser!!,
+        nameColId: "id"
       });
     },
     [paramsFromSheets, cudGlobalFieldsArrayEntities, getConfiguracionesData],

@@ -16,6 +16,7 @@ import {
   CurrencyInput,
   ToggleSwitch,
   Select,
+  InputGroupWithIcon
 } from "~/components/InputsForm";
 import { LuRuler, LuBanknote } from "react-icons/lu";
 import CuchetinForm from "~/forms/CuchetinForm";
@@ -40,7 +41,6 @@ import type { Fotos } from "~/types/carroceria-usada";
 import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import {
   materialOptions,
-  espesorOptions,
   anchoOptionsExt,
   arcosOptions,
   lineasRefOptions,
@@ -92,7 +92,6 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       status: "disponible",
       tipo_carrozado: "",
       material: "",
-      espesor_chapa: undefined,
       largo: undefined,
       ancho: undefined,
       alto: undefined,
@@ -108,7 +107,8 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       cumbreras: false,
       notas: "",
       /* Datos del camión */
-      tara_camion: undefined,
+      tipo_larguero: undefined,
+      med_larguero: undefined,
       marca_camion: "",
       modelo_camion: "",
       /* Cuchetin */
@@ -483,6 +483,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   currencySymbol="$"
                   locale="es-AR"
                 />
+
                 <Input
                   label="Marca de carrocería"
                   {...register("marca_carroceria", {
@@ -502,18 +503,28 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   requiredField
                   error={errors.anno_fabricacion?.message}
                 />
+                <Select
+                  label="Larguero"
+                  {...register("tipo_larguero")}
+                  options={[
+                    { value: "recto", label: "Recto" },
+                    { value: "curvo", label: "Curvo" },
+                  ]}
+                />
+                <InputGroupWithIcon
+                  type="text"
+                  placeholder="Ingrese un valor"
+                  label="Med Larguero (mm)"
+                  {...register("med_larguero")}
+                  icon={LuRuler}
+                />
 
                 <div className="md:col-span-4 mt-4 border-t pt-4 border-gray-300">
                   <h6 className="mb-2 font-semibold tracking-widest uppercase text-gray-500 text-sm">
                     Datos del camión donde estaba instalada
                   </h6>
                   <div className="grid md:grid-cols-3 gap-2">
-                    <InputNumberIcon
-                      label="Tara"
-                      placeholder="Ej: 7500"
-                      icon={TbDimensions}
-                      {...register("tara_camion")}
-                    />
+                    {/* Larguero */}
                     <Input
                       label="Marca"
                       placeholder="Ej: Scania, Volvo, Mercedes, etc."
@@ -546,12 +557,6 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   options={materialOptions}
                   label="Material"
                   keyAttribute="material"
-                />
-
-                <MorphingInput
-                  options={espesorOptions}
-                  label="Espesor chapa"
-                  keyAttribute="espesor_chapa"
                 />
                 <InputNumberIcon
                   label="Largo"

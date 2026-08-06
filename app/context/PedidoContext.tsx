@@ -26,7 +26,10 @@ import type {
 import type { DirtyMap } from "~/utils/prepareUpdatePayload";
 import { useSociosComercial } from "./SociosComercialesContext";
 import { useUser } from "./UserContext";
-import { findRowById } from "~/backend/Database/helperTransformData";
+import {
+  findRowById,
+  findAllRowsById,
+} from "~/backend/Database/helperTransformData";
 import {
   SHEET_ID_PEDIDO,
   SHEET_NAMES_PEDIDOS,
@@ -41,7 +44,6 @@ import {
   useGlobal,
   type CreateGlobalResponse,
   type CrudGlobalResponse,
-  type UpdateGlobalMethod,
 } from "./GlobalContext";
 import { useCarroceriasUsadas } from "./CarroceriasUsadasContext";
 type PedidoDirtyFields = DirtyMap<PedidoFormValues>;
@@ -50,6 +52,10 @@ type Response = {
   error: string | null;
   success: boolean;
   message: string | null;
+};
+
+type ResponseWithData = Response & {
+  data: any;
 };
 
 type PedidoContextType = {
@@ -106,7 +112,10 @@ type PedidoContextType = {
     pedidoId: string,
     closeStatus?: string,
   ) => Promise<Response>;
-  deletePedido: (idPedido: string) => Promise<Response>;
+  deletePedido: (
+    idPedido: string,
+    idCarroceriaUsada?: string,
+  ) => Promise<Response>;
   updateCamionBase: (
     existingCamion: Camion,
     dirtyFields: DirtyMap<Camion>,
@@ -121,7 +130,7 @@ type PedidoContextType = {
   ) => Promise<Response>;
   createCarroceriaUsadaBase: (
     newCarroceriaUsada: CarroceriaUsada,
-  ) => Promise<Response>;
+  ) => Promise<ResponseWithData>;
   updateCarroceriaUsadaBase: (
     existingCarroceriaUsada: CarroceriaUsada,
     dirtyFields: DirtyMap<CarroceriaUsada>,
@@ -288,7 +297,8 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.pedidos,
       getPedidosData,
-      activeUser!!
+      activeUser!!,
+      "id",
     );
   const { create: createCamionBase, update: updateCamionBase } =
     createGlobalEntityCrud<Camion>(
@@ -298,7 +308,8 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.camiones,
       getPedidosData,
-      activeUser!!
+      activeUser!!,
+      "id",
     );
   const { create: createCarroceriaBase, update: updateCarroceriaBase } =
     createGlobalEntityCrud<Carroceria>(
@@ -308,7 +319,8 @@ export const PedidosProvider = ({
       SHEET_ID_PEDIDO,
       SHEET_NAMES_PEDIDOS.carroceria,
       getPedidosData,
-      activeUser!!
+      activeUser!!,
+      "id",
     );
   const {
     create: createOrdenTrabajoBase,
@@ -321,7 +333,8 @@ export const PedidosProvider = ({
     SHEET_ID_PEDIDO,
     SHEET_NAMES_PEDIDOS.ordenes_trabajo,
     getPedidosData,
-    activeUser!!
+    activeUser!!,
+    "id",
   );
   const {
     create: createCarroceriaUsadaBase,
@@ -333,7 +346,8 @@ export const PedidosProvider = ({
     SHEET_ID_PEDIDO,
     SHEET_NAMES_PEDIDOS.carroceria_usada,
     getPedidosData,
-    activeUser!!
+    activeUser!!,
+    "id",
   );
   /* PEDIDO */
   const CUDFormasPago = useCallback(
@@ -348,7 +362,8 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.formas_pago,
         successMessage: "Formas de pago actualizadas exitosamente",
         onGetData: getPedidosData,
-        activeUser: activeUser!!
+        activeUser: activeUser!!,
+        nameColId: "id",
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -461,7 +476,8 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.documentos,
         successMessage: "Documentos actualizados exitosamente",
         onGetData: getPedidosData,
-        activeUser: activeUser!!
+        activeUser: activeUser!!,
+        nameColId: "id",
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -563,6 +579,7 @@ export const PedidosProvider = ({
             `Error al actualizar el status del pedido: ${errorPedido}`,
           );
         }
+        /* iniciar registro en carroceria_usada */
         return {
           success: true,
           message: "Status del pedido actualizado exitosamente",
@@ -751,7 +768,8 @@ export const PedidosProvider = ({
         sheetName: SHEET_NAMES_PEDIDOS.trabajo_chasis,
         successMessage: "Trabajos en chasis actualizados exitosamente",
         onGetData: getPedidosData,
-        activeUser: activeUser!!
+        activeUser: activeUser!!,
+        nameColId: "id",
       });
     },
     [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
@@ -930,19 +948,21 @@ export const PedidosProvider = ({
     [paramsFromSheets, activeUser],
   );
   const deletePedido = useCallback(
-    async (idPedido: string) => {
+    async (idPedido: string, idCarroceriaUsada?: string) => {
       try {
         const deletePayload = [];
         const { headers, values } = assertReady(
           "eliminar pedido",
           paramsFromSheets,
-          activeUser!!
+          activeUser!!,
         );
         const rowPedido = findRowById(
           idPedido,
           SHEET_NAMES_PEDIDOS.pedidos,
           values,
+          "id",
         );
+        //pedidos
         if (!rowPedido) {
           throw new Error("No se encontró el pedido a eliminar.");
         }
@@ -952,24 +972,26 @@ export const PedidosProvider = ({
           values: [dimensionPedido || []],
         };
         deletePayload.push(deleteRangePedido);
-        const rowFormasPago = findRowById(
+        //formas de pago (puede haber múltiples)
+        const rowsFormasPago = findAllRowsById(
           idPedido,
           SHEET_NAMES_PEDIDOS.formas_pago,
           values,
+          "pedido_id",
         );
-        if (rowFormasPago) {
+        rowsFormasPago.forEach((row) => {
           const dimensionFormasPago = headers.formas_pago?.map(() => "");
-          const deleteRangeFormasPago = {
-            range: `${SHEET_NAMES_PEDIDOS.formas_pago}!A${rowFormasPago}:ZZZ${rowFormasPago}`,
+          deletePayload.push({
+            range: `${SHEET_NAMES_PEDIDOS.formas_pago}!A${row}:ZZZ${row}`,
             values: [dimensionFormasPago || []],
-          };
-          deletePayload.push(deleteRangeFormasPago);
-        }
-
+          });
+        });
+        //camiones
         const rowCamiones = findRowById(
           idPedido,
           SHEET_NAMES_PEDIDOS.camiones,
           values,
+          "pedido_id",
         );
         if (rowCamiones) {
           const dimensionCamiones = headers.camiones?.map(() => "");
@@ -979,10 +1001,12 @@ export const PedidosProvider = ({
           };
           deletePayload.push(deleteRangeCamiones);
         }
+        //carrocerías
         const rowCarrocerias = findRowById(
           idPedido,
           SHEET_NAMES_PEDIDOS.carroceria,
           values,
+          "pedido_id",
         );
         if (rowCarrocerias) {
           const dimensionCarrocerias = headers.carroceria?.map(() => "");
@@ -996,6 +1020,7 @@ export const PedidosProvider = ({
           idPedido,
           SHEET_NAMES_PEDIDOS.carroceria_usada,
           values,
+          "pedido_id",
         );
         if (rowCarroceriasUsadas) {
           const dimensionCarroceriasUsadas = headers.carroceria_usada?.map(
@@ -1007,53 +1032,59 @@ export const PedidosProvider = ({
           };
           deletePayload.push(deleteRangeCarroceriasUsadas);
         }
-        const rowDocumentos = findRowById(
+        //documentos (puede haber múltiples)
+        const rowsDocumentos = findAllRowsById(
           idPedido,
           SHEET_NAMES_PEDIDOS.documentos,
           values,
+          "pedido_id",
         );
-        if (rowDocumentos) {
+        rowsDocumentos.forEach((row) => {
           const dimensionDocumentos = headers.documentos?.map(() => "");
-          const deleteRangeDocumentos = {
-            range: `${SHEET_NAMES_PEDIDOS.documentos}!A${rowDocumentos}:ZZZ${rowDocumentos}`,
+          deletePayload.push({
+            range: `${SHEET_NAMES_PEDIDOS.documentos}!A${row}:ZZZ${row}`,
             values: [dimensionDocumentos || []],
-          };
-          deletePayload.push(deleteRangeDocumentos);
-        }
-        const rowTrabajosChasis = findRowById(
+          });
+        });
+        //trabajo_chasis (puede haber múltiples)
+        const rowsTrabajosChasis = findAllRowsById(
           idPedido,
           SHEET_NAMES_PEDIDOS.trabajo_chasis,
           values,
+          "pedido_id",
         );
-        if (rowTrabajosChasis) {
+        rowsTrabajosChasis.forEach((row) => {
           const dimensionTrabajosChasis = headers.trabajo_chasis?.map(() => "");
-          const deleteRangeTrabajosChasis = {
-            range: `${SHEET_NAMES_PEDIDOS.trabajo_chasis}!A${rowTrabajosChasis}:ZZZ${rowTrabajosChasis}`,
+          deletePayload.push({
+            range: `${SHEET_NAMES_PEDIDOS.trabajo_chasis}!A${row}:ZZZ${row}`,
             values: [dimensionTrabajosChasis || []],
-          };
-          deletePayload.push(deleteRangeTrabajosChasis);
-        }
-        const rowOrdenesTrabajo = findRowById(
+          });
+        });
+        //ordenes_trabajo (puede haber múltiples)
+        const rowsOrdenesTrabajo = findAllRowsById(
           idPedido,
           SHEET_NAMES_PEDIDOS.ordenes_trabajo,
           values,
+          "pedido_id",
         );
-        if (rowOrdenesTrabajo) {
+        rowsOrdenesTrabajo.forEach((row) => {
           const dimensionOrdenesTrabajo = headers.ordenes_trabajo?.map(
             () => "",
           );
-          const deleteRangeOrdenesTrabajo = {
-            range: `${SHEET_NAMES_PEDIDOS.ordenes_trabajo}!A${rowOrdenesTrabajo}:ZZZ${rowOrdenesTrabajo}`,
+          deletePayload.push({
+            range: `${SHEET_NAMES_PEDIDOS.ordenes_trabajo}!A${row}:ZZZ${row}`,
             values: [dimensionOrdenesTrabajo || []],
-          };
-          deletePayload.push(deleteRangeOrdenesTrabajo);
-        }
+          });
+        });
         const { error } = await updateManySheets(
           SHEET_ID_PEDIDO,
           deletePayload,
         );
         if (error) {
           throw new Error(`Error al eliminar el pedido: ${error.message}`);
+        }
+        if (idCarroceriaUsada) {
+          await changeStatusCarroceriaUsada(idCarroceriaUsada, "disponible");
         }
         await getPedidosData();
         return {
@@ -1070,7 +1101,7 @@ export const PedidosProvider = ({
         };
       }
     },
-    [paramsFromSheets, activeUser, getPedidosData],
+    [paramsFromSheets, activeUser, getPedidosData, changeStatusCarroceriaUsada],
   );
 
   return (
@@ -1094,7 +1125,7 @@ export const PedidosProvider = ({
         asignedCarroceriaUsada,
         createCarroceriaUsadaBase,
         updateCarroceriaUsadaBase,
-        updatePedidoBase
+        updatePedidoBase,
       }}
     >
       {children}

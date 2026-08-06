@@ -104,7 +104,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     SHEET_ID_USUARIOS,
     SHEET_NAMES_USUARIOS.usuarios,
     getUsersData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
 
   return (

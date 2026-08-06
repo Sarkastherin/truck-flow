@@ -7,6 +7,7 @@ import { SeleccionarCarroceriaModal } from "~/components/modals/customs/Seleccio
 import { useModal } from "~/context/ModalContext";
 import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
 import { usePedido } from "~/context/PedidoContext";
+import { useUser } from "~/context/UserContext";
 import CardCarroceriaUsadaAsigned from "~/components/specials/CardCarroceriaUsadaAsigned";
 import { Textarea } from "~/components/InputsForm";
 import { useForm } from "react-hook-form";
@@ -39,6 +40,7 @@ export default function PedidosCarroceriaUsada() {
     createCarroceriaUsadaBase,
     updateCarroceriaUsadaBase,
   } = usePedido();
+  const { activeUser } = useUser();
   const pedido = useOutletContext<PedidoFormValues>();
   const { carroceria_usada } = pedido;
   const { openModal } = useModal();
@@ -121,6 +123,12 @@ export default function PedidosCarroceriaUsada() {
         if (!response.success) {
           throw new Error("Error al crear la carrocería usada");
         }
+        const now = new Date().toISOString();
+        setValue("id", response.data.id);
+        setValue("created_at", now);
+        setValue("created_by", activeUser?.id || "");
+        setValue("updated_at", now);
+        setValue("updated_by", activeUser?.id || "");
         openModal("success", {
           props: {
             title: "Carrocería usada creada",

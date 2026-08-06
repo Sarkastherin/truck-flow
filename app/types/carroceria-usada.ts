@@ -16,7 +16,6 @@ export type CarroceriaUsada = CommonTypes & {
   notas?: string;
   marca_carroceria?: string;
   anno_fabricacion?: number | null;
-  tara_camion?: number | null;
   marca_camion?: string;
   modelo_camion?: string;
   status: StatusCarroceriaUsada;
@@ -37,7 +36,6 @@ export type CarroceriaUsada = CommonTypes & {
   tipos_arcos?: string;
   corte_guardabarros: boolean;
   cumbreras: boolean;
-  espesor_chapa?: string;
   tipo_zocalo?: string;
   lineas_refuerzo?: string | null;
   /* cuchetin */
@@ -46,6 +44,8 @@ export type CarroceriaUsada = CommonTypes & {
   alt_pta_cuchetin: number | null;
   alt_techo_cuchetin: number | null;
   notas_cuchetin?: string;
+  tipo_larguero?: string;
+  med_larguero?: string
 
   /* Accesorios */
   luces?: number | null;

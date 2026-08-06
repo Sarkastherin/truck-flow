@@ -31,10 +31,7 @@ export default function CardCarroceriaUsadaAsigned({
       value: carroceriaUsada?.anno_fabricacion,
     },
     { label: "Material", value: carroceriaUsada?.material },
-    {
-      label: "Espesor de chapa",
-      value: carroceriaUsada?.espesor_chapa,
-    },
+
     { label: "Largo", value: carroceriaUsada?.largo },
     { label: "Ancho", value: carroceriaUsada?.ancho },
     { label: "Alto", value: carroceriaUsada?.alto },
@@ -210,10 +207,14 @@ export default function CardCarroceriaUsadaAsigned({
       customRender: true,
     },
     // Datos del camión
+    /* Larguero */
     {
-      label: "Tara camión",
-      value: carroceriaUsada?.tara_camion,
-      customRender: true,
+      label: "Larguero",
+      value: carroceriaUsada?.tipo_larguero,
+    },
+    {
+      label: "Medida de larguero",
+      value: carroceriaUsada?.med_larguero,
     },
     {
       label: "Marca camión",
@@ -341,21 +342,14 @@ export default function CardCarroceriaUsadaAsigned({
         <p className="border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
           Datos del camión donde estaba instalada:
         </p>
-        {carroceriaUsada.tara_camion ||
-        carroceriaUsada.marca_camion ||
+        {carroceriaUsada.marca_camion ||
         carroceriaUsada.modelo_camion ? null : (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No hay datos del camión donde estaba instalada esta carrocería.
           </p>
         )}
-        {(carroceriaUsada.tara_camion ||
-          carroceriaUsada.marca_camion ||
-          carroceriaUsada.modelo_camion) && (
+        {(carroceriaUsada.marca_camion || carroceriaUsada.modelo_camion) && (
           <div className="grid grid-cols-3 gap-2">
-            <InfoField
-              label="Tara camión"
-              value={carroceriaUsada.tara_camion}
-            />
             <InfoField
               label="Marca camión"
               value={carroceriaUsada.marca_camion}

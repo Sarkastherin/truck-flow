@@ -75,11 +75,6 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       setEmail(null);
     }
   }, []);
-  /* useEffect(() => {
-    if (auth === null) {
-      void getAuth();
-    }
-  }, [auth, getAuth]); */
     return (
     <AuthContext.Provider value={{ auth, isLoading, getAuth, logout, email, errorMessage }}>
       {children}

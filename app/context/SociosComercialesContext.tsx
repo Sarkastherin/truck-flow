@@ -126,7 +126,8 @@ export const SociosProvider = ({ children }: { children: React.ReactNode }) => {
     SHEET_ID_SOCIOS,
     SHEET_NAMES_SOCIOS.socios_comerciales,
     getSociosData,
-    activeUser!!
+    activeUser!!,
+    "id"
   );
   const isCUITRegistered = useCallback(
     (cuit: string, tipoSocio: string) => {

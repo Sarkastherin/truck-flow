@@ -53,6 +53,7 @@ type GlobalContextType = {
     sheetName: string,
     onGetData: () => Promise<void>,
     activeUser: UsersTable,
+    nameColId: string
   ) => {
     create: (entityData: Omit<T, "id">) => Promise<CreateGlobalResponse<T>>;
     update: (
@@ -74,6 +75,7 @@ type GlobalContextType = {
     successMessage,
     onGetData,
     activeUser,
+    nameColId
   }: {
     entities: T[];
     deletedIds: string[];
@@ -85,6 +87,7 @@ type GlobalContextType = {
     successMessage: string;
     onGetData: () => Promise<void>;
     activeUser: UsersTable;
+    nameColId: string
   }) => Promise<CrudGlobalResponse>;
   uploadFiles: (
     file: File | Blob,
@@ -138,6 +141,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     sheetName: string,
     onGetData: () => Promise<void>,
     activeUser: UsersTable,
+    nameColId: string
   ) => {
     const rangeComplete = `${sheetName}!A:ZZZ`;
     const create = async (
@@ -201,7 +205,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
           dirtyFields,
           formData: existingEntity,
         });
-        const row = findRowById(existingEntity.id, sheetName, values);
+        const row = findRowById(existingEntity.id, sheetName, values, nameColId);
         if (row === null) {
           throw new Error(
             `No se encontro ${entityLabel} con id ${existingEntity.id}`,
@@ -256,6 +260,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
           entityId,
           sheetName,
           paramsFromSheets?.values || {},
+          nameColId
         );
         if (row === null) {
           throw new Error(`No se encontro ${entityLabel} con id ${entityId}`);
@@ -333,6 +338,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       sheetId: string,
       sheetName: string,
       activeUser: UsersTable,
+      nameColId: string
     ) => {
       const {
         headers,
@@ -342,7 +348,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       const updates = data
         .filter((item): item is T & { id: string } => Boolean(item.id))
         .map((item) => {
-          const row = findRowById(item.id, sheetName, values);
+          const row = findRowById(item.id, sheetName, values, nameColId);
           if (row === null) {
             throw new Error(
               `No se encontro registro de ${entityLabel} con id ${item.id}`,
@@ -375,6 +381,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       sheetId: string,
       sheetName: string,
       activeUser: UsersTable,
+      nameColId: string
     ) => {
       const rangeComplete = `${sheetName}!A:ZZZ`;
       const { headers, values } = assertReady(
@@ -386,7 +393,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       const deletePayload = deletedIds.map((id) => {
-        const row = findRowById(id, sheetName, values);
+        const row = findRowById(id, sheetName, values, nameColId);
         if (row === null) {
           throw new Error(
             `No se encontro registro de ${entityLabel} con id ${id}`,
@@ -416,6 +423,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       successMessage,
       onGetData,
       activeUser,
+      nameColId
     }: {
       entities: T[];
       deletedIds: string[];
@@ -427,6 +435,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       successMessage: string;
       onGetData: () => Promise<void>;
       activeUser: UsersTable;
+      nameColId: string
     }): Promise<CrudGlobalResponse> => {
       try {
         if (entities.length > 0) {
@@ -451,7 +460,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
               paramsFromSheets,
               sheetId,
               sheetName,
-              activeUser
+              activeUser,
+              nameColId
             );
           }
         }
@@ -463,7 +473,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
             paramsFromSheets,
             sheetId,
             sheetName,
-            activeUser
+            activeUser,
+            nameColId
           );
         }
         await onGetData();

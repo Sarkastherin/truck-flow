@@ -175,6 +175,7 @@ export type FilterField = {
   }[];
   emptyOption?: string;
   manualFilter?: boolean; // Si es true, requiere clic en botón Filtrar. Por defecto filtra automáticamente
+  customFilter?: (item: any, value: string) => boolean; // Función de filtro personalizada para campos complejos (ej: arrays anidados)
 };
 
 type TableProps<T> = {
@@ -358,7 +359,14 @@ export function TableComponent<T>({
   }
   const onFilter = (newFilters: Record<string, string>) => {
     const result = data.filter((item) =>
-      filterFields.every(({ key, type }) => {
+      filterFields.every(({ key, type, customFilter }) => {
+        const filterValue = newFilters[key] ?? "";
+
+        // Si hay filtro personalizado, usarlo directamente
+        if (customFilter) {
+          return !filterValue || customFilter(item, filterValue);
+        }
+
         if (type === "dateRange") {
           const from = newFilters[`${key}_from`];
           const to = newFilters[`${key}_to`];
@@ -375,7 +383,7 @@ export function TableComponent<T>({
             (!toDate || itemDate <= toDate)
           );
         } else {
-          const value = removeAccents(newFilters[key]?.toLowerCase() ?? "");
+          const value = removeAccents(filterValue.toLowerCase());
           const itemValue = removeAccents(
             String(getNestedValue(item, key) ?? "").toLowerCase(),
           );

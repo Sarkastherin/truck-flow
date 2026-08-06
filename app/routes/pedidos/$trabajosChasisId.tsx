@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "flowbite-react";
 import { useModal } from "~/context/ModalContext";
 import { usePedido } from "~/context/PedidoContext";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 export function meta({}: Route.MetaArgs) {
   return [
@@ -20,10 +20,12 @@ export default function PedidosTrabajosChasis() {
   const { openModal } = useModal();
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const { CUDTrabajosChasis } = usePedido();
+  const shouldResetAfterSave = useRef(false);
   const {
     register,
     control,
     watch,
+    reset,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
     handleSubmit,
   } = useForm<Pick<PedidoFormValues, "trabajo_chasis">>({
@@ -31,6 +33,13 @@ export default function PedidosTrabajosChasis() {
       trabajo_chasis: pedido.trabajo_chasis || [],
     },
   });
+
+  useEffect(() => {
+    if (shouldResetAfterSave.current) {
+      reset({ trabajo_chasis: pedido.trabajo_chasis || [] });
+      shouldResetAfterSave.current = false;
+    }
+  }, [pedido.trabajo_chasis, reset]);
   const onSubmit = async (data: Pick<PedidoFormValues, "trabajo_chasis">) => {
     openModal("loading", {
       props: {
@@ -56,6 +65,7 @@ export default function PedidosTrabajosChasis() {
               "Los trabajos en chasis han sido actualizados exitosamente.",
           },
         });
+        shouldResetAfterSave.current = true;
       } else {
         openModal("info", {
           props: {

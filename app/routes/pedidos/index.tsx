@@ -115,8 +115,14 @@ export default function PedidosHome() {
           },
           { key: "cliente.razon_social", label: "Cliente" },
           {
-            key: "ordenes_trabajo.armador.responsable_nombre",
+            key: "armador",
             label: "Armador",
+            customFilter: (item, value) => {
+              const armador = item.ordenes_trabajo?.find(
+                (wo:any) => wo.cargo === "armador"
+              )?.responsable_nombre || "";
+              return armador.toLowerCase().includes(value.toLowerCase());
+            },
           },
           {
             key: "status",

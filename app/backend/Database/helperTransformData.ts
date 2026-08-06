@@ -114,6 +114,7 @@ export const findRowById = (
   id: string,
   sheetName: string,
   dataFromSheets: Record<string, SheetCellValue[][]>,
+  nameColId:string
 ): number | null => {
   if (!dataFromSheets) {
     console.error(
@@ -127,6 +128,22 @@ export const findRowById = (
     console.error("Datos disponibles:", sheetData);
     return null;
   }
-  const index = sheetData.findIndex((row) => row[0] === id);
+  const colIndex = sheetData[0].findIndex(item => item === nameColId);
+  const index = sheetData.findIndex((row) => row[colIndex] === id);
   return index !== -1 ? index + 1 : null;
+};
+
+export const findAllRowsById = (
+  id: string,
+  sheetName: string,
+  dataFromSheets: Record<string, SheetCellValue[][]>,
+  nameColId: string
+): number[] => {
+  if (!dataFromSheets) return [];
+  const sheetData = dataFromSheets[sheetName];
+  if (!sheetData) return [];
+  const colIndex = sheetData[0].findIndex(item => item === nameColId);
+  return sheetData
+    .map((row, index) => (row[colIndex] === id ? index + 1 : null))
+    .filter((row): row is number => row !== null);
 };

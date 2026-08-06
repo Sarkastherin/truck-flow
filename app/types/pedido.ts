@@ -478,6 +478,7 @@ export const atributosConMetadata: AtributoMetadata[] = [
     options: [
       { value: "recto", label: "Recto" },
       { value: "curvo", label: "Curvo" },
+  
     ],
     disabledDefaultValues: true,
   },

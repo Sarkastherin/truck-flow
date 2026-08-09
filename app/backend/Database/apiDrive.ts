@@ -82,6 +82,7 @@ declare const gapi: {
       headers?: any;
       body?: string | ArrayBuffer | Blob;
     }) => Promise<any>;
+    getToken: () => { access_token: string } | null;
     drive: {
       files: {
         create: (params: {
@@ -307,6 +308,58 @@ export async function deleteFileFromDrive(fileIdOrUrl: string): Promise<{
     return {
       success: false,
       error: `No se pudo eliminar el archivo de Drive: ${error instanceof Error ? error.message : "Error desconocido"}`,
+    };
+  }
+}
+
+export async function downloadFileFromDrive(
+  fileIdOrUrl: string,
+): Promise<{ data: ArrayBuffer; mimeType: string } | { error: string }> {
+  try {
+    const fileId = getDriveFileId(fileIdOrUrl);
+
+    // Obtener metadatos del archivo (incluye mimeType)
+    const metaResponse = await gapi.client.request({
+      path: `https://www.googleapis.com/drive/v3/files/${fileId}`,
+      method: "GET",
+      params: {
+        fields: "mimeType,name",
+      },
+    });
+
+    const mimeType = metaResponse.result?.mimeType || "application/octet-stream";
+
+    // Obtener access token para fetch directo
+    const token = gapi.client.getToken()?.access_token;
+    if (!token) {
+      return { error: "No hay token de acceso disponible" };
+    }
+
+    // Descargar contenido con fetch (gapi.client.request no soporta binario correctamente)
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      return { error: `Error HTTP ${response.status}: ${response.statusText}` };
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    if (arrayBuffer.byteLength === 0) {
+      return { error: "El archivo descargado está vacío" };
+    }
+
+    return { data: arrayBuffer, mimeType };
+  } catch (error) {
+    console.error("Error al descargar archivo de Drive:", error);
+    return {
+      error: `No se pudo descargar el archivo: ${error instanceof Error ? error.message : "Error desconocido"}`,
     };
   }
 }

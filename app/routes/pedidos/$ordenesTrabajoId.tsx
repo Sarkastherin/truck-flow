@@ -24,7 +24,7 @@ type PropsOrdenes = {
 };
 export default function PedidosOrdenesTrabajo() {
   const pedido = useOutletContext() as PedidoFormValues;
-  const { ordenes_trabajo } = pedido;
+  const { ordenes_trabajo, documentos } = pedido;
   const navigate = useNavigate();
   const { openModal } = useModal();
 

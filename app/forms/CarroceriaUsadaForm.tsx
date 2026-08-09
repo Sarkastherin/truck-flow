@@ -18,7 +18,7 @@ import {
   Select,
   InputGroupWithIcon
 } from "~/components/InputsForm";
-import { LuRuler, LuBanknote } from "react-icons/lu";
+import { LuRuler, LuBanknote, LuPencil, LuTrash2, LuX, LuCheck } from "react-icons/lu";
 import CuchetinForm from "~/forms/CuchetinForm";
 import AlarguesForm from "~/forms/AlarguesForm";
 import AccesoriosForm from "~/forms/AccesoriosForm";
@@ -37,6 +37,7 @@ import ImageGallery from "react-image-gallery";
 import type { GalleryItem } from "react-image-gallery";
 import ImageFileComponent from "~/components/ImageFileComponent";
 import type { dataToPayload } from "~/components/ImageFileComponent";
+import { deleteImage } from "~/backend/Cloudinary/cloudinary";
 import type { Fotos } from "~/types/carroceria-usada";
 import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import {
@@ -216,6 +217,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       </span>
     </div>
   );
+
+  const [isEditingPhotos, setIsEditingPhotos] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+
   const images: GalleryItem[] =
     data?.fotos?.map((foto) => ({
       original: foto.url,
@@ -245,6 +250,60 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
         message: "Fotos subidas con éxito",
       });
     }
+  };
+
+  const togglePhotoSelection = (fotoId: string) => {
+    setSelectedPhotos((prev) => {
+      const next = new Set(prev);
+      if (next.has(fotoId)) {
+        next.delete(fotoId);
+      } else {
+        next.add(fotoId);
+      }
+      return next;
+    });
+  };
+
+  const onDeleteSelected = async () => {
+    if (selectedPhotos.size === 0) return;
+
+    const confirmMessage = `¿Eliminar ${selectedPhotos.size} imagen(es) seleccionada(s)?`;
+    if (!window.confirm(confirmMessage)) return;
+
+    openModal("loading", {
+      props: {
+        title: "Eliminando imágenes",
+        message: "Las imágenes se están eliminando, por favor espera.",
+      },
+    });
+
+    const fotos = data?.fotos || [];
+    const fotosToDelete = fotos.filter((f) => selectedPhotos.has(f.id));
+    const errors: string[] = [];
+
+    for (const foto of fotosToDelete) {
+      try {
+        await deleteImage(foto.public_id);
+      } catch (error) {
+        console.warn(`Error eliminando de Cloudinary: ${foto.public_id}`, error);
+        errors.push(foto.public_id || "imagen");
+      }
+    }
+
+    const result = await CUDFotos([], Array.from(selectedPhotos));
+
+    if (!result.success || errors.length > 0) {
+      openModal("error", {
+        message: `Error al eliminar algunas imágenes. ${errors.length > 0 ? `No se pudieron eliminar de Cloudinary: ${errors.join(", ")}` : ""}`,
+      });
+    } else {
+      openModal("success", {
+        message: `${selectedPhotos.size} imagen(es) eliminada(s) con éxito`,
+      });
+    }
+
+    setSelectedPhotos(new Set());
+    setIsEditingPhotos(false);
   };
 
   const MorphingInput = ({
@@ -333,19 +392,95 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
               </h2>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <ImageFileComponent onUpload={onUpload} />
-              <BadgeStatusCarroceriaUsada status={data?.status || "-"} />
+              {isEditingPhotos ? (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    color="failure"
+                    outline
+                    onClick={onDeleteSelected}
+                    disabled={selectedPhotos.size === 0}
+                  >
+                    <LuTrash2 className="size-4 mr-1" />
+                    Eliminar ({selectedPhotos.size})
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="gray"
+                    outline
+                    onClick={() => {
+                      setIsEditingPhotos(false);
+                      setSelectedPhotos(new Set());
+                    }}
+                  >
+                    <LuX className="size-4 mr-1" />
+                    Cancelar
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <ImageFileComponent onUpload={onUpload} />
+                    {data?.fotos && data.fotos.length > 0 && (
+                      <Button
+                        size="sm"
+                        className="rounded-full px-2 py-2 md:px-4 justify-center items-center gap-2"
+                        color="light"
+                        outline
+                        onClick={() => setIsEditingPhotos(true)}
+                      >
+                        <LuPencil className="size-4" />
+                        <span className="hidden md:block">Editar fotos</span>
+                      </Button>
+                    )}
+                  </div>
+                  <BadgeStatusCarroceriaUsada status={data?.status || "-"} />
+                </>
+              )}
             </div>
           </div>
           {/* Carrusel de fotos */}
 
           {data?.fotos && data.fotos.length > 0 && (
             <div className="max-w-2xl mx-auto rounded-lg mb-6">
-              <ImageGallery
-                items={images}
-                showBullets={true}
-                showPlayButton={false}
-              />
+              {isEditingPhotos ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {data.fotos.map((foto) => (
+                    <div
+                      key={foto.id}
+                      className="relative cursor-pointer group"
+                      onClick={() => togglePhotoSelection(foto.id)}
+                    >
+                      <img
+                        src={foto.url}
+                        alt={foto.public_id || ""}
+                        className={`w-full h-32 object-cover rounded-lg transition-all ${
+                          selectedPhotos.has(foto.id)
+                            ? "ring-4 ring-red-500 opacity-70"
+                            : "ring-2 ring-transparent hover:ring-gray-300"
+                        }`}
+                      />
+                      <div
+                        className={`absolute top-2 left-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                          selectedPhotos.has(foto.id)
+                            ? "bg-red-500 border-red-500"
+                            : "bg-white/80 border-gray-400"
+                        }`}
+                      >
+                        {selectedPhotos.has(foto.id) && (
+                          <LuCheck className="text-white size-3" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <ImageGallery
+                  items={images}
+                  showBullets={true}
+                  showPlayButton={false}
+                />
+              )}
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">

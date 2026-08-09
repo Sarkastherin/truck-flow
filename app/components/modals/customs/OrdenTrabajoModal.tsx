@@ -31,6 +31,7 @@ import { OrdenMontajeTemplate } from "~/components/pdf/OrdenMontajeTemplate";
 import { ControlCarrozadoTemplate } from "~/components/pdf/ControlCarrozadoTemplate";
 import type { ControlCarrozado } from "~/types/Configuraciones";
 import { BadgeStatusOT } from "~/components/specials/Badges";
+import { mergePDFs } from "~/utils/pdfMerge";
 type ModalStep = {
   type:
     | "form"
@@ -246,7 +247,19 @@ export default function OrdenTrabajoModal({
           "El PDF generado está vacío. Puede ser un problema con los datos o el template.",
         );
       }
-      setPdfBlob(blob);
+
+      // Merge con documentos asociados (solo para órdenes de fabricación)
+      const documentosPedido = pedido.documentos || [];
+      let finalBlob = blob;
+      if (tipo === "fabricacion" && documentosPedido.length > 0) {
+        setStep({
+          type: "saving",
+          message: `Adjuntando ${documentosPedido.length} documento(s)...`,
+        });
+        finalBlob = await mergePDFs(blob, documentosPedido);
+      }
+
+      setPdfBlob(finalBlob);
       // Mostrar previa del PDF o descargarlo directamente
       setStep({
         type: "preview",

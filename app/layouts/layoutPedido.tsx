@@ -7,6 +7,7 @@ import {
   LuDrill,
   LuFileBox,
   LuShieldCheck,
+  LuFlaskConical
 } from "react-icons/lu";
 import { useParams } from "react-router";
 import { usePedido } from "~/context/PedidoContext";
@@ -104,6 +105,13 @@ export default function PedidosLayout() {
         name: "Controles de Calidad",
         href: `/pedidos/controles-calidad/${id}`,
         icon: LuShieldCheck,
+        show: pedido?.tipo === "nueva",
+      },
+      {
+        key: "controles-calidad-beta",
+        name: "Testing",
+        href: `/pedidos/controles-calidad_beta/${id}`,
+        icon: LuFlaskConical,
         show: pedido?.tipo === "nueva",
       },
     ];

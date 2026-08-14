@@ -37,6 +37,10 @@ export default [
           "controles-calidad/:pedidoId",
           "routes/pedidos/$controlesCalidadId.tsx",
         ),
+        route(
+          "controles-calidad_beta/:pedidoId",
+          "routes/pedidos/$controlesCalidadId_Dev.tsx",
+        ),
       ]),
     ]),
     ...prefix("configuraciones", [

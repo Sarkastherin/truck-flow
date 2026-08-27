@@ -15,6 +15,7 @@
   { "value": "BSE", "label": "Banco de Santiago del Estero" },
   { "value": "BNEU", "label": "Banco de Neuquén" },
   { "value": "BRN", "label": "Banco de Río Negro" },
+  
 
   { "value": "BBVA", "label": "BBVA Argentina" },
   { "value": "SANTANDER", "label": "Banco Santander Argentina" },
@@ -30,5 +31,6 @@
   { "value": "COLUMBIA", "label": "Banco Columbia" },
   { "value": "CMF", "label": "Banco CMF" },
   { "value": "BICA", "label": "Banco Bica" },
-  { "value": "DINO", "label": "Banco Dino" }
+  { "value": "DINO", "label": "Banco Dino" },
+  { "value": "COINAG", "label": "Banco Coinag" }
 ]

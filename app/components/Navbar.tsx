@@ -3,8 +3,15 @@ import { LogoComponent } from "./LogoComponent";
 import { useAuth } from "../context/AuthContext";
 import { useUser } from "../context/UserContext";
 import { useNavItems } from "~/hooks/useNavItems";
-import { LuLogOut, LuShieldCheck, LuUserRound } from "react-icons/lu";
-import {optionsRoles} from "~/types/users";
+import {
+  LuLogOut,
+  LuShieldCheck,
+  LuUserRound,
+  LuCircleHelp,
+} from "react-icons/lu";
+import { optionsRoles } from "~/types/users";
+import { useModal } from "~/context/ModalContext";
+import HelpFAQModal from "./HelpFAQModal";
 import {
   Avatar,
   Dropdown,
@@ -44,6 +51,7 @@ export function NavBar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { navItems } = useNavItems();
+  const { openModal } = useModal();
 
   const fullName = activeUser
     ? `${activeUser.nombre} ${activeUser.apellido}`.trim()
@@ -63,7 +71,6 @@ export function NavBar() {
 
   return (
     <Navbar
-      
       rounded
       className="sticky top-0 z-50 border-b border-white/50 bg-linear-to-r from-slate-50 via-white to-violet-50/80 shadow-sm backdrop-blur-xl dark:border-gray-700/70 dark:from-gray-900 dark:via-gray-900 dark:to-violet-950/40"
     >
@@ -90,7 +97,10 @@ export function NavBar() {
             </span>
             <span className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2">
               <LuShieldCheck className="h-3.5 w-3.5 text-violet-500" />
-              {isLoading ? "Sincronizando" : (optionsRoles.find((r) => r.value === activeUser?.role)?.label || "Rol desconocido")}
+              {isLoading
+                ? "Sincronizando"
+                : optionsRoles.find((r) => r.value === activeUser?.role)
+                    ?.label || "Rol desconocido"}
             </span>
           </DropdownHeader>
           <DropdownDivider />
@@ -103,6 +113,20 @@ export function NavBar() {
           </DropdownItem>
         </Dropdown>
         <NavbarToggle className="ml-2" />
+        <button
+          type="button"
+          onClick={() =>
+            openModal("custom", {
+              title: "Centro de Ayuda",
+              component: HelpFAQModal,
+              size: "3xl"
+            })
+          }
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white/80 text-gray-500 hover:bg-white hover:text-violet-600 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400 transition-colors"
+          title="Centro de Ayuda"
+        >
+          <LuCircleHelp className="h-5 w-5" />
+        </button>
         <DarkThemeToggle className="ml-2 flex h-11 w-full items-center justify-center rounded-2xl border border-gray-200 bg-white/80 hover:bg-white dark:border-gray-700 dark:bg-gray-800/80 dark:hover:bg-gray-800 md:w-auto md:rounded-full" />
       </div>
       <NavbarCollapse>

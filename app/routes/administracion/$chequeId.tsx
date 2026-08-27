@@ -333,14 +333,8 @@ export default function ChequeForm() {
                 {bancos && (
                   <Select
                     label="Banco"
-                    {...register(`banco`, {
-                      required: {
-                        value: watch(`tipo`) === "fisico",
-                        message: "El banco es obligatorio",
-                      },
-                    })}
+                    {...register(`banco`)}
                     error={errors.banco?.message as string}
-                    requiredField={watch(`tipo`) === "fisico"}
                     options={bancos}
                   />
                 )}

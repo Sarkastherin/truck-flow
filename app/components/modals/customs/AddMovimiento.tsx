@@ -275,21 +275,12 @@ export default function AddMovimiento({
                       <Select
                         sizing={"sm"}
                         label="Banco"
-                        {...form.register(`cheques.${index}.banco`, {
-                          required: {
-                            value:
-                              form.watch(`cheques.${index}.tipo`) === "fisico",
-                            message: "El banco es obligatorio",
-                          },
-                        })}
+                        {...form.register(`cheques.${index}.banco`)}
                         error={
                           Array.isArray(form.formState.errors.cheques)
                             ? form.formState.errors.cheques[index]?.banco
                                 ?.message
                             : undefined
-                        }
-                        requiredField={
-                          form.watch(`cheques.${index}.tipo`) === "fisico"
                         }
                         options={bancos}
                         disabled={!form.watch(`cheques.${index}.tipo`)}

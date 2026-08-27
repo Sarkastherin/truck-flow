@@ -66,3 +66,11 @@ export const BadgeStatusUsuarioRole = ({ role }: { role: string }) => {
     optionsRoles.find((option) => option.value === role)?.label || role;
   return <Badge color={statusColorsUsuarioRole[role as Role] || "gray"}>{label}</Badge>;
 };
+
+export const BadgeStatusMovimiento = ({ active }: { active: boolean }) => {
+  return (
+    <Badge color={active !== false ? "green" : "red"}>
+      {active !== false ? "Activo" : "Anulado"}
+    </Badge>
+  );
+};

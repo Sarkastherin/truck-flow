@@ -15,6 +15,7 @@ import EditMovimiento from "../modals/customs/EditMovimiento";
 import { useMovimientos } from "~/hooks/useMovimientos";
 import type { FileTypeActions } from "../FileInputComponent";
 import { useState, useRef, useEffect } from "react";
+import { BadgeStatusMovimiento } from "./Badges";
 const columns: TableColumn<MovimientoDetalle>[] = [
   {
     name: "Fecha",
@@ -53,6 +54,12 @@ const columns: TableColumn<MovimientoDetalle>[] = [
         style: "currency",
         currency: "ARS",
       }),
+    sortable: true,
+  },
+  {
+    name: "Estado",
+    width: "100px",
+    cell: (row) => <BadgeStatusMovimiento active={row.active} />,
     sortable: true,
   },
   {
@@ -98,7 +105,7 @@ export default function TableMovimientos({
   });
 
   const filesRef = useRef(files);
-  const { form, fieldArrayCheques, fieldArrayDocumentos, onUpdate } =
+  const { form, fieldArrayCheques, fieldArrayDocumentos, onUpdate, onAnularPago } =
     useMovimientos();
   useEffect(() => {
     filesRef.current = files;
@@ -124,6 +131,7 @@ export default function TableMovimientos({
           row.medio_pago === "efectivo" || row.medio_pago === "transferencia",
         files,
         setFiles,
+        onAnularPago,
       },
       onSubmit: form.handleSubmit(handleOnUpdate),
     });

@@ -71,6 +71,13 @@ type AdministracionContextType = {
   ) => Promise<CrudResponse>;
   createNewMovimiento: CreateGlobalMethod<MovimientoDetalle>;
   isCHEQUERegistered: (numeroCheque: number, cliente_id: string) => boolean;
+  anularPago: (
+    movimientoId: string,
+    fechaAnulacion: string,
+    motivo: string,
+    cliente_id: string,
+    monto: number,
+  ) => Promise<CrudResponse>;
 };
 type HeadersType = {
   movimientos: SheetCellValue[] | null;
@@ -491,6 +498,65 @@ export const AdministracionProvider = ({
     },
     [cheques],
   );
+  const anularPago = useCallback(
+    async (
+      movimientoId: string,
+      fechaAnulacion: string,
+      motivo: string,
+      cliente_id: string,
+      monto: number,
+    ): Promise<CrudResponse> => {
+      try {
+        // 1. Marcar el movimiento original como inactivo
+        const { error: updateError } = await updateMovimiento(
+          { id: movimientoId, active: false } as Movimientos,
+          { active: true },
+        );
+        if (updateError) {
+          throw new Error(
+            `Error al desactivar el movimiento: ${updateError}`,
+          );
+        }
+
+        // 2. Crear movimiento deuda para reversar el pago
+        const payload: Omit<MovimientoDetalle, "id"> = {
+          cliente_id,
+          fecha_movimiento: fechaAnulacion,
+          tipo_movimiento: "deuda",
+          origen: "anulacion_movimiento",
+          medio_pago: "no_aplica",
+          debe: monto,
+          haber: 0,
+          concepto: `Anulación de pago - ${motivo}`,
+        };
+        const { error: createError } = await createNewMovimiento(
+          payload as MovimientoDetalle,
+        );
+        if (createError) {
+          throw new Error(
+            `Movimiento desactivado pero error al crear deuda: ${createError}`,
+          );
+        }
+
+        // 3. Refrescar datos
+        await getAdministracionData();
+
+        return {
+          success: true,
+          message: "Pago anulado exitosamente",
+          error: null,
+        };
+      } catch (error) {
+        console.error("Error anulando pago:", error);
+        return {
+          success: false,
+          message: "Error al anular el pago",
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    },
+    [updateMovimiento, createNewMovimiento, getAdministracionData],
+  );
   return (
     <AdministracionContext.Provider
       value={{
@@ -504,6 +570,7 @@ export const AdministracionProvider = ({
         updateCheque,
         createNewMovimiento,
         isCHEQUERegistered,
+        anularPago,
       }}
     >
       {children}

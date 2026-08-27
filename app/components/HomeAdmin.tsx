@@ -179,6 +179,7 @@ export default function HomeAdmin() {
     deuda: "Deuda",
     pago: "Pago",
     nota_credito: "Nota de credito",
+
   };
 
   function getMovementSortValue(

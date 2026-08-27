@@ -12,6 +12,7 @@ export const useMovimientos = () => {
     createMovimiento,
     updateMovimientoAndDocumentos,
     isCHEQUERegistered,
+    anularPago,
   } = useAdministracion();
   const { setMessageForm, setStepForm } = useModal();
   const form = useForm<MovimientoFormValues>({
@@ -88,5 +89,27 @@ export const useMovimientos = () => {
     setMessageForm(result.message || "Movimiento actualizado exitosamente");
     setStepForm("success");
   };
-  return { form, fieldArrayCheques, fieldArrayDocumentos, onCreate, onUpdate };
+  const onAnularPago = async (
+    movimientoId: string,
+    fechaAnulacion: string,
+    motivo: string,
+    cliente_id: string,
+    monto: number,
+  ) => {
+    const result = await anularPago(
+      movimientoId,
+      fechaAnulacion,
+      motivo,
+      cliente_id,
+      monto,
+    );
+    if (!result.success) {
+      setMessageForm(result.message || "Error al anular el pago");
+      setStepForm("error");
+      return;
+    }
+    setMessageForm(result.message || "Pago anulado exitosamente");
+    setStepForm("success");
+  };
+  return { form, fieldArrayCheques, fieldArrayDocumentos, onCreate, onUpdate, onAnularPago };
 };

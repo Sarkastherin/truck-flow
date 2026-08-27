@@ -20,7 +20,7 @@ import {
 import { useNavigate } from "react-router";
 import { useModal } from "~/context/ModalContext";
 import { useAdministracion } from "~/context/AdministracionContext";
-import { Card } from "flowbite-react";
+import { Button, Card } from "flowbite-react";
 import { BadgeStatusCheque } from "~/components/specials/Badges";
 export default function EditMovimiento({
   props,
@@ -36,12 +36,25 @@ export default function EditMovimiento({
     isEfectivo?: boolean;
     files: FileTypeActions<Documento>;
     setFiles: React.Dispatch<React.SetStateAction<FileTypeActions<Documento>>>;
+    onAnularPago: (
+      movimientoId: string,
+      fechaAnulacion: string,
+      motivo: string,
+      cliente_id: string,
+      monto: number,
+    ) => Promise<void>;
   };
 }) {
   const navigate = useNavigate();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
   const { bancos } = useAdministracion();
-  const { form, isEfectivo, files, setFiles } = props;
+  const { form, isEfectivo, files, setFiles, onAnularPago } = props;
+  const [showAnulacionModal, setShowAnulacionModal] = useState(false);
+  const [fechaAnulacion, setFechaAnulacion] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [motivoAnulacion, setMotivoAnulacion] = useState("");
+  const isAnulado = form.watch("active") === false;
   const cheques = (form.watch("cheques") as Cheque[]) || [];
   const mediosPagosEfectivo = useMemo(() => {
     return optionMediosPago.filter(
@@ -105,7 +118,7 @@ export default function EditMovimiento({
           />
         </div>
       </fieldset>
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
+      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
         <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
           📝 Campos editables
         </legend>
@@ -141,7 +154,7 @@ export default function EditMovimiento({
         </div>
       </fieldset>
       {form.watch("medio_pago") === "cheque" && (
-        <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
+      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
           <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             💳 Cheques asociados
           </legend>
@@ -206,6 +219,97 @@ export default function EditMovimiento({
             ))}
           </div>
         </fieldset>
+      )}
+      {form.watch("tipo_movimiento") === "pago" &&
+        form.watch("medio_pago") !== "cheque" &&
+        !isAnulado && (
+          <fieldset
+            className="border-t border-gray-300 dark:border-gray-600 pt-5"
+            disabled={form.formState.isSubmitting}
+          >
+            <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              ⚠️ Anulación de pago
+            </legend>
+            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                Esta acción creará un movimiento de deuda para reversar el pago
+                de $
+                {(form.getValues("haber") || 0).toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                .
+              </p>
+              <Button
+                color="red"
+                onClick={() => setShowAnulacionModal(true)}
+                outline
+              >
+                Anular este pago
+              </Button>
+            </div>
+          </fieldset>
+        )}
+      {showAnulacionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Confirmar Anulación de Pago
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Se creará un movimiento de deuda por $
+              {(form.getValues("haber") || 0).toLocaleString("es-AR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              para reversar este pago.
+            </p>
+            <Input
+              label="Fecha de anulación"
+              type="date"
+              value={fechaAnulacion}
+              onChange={(e) => setFechaAnulacion(e.target.value)}
+              requiredField
+            />
+            <Input
+              label="Motivo de anulación"
+              placeholder="Ingrese el motivo de la anulación"
+              value={motivoAnulacion}
+              onChange={(e) => setMotivoAnulacion(e.target.value)}
+              requiredField
+            />
+            <div className="flex gap-2 justify-end pt-2">
+              <Button
+                color="gray"
+                onClick={() => {
+                  setShowAnulacionModal(false);
+                  setMotivoAnulacion("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                color="red"
+                onClick={async () => {
+                  if (!motivoAnulacion.trim()) return;
+                  await onAnularPago(
+                    form.getValues("id")!,
+                    fechaAnulacion,
+                    motivoAnulacion,
+                    form.getValues("cliente_id"),
+                    form.getValues("haber") || 0,
+                  );
+                  setShowAnulacionModal(false);
+                  setMotivoAnulacion("");
+                  closeModal();
+                }}
+                disabled={!motivoAnulacion.trim() || !fechaAnulacion}
+              >
+                Confirmar Anulación
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

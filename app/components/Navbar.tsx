@@ -24,6 +24,7 @@ import {
   NavbarLink,
   NavbarToggle,
   DarkThemeToggle,
+  useNavbarContext,
 } from "flowbite-react";
 const NavLinkComponent = ({
   children,
@@ -46,11 +47,32 @@ const NavLinkComponent = ({
   </NavLink>
 );
 
+function NavLinks() {
+  const { setIsOpen } = useNavbarContext();
+  const { navItems } = useNavItems();
+
+  return (
+    <NavbarCollapse>
+      {navItems.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          onClick={() => setIsOpen(false)}
+          className={({ isActive }) =>
+            `${isActive ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500 hover:bg-violet-600 hover:text-white hover:dark:bg-violet-500" : "hover:bg-violet-300 hover:dark:bg-violet-600/50 "}  m-2 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
+          }
+        >
+          {item.name}
+        </NavLink>
+      ))}
+    </NavbarCollapse>
+  );
+}
+
 export function NavBar() {
   const { activeUser, isLoading } = useUser();
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const { navItems } = useNavItems();
   const { openModal } = useModal();
 
   const fullName = activeUser
@@ -129,19 +151,7 @@ export function NavBar() {
         </button>
         <DarkThemeToggle className="ml-2 flex h-11 w-full items-center justify-center rounded-2xl border border-gray-200 bg-white/80 hover:bg-white dark:border-gray-700 dark:bg-gray-800/80 dark:hover:bg-gray-800 md:w-auto md:rounded-full" />
       </div>
-      <NavbarCollapse>
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `${isActive ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500 hover:bg-violet-600 hover:text-white hover:dark:bg-violet-500" : "hover:bg-violet-300 hover:dark:bg-violet-600/50 "}  m-2 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
-            }
-          >
-            {item.name}
-          </NavLink>
-        ))}
-      </NavbarCollapse>
+      <NavLinks />
     </Navbar>
   );
 }

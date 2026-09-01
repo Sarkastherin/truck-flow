@@ -77,6 +77,9 @@ export function Sidebar({
                         if (setActiveTab) {
                           setActiveTab(item.key);
                         }
+                        if (window.innerWidth < 768) {
+                          setCollapsed(true);
+                        }
                       }}
                       icon={item.icon}
                       active={
@@ -106,7 +109,7 @@ export function Sidebar({
       {collapsible && (
         <button
           onClick={() => setCollapsed((c) => !c)}
-          className="hidden md:flex absolute -right-3 top-5 z-10 h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="flex absolute -right-3 top-5 z-10 h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           title={collapsed ? "Expandir menú" : "Contraer menú"}
         >
           {collapsed ? (

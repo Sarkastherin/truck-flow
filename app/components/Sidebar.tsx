@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Sidebar as FlowbiteSidebar,
@@ -43,23 +43,6 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const syncCollapsedWithViewport = () => {
-      setCollapsed(window.innerWidth < 768);
-    };
-
-    syncCollapsedWithViewport();
-    window.addEventListener("resize", syncCollapsedWithViewport);
-
-    return () => {
-      window.removeEventListener("resize", syncCollapsedWithViewport);
-    };
-  }, []);
   return (
     <div
       className={`relative shrink-0 transition-all duration-300 ease-in-out ${

@@ -49,4 +49,9 @@ export const flowbiteTheme = createTheme({
       },
     },
   },
+  toast: {
+    root: {
+      base: "border border-red-500"
+    }
+  }
 });

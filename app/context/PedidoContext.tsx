@@ -22,6 +22,7 @@ import type {
   TrabajoChasis,
   OrdenesTrabajo,
   CarroceriaUsada,
+  ControlCarrozado,
 } from "~/types/pedido";
 import type { DirtyMap } from "~/utils/prepareUpdatePayload";
 import { useSociosComercial } from "./SociosComercialesContext";
@@ -95,6 +96,10 @@ type PedidoContextType = {
   ) => Promise<Response>;
   CUDTrabajosChasis: (
     data: TrabajoChasis[],
+    deletedIds: string[],
+  ) => Promise<CrudGlobalResponse>;
+  CUDcontrolCarrozado: (
+    data: ControlCarrozado[],
     deletedIds: string[],
   ) => Promise<CrudGlobalResponse>;
   createNewOrdenTrabajo: (
@@ -259,7 +264,7 @@ export const PedidosProvider = ({
           trabajo_chasis: trabajoChasisForThisPedido,
           ordenes_trabajo: ordenesTrabajoForThisPedido,
           documentos: documentosForThisPedido,
-          control_carrozado: controlCarrozadoForThisPedido
+          control_carrozado: controlCarrozadoForThisPedido,
         } as Pedido;
       });
       setPedidos(
@@ -820,6 +825,25 @@ export const PedidosProvider = ({
     },
     [],
   );
+  /* CONTROL DE CARROZADO */
+  const CUDcontrolCarrozado = useCallback(
+    async (data: ControlCarrozado[], deletedIds: string[]) => {
+      return cudGlobalFieldsArrayEntities({
+        entities: data,
+        deletedIds,
+        sheetKey: "control_carrozado_resultado",
+        entityLabel: "trabajo en chasis",
+        paramsFromSheets,
+        sheetId: SHEET_ID_PEDIDO,
+        sheetName: SHEET_NAMES_PEDIDOS.control_carrozado_resultado,
+        successMessage: "Control de carrozado actualizados exitosamente",
+        onGetData: getPedidosData,
+        activeUser: activeUser!!,
+        nameColId: "id",
+      });
+    },
+    [cudGlobalFieldsArrayEntities, getPedidosData, paramsFromSheets],
+  );
   const createNewOrdenTrabajo = useCallback(
     async (
       newOrdenTrabajo: OrdenesTrabajo,
@@ -1126,6 +1150,7 @@ export const PedidosProvider = ({
         createNewCarroceria,
         updateCarroceria,
         CUDTrabajosChasis,
+        CUDcontrolCarrozado,
         createNewOrdenTrabajo,
         deleteOrdenTrabajo,
         closeOrdenTrabajo,

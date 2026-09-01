@@ -1,18 +1,15 @@
 import type { Route } from "../+types/home";
 import { useOutletContext, useNavigate } from "react-router";
-import type { PedidoFormValues, TipoOrden } from "~/types/pedido";
-import { atributosConMetadata } from "~/types/pedido";
-import { LuShieldCheck } from "react-icons/lu";
-import { Button, Card, Textarea } from "flowbite-react";
+import type { PedidoFormValues } from "~/types/pedido";
+import { Button, Card } from "flowbite-react";
 import { useModal } from "~/context/ModalContext";
-import OrdenTrabajoModal from "~/components/modals/customs/OrdenTrabajoModal";
-import type { IconType } from "react-icons";
 import { useMemo } from "react";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
-import { useState } from "react";
-import { ToggleSwitch } from "~/components/InputsForm";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
 import { ControlCarrozadoForm } from "~/forms/ControlCarrozadoForm";
+import { usePedido } from "~/context/PedidoContext";
+import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Controles de Calidad Beta" },
@@ -26,10 +23,11 @@ export type ControlCarrozadoForm = Pick<PedidoFormValues, "control_carrozado">;
 
 export default function PedidosControlesCalidad() {
   const pedido = useOutletContext() as PedidoFormValues;
-  const { control_carrozado } = pedido;
   const navigate = useNavigate();
-  const { openModal } = useModal();
   const [collapse, setCollapse] = useState(true);
+  const { CUDcontrolCarrozado } = usePedido();
+  const { openModal } = useModal();
+  const shouldResetAfterSave = useRef(false);
 
   const { carrozados, puertasTraseras, colores, controlCarrozado } =
     useConfiguracion();
@@ -77,6 +75,8 @@ export default function PedidosControlesCalidad() {
     control,
     watch,
     reset,
+    setValue,
+    clearErrors,
     formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
     handleSubmit,
   } = useForm<ControlCarrozadoForm>({
@@ -159,7 +159,61 @@ export default function PedidosControlesCalidad() {
       {label}: <strong>{value || "-"}</strong>
     </p>
   );
-  const onSubmit = async () => {};
+  const onSubmit = async (data: ControlCarrozadoForm) => {
+    openModal("loading", {
+      props: {
+        title: "Actualizando control de carrozado...",
+      },
+    });
+    try {
+      if (data.control_carrozado && data.control_carrozado.length > 0) {
+        const controlCarrozadoWithRevision = data.control_carrozado.map(
+          (item) => ({
+            ...item,
+            revision: item.id ? (item.revision ?? 0) + 1 : 0,
+          }),
+        );
+        const { error } = await CUDcontrolCarrozado(
+          controlCarrozadoWithRevision,
+          [],
+        );
+        if (error) {
+          throw new Error(`Error al guardar control de carrozado: ${error}`);
+        }
+        openModal("success", {
+          props: {
+            title: "Control de carrozado actualizados",
+            message:
+              "El control de carrozado ha sido actualizado exitosamente.",
+          },
+        });
+        shouldResetAfterSave.current = true;
+      } else {
+        openModal("info", {
+          props: {
+            title: "Sin cambios",
+            message: "No se han realizado cambios en el control de carrozado.",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error en onSubmit de PedidosForm:", error);
+      openModal("error", {
+        props: {
+          title: "Error al guardar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Ocurrió un error al actualizar los trabajos en chasis. Por favor, intenta nuevamente.",
+        },
+      });
+    }
+  };
+  useFormNavigationBlock<PedidoFormValues>({
+    isDirty,
+    isSubmitSuccessful,
+    dirtyFields,
+  });
   return (
     <section className="ps-4 w-full">
       {pedido.carroceria && pedido.carroceria.id && (
@@ -247,10 +301,19 @@ export default function PedidosControlesCalidad() {
           <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
             <ControlCarrozadoForm
               register={register}
+              setValue={setValue}
               control={control}
               controlCarrozadoData={controlCarrozadoData}
               pedido={pedido}
+              watch={watch}
+              errors={errors}
+              clearErrors={clearErrors}
             />
+            <div className="space-y-2">
+              <Button type="submit" className="ml-auto block" disabled={false}>
+                Guardar pedido
+              </Button>
+            </div>
           </form>
         </>
       )}

@@ -727,7 +727,8 @@ export type ControlCarrozado = CommonTypes & {
   pedido_id: string;
   item_control_id: string;
   revision: number;
-  resultado: "ok" | "nc" | "reparó" | null;
+  resultado: "ok" | "nc" | "reparo" | null;
+  observaciones?: string
 };
 export type DocumentosFormValues = Omit<Documentos, keyof CommonTypes> & {
   id?: string;

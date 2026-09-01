@@ -49,6 +49,17 @@ export default function PedidosHome() {
     },
   },
   {
+    name: "Fecha de ingreso",
+    selector: (row) => formatDateUStoES(row.fecha_ingreso),
+    sortable: true,
+    width: "150px",
+    sortFunction: (rowA, rowB) => {
+      const dateA = new Date(rowA.fecha_ingreso);
+      const dateB = new Date(rowB.fecha_ingreso);
+      return dateA.getTime() - dateB.getTime();
+    },
+  },
+  {
     name: "Tipo de Cheque",
     selector: (row) => capitalize(row.tipo),
     width: "130px",

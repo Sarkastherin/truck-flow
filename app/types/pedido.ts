@@ -145,7 +145,8 @@ export const atributosConMetadata: AtributoMetadata[] = [
     value: "largo_int",
     label: "Largo interior",
     fieldType: "number",
-    placeholder: "Ingrese largo interior en milimetros, si no aplica, ingrese 0",
+    placeholder:
+      "Ingrese largo interior en milimetros, si no aplica, ingrese 0",
     min: 0,
     unit: "mm",
   },
@@ -153,7 +154,8 @@ export const atributosConMetadata: AtributoMetadata[] = [
     value: "largo_ext",
     label: "Largo exterior",
     fieldType: "number",
-    placeholder: "Ingrese largo exterior en milimetros, si no aplica, ingrese 0",
+    placeholder:
+      "Ingrese largo exterior en milimetros, si no aplica, ingrese 0",
     min: 0,
     unit: "mm",
   },
@@ -183,7 +185,8 @@ export const atributosConMetadata: AtributoMetadata[] = [
     value: "alt_baranda",
     label: "Altura baranda",
     fieldType: "number",
-    placeholder: "Ingrese altura baranda en milimetros, si no aplica, ingrese 0",
+    placeholder:
+      "Ingrese altura baranda en milimetros, si no aplica, ingrese 0",
     min: 0,
     unit: "mm",
   },
@@ -294,7 +297,7 @@ export const atributosConMetadata: AtributoMetadata[] = [
     label: "Color lona",
     fieldType: "text",
     placeholder: "Color de la lona",
-    disabledDefaultValues: true
+    disabledDefaultValues: true,
   },
   {
     value: "color_carrozado_id",
@@ -479,7 +482,6 @@ export const atributosConMetadata: AtributoMetadata[] = [
     options: [
       { value: "recto", label: "Recto" },
       { value: "curvo", label: "Curvo" },
-  
     ],
     disabledDefaultValues: true,
   },
@@ -547,7 +549,7 @@ export type Carroceria = CommonTypes & {
   /* Boquillas */
   boquillas: number | null;
   tipo_boquillas: (typeof tiposBoquillasOptions)[number]["value"];
-  ubic_boquillas: string | null
+  ubic_boquillas: string | null;
   /* Cajon de herramientas */
   med_cajon_herramientas: number | null;
   ubicacion_cajon_herramientas: (typeof ubicacionOptions)[number]["value"];
@@ -667,6 +669,7 @@ export type Pedido = PedidoCreate & {
   ordenes_trabajo?: OrdenesTrabajo[] | [];
   documentos?: Documentos[] | [];
   prestamo?: PrestamoCarroceria | null;
+  control_carrozado: ControlCarrozado[] | null;
 };
 
 export type PedidoCreate = CommonTypes & {
@@ -719,6 +722,12 @@ export type Documentos = CommonTypes & {
   tipo_documento: TipoDocumento;
   nombre: string;
   url: string;
+};
+export type ControlCarrozado = CommonTypes & {
+  pedido_id: string;
+  item_control_id: string;
+  revision: number;
+  resultado: "ok" | "nc" | "reparó" | null;
 };
 export type DocumentosFormValues = Omit<Documentos, keyof CommonTypes> & {
   id?: string;

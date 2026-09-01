@@ -149,6 +149,7 @@ type HeadersType = {
   ordenes_trabajo: SheetCellValue[] | null;
   documentos: SheetCellValue[] | null;
   carroceria_usada: SheetCellValue[] | null;
+  control_carrozado_resultado: SheetCellValue[] | null;
 };
 const PedidoContext = createContext<PedidoContextType | undefined>(undefined);
 export const PedidosProvider = ({
@@ -196,6 +197,7 @@ export const PedidosProvider = ({
           ordenes_trabajo: data[5]?.[0] || null,
           documentos: data[6]?.[0] || null,
           carroceria_usada: data[7]?.[0] || null,
+          control_carrozado_resultado: data[8]?.[0] || null,
         },
         values: {
           pedidos: data[0] || [],
@@ -206,6 +208,7 @@ export const PedidosProvider = ({
           ordenes_trabajo: data[5] || [],
           documentos: data[6] || [],
           carroceria_usada: data[7] || [],
+          control_carrozado_resultado: data[8] || [],
         },
       });
 
@@ -217,6 +220,8 @@ export const PedidosProvider = ({
       const ordenesTrabajoData = getDataInJSONFormat(data[5]);
       const documentosData = getDataInJSONFormat(data[6]);
       const carroceriasUsadasData = getDataInJSONFormat(data[7]);
+      const controlCarrozadoResultadoData = getDataInJSONFormat(data[8]);
+
       const combinedData = pedidosData.map((pedido) => {
         const cliente =
           socios.find((socio) => socio.id === pedido.cliente_id) || null;
@@ -240,6 +245,10 @@ export const PedidosProvider = ({
           carroceriasUsadasData.find(
             (carroceria) => carroceria.pedido_id === pedido.id,
           ) || {};
+        const controlCarrozadoForThisPedido =
+          controlCarrozadoResultadoData.filter(
+            (cc) => cc.pedido_id === pedido.id,
+          ) || [];
         return {
           ...pedido,
           cliente: cliente,
@@ -250,6 +259,7 @@ export const PedidosProvider = ({
           trabajo_chasis: trabajoChasisForThisPedido,
           ordenes_trabajo: ordenesTrabajoForThisPedido,
           documentos: documentosForThisPedido,
+          control_carrozado: controlCarrozadoForThisPedido
         } as Pedido;
       });
       setPedidos(

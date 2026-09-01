@@ -13,6 +13,7 @@ export const SHEET_NAMES_PEDIDOS = {
   ordenes_trabajo: "ordenes_trabajo",
   documentos: "documentos",
   carroceria_usada: "carroceria_usada",
+  control_carrozado_resultado: "control_carrozado_resultado"
 };
 export const SHEET_NAMES_CONFIGURACIONES = {
   carrozados: "carrozados",

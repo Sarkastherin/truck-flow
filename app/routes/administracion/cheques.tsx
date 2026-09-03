@@ -109,6 +109,20 @@ export default function PedidosHome() {
       <TableComponent
         columns={columns}
         data={cheques || []}
+        btnExport={{
+          filename: "cheques.csv",
+          headers: [
+            { label: "Fecha de pago", key: "fecha_cobro" },
+            { label: "Fecha de ingreso", key: "fecha_ingreso" },
+            { label: "Tipo de Cheque", key: "tipo" },
+            { label: "Banco", key: "banco" },
+            { label: "Número", key: "numero" },
+            { label: "Importe", key: "importe", type: "number" },
+            { label: "Origen", key: "cliente.razon_social" },
+            { label: "Destino", key: "proveedor.razon_social" },
+            { label: "Estado", key: "status" },
+          ],
+        }}
         filterFields={[
           {
             key: "cliente.razon_social",

@@ -15,7 +15,7 @@ import type { PedidoFormValues } from "~/types/pedido";
 import { atributosConMetadata } from "~/types/pedido";
 import { Textarea, ToggleSwitch } from "~/components/InputsForm";
 import { HelperText, Toast, ToastToggle } from "flowbite-react";
-import {  HiExclamation } from "react-icons/hi";
+import { HiExclamation } from "react-icons/hi";
 export function ControlCarrozadoForm({
   register,
   setValue,
@@ -172,47 +172,57 @@ export function ControlCarrozadoForm({
                   {error}
                 </HelperText>
               </div>
-              {watch(`control_carrozado.${originalIndex}.resultado`) !== "ok" ? (
-                <Textarea
-                  label="Observaciones"
-                  {...register(
-                    `control_carrozado.${originalIndex}.observaciones`,
+              {watch(`control_carrozado.${originalIndex}.resultado`) ===
+              "ok" ? (
+                <>
+                  {showObservaciones[originalIndex] ? (
+                    <div className="flex flex-col gap-1">
+                      <Textarea
+                        label="Observaciones"
+                        {...register(
+                          `control_carrozado.${originalIndex}.observaciones`,
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowObservaciones((prev) => ({
+                            ...prev,
+                            [originalIndex]: false,
+                          }))
+                        }
+                        className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-end"
+                      >
+                        ✕ Cerrar
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowObservaciones((prev) => ({
+                          ...prev,
+                          [originalIndex]: true,
+                        }))
+                      }
+                      className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 border border-violet-300 dark:border-violet-700 rounded px-2 py-1 self-start"
+                    >
+                      📝 Obs.
+                    </button>
                   )}
-                />
-              ) : showObservaciones[originalIndex] ? (
-                <div className="flex flex-col gap-1">
-                  <Textarea
-                    label="Observaciones"
-                    {...register(
-                      `control_carrozado.${originalIndex}.observaciones`,
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowObservaciones((prev) => ({
-                        ...prev,
-                        [originalIndex]: false,
-                      }))
-                    }
-                    className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-end"
-                  >
-                    ✕ Cerrar
-                  </button>
-                </div>
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowObservaciones((prev) => ({
-                      ...prev,
-                      [originalIndex]: true,
-                    }))
-                  }
-                  className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 border border-violet-300 dark:border-violet-700 rounded px-2 py-1 self-start"
-                >
-                  📝 Obs.
-                </button>
+                <>
+                  {watch(`control_carrozado.${originalIndex}.resultado`) !==
+                  null ? (
+                    <Textarea
+                      label="Observaciones"
+                      {...register(
+                        `control_carrozado.${originalIndex}.observaciones`,
+                      )}
+                    />
+                  ) : null}
+                </>
               )}
             </div>
           );
@@ -222,12 +232,12 @@ export function ControlCarrozadoForm({
         <div className="fixed bottom-0 left-5">
           <Toast>
             <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
-              <HiExclamation  className="h-5 w-5" />
+              <HiExclamation className="h-5 w-5" />
             </div>
             <div className="ml-3 text-sm font-normal">
               Faltan ítems por evaluar
             </div>
-            <ToastToggle/>
+            <ToastToggle />
           </Toast>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useFieldArray } from "react-hook-form";
 import type {
   Control,
@@ -34,6 +35,10 @@ export function ControlCarrozadoForm({
   errors: FieldErrors<ControlCarrozadoForm>;
   clearErrors: UseFormClearErrors<ControlCarrozadoForm>;
 }) {
+  const [showObservaciones, setShowObservaciones] = useState<
+    Record<number, boolean>
+  >({});
+
   const { fields } = useFieldArray({
     control,
     name: "control_carrozado" as FieldArrayPath<ControlCarrozadoForm>,
@@ -167,12 +172,48 @@ export function ControlCarrozadoForm({
                   {error}
                 </HelperText>
               </div>
-              <Textarea
-                label="Observaciones"
-                {...register(
-                  `control_carrozado.${originalIndex}.observaciones`,
-                )}
-              />
+              {watch(`control_carrozado.${originalIndex}.resultado`) !== "ok" ? (
+                <Textarea
+                  label="Observaciones"
+                  {...register(
+                    `control_carrozado.${originalIndex}.observaciones`,
+                  )}
+                />
+              ) : showObservaciones[originalIndex] ? (
+                <div className="flex flex-col gap-1">
+                  <Textarea
+                    label="Observaciones"
+                    {...register(
+                      `control_carrozado.${originalIndex}.observaciones`,
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowObservaciones((prev) => ({
+                        ...prev,
+                        [originalIndex]: false,
+                      }))
+                    }
+                    className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-end"
+                  >
+                    ✕ Cerrar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowObservaciones((prev) => ({
+                      ...prev,
+                      [originalIndex]: true,
+                    }))
+                  }
+                  className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 border border-violet-300 dark:border-violet-700 rounded px-2 py-1 self-start"
+                >
+                  📝 Obs.
+                </button>
+              )}
             </div>
           );
         })}

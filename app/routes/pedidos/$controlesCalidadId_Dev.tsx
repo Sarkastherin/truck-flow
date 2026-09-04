@@ -3,7 +3,7 @@ import { useOutletContext, useNavigate } from "react-router";
 import type { PedidoFormValues } from "~/types/pedido";
 import { Button, Card } from "flowbite-react";
 import { useModal } from "~/context/ModalContext";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -25,9 +25,14 @@ export default function PedidosControlesCalidad() {
   const pedido = useOutletContext() as PedidoFormValues;
   const navigate = useNavigate();
   const [collapse, setCollapse] = useState(true);
+  const [isLastPage, setIsLastPage] = useState(false);
   const { CUDcontrolCarrozado } = usePedido();
   const { openModal } = useModal();
   const shouldResetAfterSave = useRef(false);
+
+  const handlePageChange = useCallback((page: number, totalPages: number) => {
+    setIsLastPage(page === totalPages);
+  }, []);
 
   const { carrozados, puertasTraseras, colores, controlCarrozado } =
     useConfiguracion();
@@ -70,6 +75,27 @@ export default function PedidosControlesCalidad() {
     revision: 0,
     resultado: null,
   }));
+
+  const getInitialValues = (): ControlCarrozadoForm["control_carrozado"] => {
+    if (pedido.control_carrozado && pedido.control_carrozado.length > 0) {
+      return pedido.control_carrozado;
+    }
+    try {
+      const draftRaw = localStorage.getItem(
+        `control_carrozado_draft_${pedido.id}`,
+      );
+      if (draftRaw) {
+        const draft = JSON.parse(draftRaw);
+        if (draft.data && Array.isArray(draft.data) && draft.data.length > 0) {
+          return draft.data;
+        }
+      }
+    } catch {
+      // ignore corrupted draft
+    }
+    return defaultValues;
+  };
+
   const {
     register,
     control,
@@ -81,10 +107,7 @@ export default function PedidosControlesCalidad() {
     handleSubmit,
   } = useForm<ControlCarrozadoForm>({
     defaultValues: {
-      control_carrozado:
-        pedido.control_carrozado?.length === 0
-          ? defaultValues
-          : pedido.control_carrozado,
+      control_carrozado: getInitialValues(),
     },
   });
 
@@ -188,6 +211,11 @@ export default function PedidosControlesCalidad() {
           },
         });
         shouldResetAfterSave.current = true;
+        try {
+          localStorage.removeItem(`control_carrozado_draft_${pedido.id}`);
+        } catch {
+          // ignore
+        }
       } else {
         openModal("info", {
           props: {
@@ -308,12 +336,15 @@ export default function PedidosControlesCalidad() {
               watch={watch}
               errors={errors}
               clearErrors={clearErrors}
+              onPageChange={handlePageChange}
             />
-            <div className="space-y-2">
-              <Button type="submit" className="ml-auto block" disabled={false}>
-                Guardar pedido
-              </Button>
-            </div>
+            {isLastPage && (
+              <div className="space-y-2">
+                <Button type="submit" className="ml-auto block" disabled={false}>
+                  Guardar pedido
+                </Button>
+              </div>
+            )}
           </form>
         </>
       )}

@@ -119,7 +119,7 @@ export default function PedidosHome() {
           filename: "cheques.csv",
           headers: [
             { label: "Fecha de pago", key: "fecha_cobro" },
-            { label: "Fecha de ingreso", key: "fecha_ingreso" },
+            { label: "Fecha de endoso", key: "fecha_endoso" },
             { label: "Tipo de Cheque", key: "tipo" },
             { label: "Banco", key: "banco" },
             { label: "Número", key: "numero" },

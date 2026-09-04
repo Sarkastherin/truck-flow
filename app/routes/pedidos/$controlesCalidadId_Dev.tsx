@@ -1,6 +1,6 @@
 import type { Route } from "../+types/home";
 import { useOutletContext, useNavigate } from "react-router";
-import type { PedidoFormValues } from "~/types/pedido";
+import type { ControlCarrozado, PedidoFormValues } from "~/types/pedido";
 import { Button, Card } from "flowbite-react";
 import { useModal } from "~/context/ModalContext";
 import { useMemo, useCallback } from "react";
@@ -93,7 +93,7 @@ export default function PedidosControlesCalidad() {
     } catch {
       // ignore corrupted draft
     }
-    return defaultValues;
+    return defaultValues as ControlCarrozado[];
   };
 
   const {

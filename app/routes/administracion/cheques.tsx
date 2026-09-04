@@ -21,7 +21,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-
 export default function PedidosHome() {
   const { getAdministracionData, cheques, bancos } = useAdministracion();
   const navigate = useNavigate();
@@ -37,75 +36,82 @@ export default function PedidosHome() {
     return <LoadingComponent />;
   }
   const columns: TableColumn<ChequeConSociosYMovimiento>[] = [
-  {
-    name: "Fecha de pago",
-    selector: (row) => formatDateUStoES(row.fecha_cobro),
-    sortable: true,
-    width: "150px",
-    sortFunction: (rowA, rowB) => {
-      const dateA = new Date(rowA.fecha_cobro);
-      const dateB = new Date(rowB.fecha_cobro);
-      return dateA.getTime() - dateB.getTime();
+    {
+      name: "Fecha de pago",
+      selector: (row) => formatDateUStoES(row.fecha_cobro),
+      sortable: true,
+      width: "150px",
+      sortFunction: (rowA, rowB) => {
+        const dateA = new Date(rowA.fecha_cobro);
+        const dateB = new Date(rowB.fecha_cobro);
+        return dateA.getTime() - dateB.getTime();
+      },
     },
-  },
-  {
-    name: "Fecha de ingreso",
-    selector: (row) => formatDateUStoES(row.fecha_ingreso),
-    sortable: true,
-    width: "150px",
-    sortFunction: (rowA, rowB) => {
-      const dateA = new Date(rowA.fecha_ingreso);
-      const dateB = new Date(rowB.fecha_ingreso);
-      return dateA.getTime() - dateB.getTime();
+    {
+      name: "Fecha de endoso",
+      selector: (row) => formatDateUStoES(row.fecha_endoso),
+      sortable: true,
+      width: "150px",
+      sortFunction: (rowA, rowB) => {
+        if (rowA.fecha_endoso && rowB.fecha_endoso) {
+          return new Date(rowA.fecha_endoso).getTime() - new Date(rowB.fecha_endoso).getTime();
+        }
+        if (!rowA.fecha_endoso && !rowB.fecha_endoso) return 0;
+        return rowA.fecha_endoso ? -1 : 1;
+      },
     },
-  },
-  {
-    name: "Tipo de Cheque",
-    selector: (row) => capitalize(row.tipo),
-    width: "130px",
-  },
-  {
-    name: "Banco",
-    selector: (row) => bancos?.find((banco) => banco.value === row.banco)?.label || "-",
-    sortable: true,
-    width: "150px",
-  },
-  {
-    name: "Número",
-    selector: (row) => row.numero || "-",
-    sortable: true,
-    width: "100px",
-  },
-  {
-    name: "Importe",
-    selector: (row) =>
-      row.importe.toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
-    sortable: true,
-    width: "150px",
-  },
-  {
-    name: "Origen",
-    selector: (row) => row.cliente?.razon_social || "-",
-    sortable: true,
-  },
-  {
-    name: "Destino",
-    selector: (row) => row.proveedor?.razon_social || "-",
-    sortable: true,
-  },
-  {
-    name: "Estado",
-    cell: (row) => <BadgeStatusCheque status={row.status} />,
-    width: "120px",
-    sortable: true,
-  },
-];
+    {
+      name: "Tipo de Cheque",
+      selector: (row) => capitalize(row.tipo),
+      width: "130px",
+    },
+    {
+      name: "Banco",
+      selector: (row) =>
+        bancos?.find((banco) => banco.value === row.banco)?.label || "-",
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Número",
+      selector: (row) => row.numero || "-",
+      sortable: true,
+      width: "100px",
+    },
+    {
+      name: "Importe",
+      selector: (row) =>
+        row.importe.toLocaleString("es-AR", {
+          style: "currency",
+          currency: "ARS",
+        }),
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Origen",
+      selector: (row) => row.cliente?.razon_social || "-",
+      sortable: true,
+    },
+    {
+      name: "Destino",
+      selector: (row) => row.proveedor?.razon_social || "-",
+      sortable: true,
+    },
+    {
+      name: "Estado",
+      cell: (row) => <BadgeStatusCheque status={row.status} />,
+      width: "120px",
+      sortable: true,
+    },
+  ];
   return (
     <>
-      <SubTitles title="Cheques" back_path="/administracion" icon={{ component: HiOutlineBanknotes, color: "text-green-500" }} />
+      <SubTitles
+        title="Cheques"
+        back_path="/administracion"
+        icon={{ component: HiOutlineBanknotes, color: "text-green-500" }}
+      />
       <TableComponent
         columns={columns}
         data={cheques || []}

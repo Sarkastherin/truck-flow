@@ -17,10 +17,23 @@ import { Textarea, ToggleSwitch } from "~/components/InputsForm";
 import { HelperText, Toast, ToastToggle } from "flowbite-react";
 import { HiExclamation, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 15, 20, 25, 30];
+const ITEMS_PER_PAGE_KEY = "control_carrozado_items_per_page";
+const DEFAULT_ITEMS_PER_PAGE = 10;
 
 function getDraftKey(pedidoId: string) {
   return `control_carrozado_draft_${pedidoId}`;
+}
+
+function getInitialItemsPerPage(): number {
+  try {
+    const saved = localStorage.getItem(ITEMS_PER_PAGE_KEY);
+    if (saved) {
+      const parsed = Number(saved);
+      if (ITEMS_PER_PAGE_OPTIONS.includes(parsed)) return parsed;
+    }
+  } catch {}
+  return DEFAULT_ITEMS_PER_PAGE;
 }
 
 export function ControlCarrozadoForm({
@@ -48,6 +61,7 @@ export function ControlCarrozadoForm({
     Record<number, boolean>
   >({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(getInitialItemsPerPage);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { fields } = useFieldArray({
@@ -80,12 +94,12 @@ export function ControlCarrozadoForm({
       .sort((a, b) => a.order - b.order);
   }, [fields, controlCarrozadoData]);
 
-  const totalPages = Math.ceil(orderedFields.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(orderedFields.length / itemsPerPage);
 
   const paginatedFields = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return orderedFields.slice(start, start + ITEMS_PER_PAGE);
-  }, [orderedFields, currentPage]);
+    const start = (currentPage - 1) * itemsPerPage;
+    return orderedFields.slice(start, start + itemsPerPage);
+  }, [orderedFields, currentPage, itemsPerPage]);
 
   const completedCount = orderedFields.filter(({ originalIndex }) => {
     const val = watch(`control_carrozado.${originalIndex}.resultado`);
@@ -105,6 +119,14 @@ export function ControlCarrozadoForm({
 
   const handleSetPage = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newSize: number) => {
+    setItemsPerPage(newSize);
+    setCurrentPage(1);
+    try {
+      localStorage.setItem(ITEMS_PER_PAGE_KEY, String(newSize));
+    } catch {}
   };
 
   const saveDraft = useCallback(
@@ -159,9 +181,22 @@ export function ControlCarrozadoForm({
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {completedCount} / {orderedFields.length} completados
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            Página {currentPage} / {totalPages}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Página {currentPage} / {totalPages}
+            </span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+            >
+              {ITEMS_PER_PAGE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt} / pág
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
           <div

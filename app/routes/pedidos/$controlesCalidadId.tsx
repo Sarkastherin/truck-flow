@@ -1,52 +1,48 @@
 import type { Route } from "../+types/home";
 import { useOutletContext, useNavigate } from "react-router";
-import type { PedidoFormValues, TipoOrden } from "~/types/pedido";
-import { LuShieldCheck } from "react-icons/lu";
+import type {
+  ControlCarrozado,
+  PedidoFormValues,
+  TipoOrden,
+} from "~/types/pedido";
 import { Button, Card } from "flowbite-react";
 import { useModal } from "~/context/ModalContext";
-import OrdenTrabajoModal from "~/components/modals/customs/OrdenTrabajoModal";
-import type { IconType } from "react-icons";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
-import { BadgeStatusOT } from "~/components/specials/Badges";
+import { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { ControlCarrozadoForm } from "~/forms/ControlCarrozadoForm";
+import { usePedido } from "~/context/PedidoContext";
+import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
+import { FaFilePdf } from "react-icons/fa6";
+import OrdenTrabajoModal from "~/components/modals/customs/OrdenTrabajoModal";
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Controles de Calidad" },
+    { title: "Controles de Calidad Beta" },
     {
       name: "description",
       content: "Gestiona los detalles de los controles de calidad",
     },
   ];
 }
-type PropsOrdenes = {
-  name: string;
-  description: string;
-  icon: IconType;
-  tipo: TipoOrden;
-  status: string | null;
-};
+export type ControlCarrozadoForm = Pick<PedidoFormValues, "control_carrozado">;
+
 export default function PedidosControlesCalidad() {
   const pedido = useOutletContext() as PedidoFormValues;
-  const { controlCarrozado } = useConfiguracion();
   const { ordenes_trabajo } = pedido;
   const navigate = useNavigate();
+  const [collapse, setCollapse] = useState(true);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const { CUDcontrolCarrozado, updateStatusPedido } = usePedido();
   const { openModal } = useModal();
+  const shouldResetAfterSave = useRef(false);
 
-  const tiposControles: PropsOrdenes[] = useMemo(() => {
-    return [
-      {
-        name: "Carrozado",
-        description:
-          "Generar el control de calidad del proceso de carrozado, asegurando que la carroceria cumpla con los estándares de calidad antes de su finalización.",
-        icon: LuShieldCheck,
-        tipo: "control_carrozado",
-        status:
-          ordenes_trabajo?.find((ot) => ot.tipo_orden === "control_carrozado")
-            ?.status ?? null,
-      },
-    ];
-  }, [ordenes_trabajo]);
+  const handlePageChange = useCallback((page: number, totalPages: number) => {
+    setIsLastPage(page === totalPages);
+  }, []);
 
+  const { carrozados, puertasTraseras, colores, controlCarrozado } =
+    useConfiguracion();
   const controlCarrozadoData = useMemo(() => {
     return controlCarrozado
       .filter(
@@ -55,17 +51,96 @@ export default function PedidosControlesCalidad() {
       )
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [controlCarrozado, pedido.carroceria?.tipo_carrozado_id]);
-  const handleOpenModal = (tipo: TipoOrden) => {
-    openModal("custom", {
-      title: "Generar Órden de Trabajo",
-      size: "4xl",
-      component: OrdenTrabajoModal,
-      pedido,
-      tipo,
-      order: ordenes_trabajo?.find((ot) => ot.tipo_orden === tipo),
-      controlCarrozado: controlCarrozadoData,
-    });
+  const carrozadoNombre = useMemo(() => {
+    return (
+      carrozados.find((c) => c.id === pedido.carroceria?.tipo_carrozado_id)
+        ?.nombre ?? "—"
+    );
+  }, [carrozados, pedido.carroceria?.tipo_carrozado_id]);
+  const puertaTraseraNombre = useMemo(() => {
+    return (
+      puertasTraseras.find((p) => p.id === pedido.carroceria?.puerta_trasera_id)
+        ?.nombre ?? "—"
+    );
+  }, [puertasTraseras, pedido.carroceria?.puerta_trasera_id]);
+  const colorCarrozadoNombre = useMemo(() => {
+    return (
+      colores.find((c) => c.id === pedido.carroceria?.color_carrozado_id)
+        ?.nombre ?? "—"
+    );
+  }, [colores, pedido.carroceria?.color_carrozado_id]);
+  const colorZocaloNombre = useMemo(() => {
+    return (
+      colores.find((c) => c.id === pedido.carroceria?.color_zocalo_id)
+        ?.nombre ?? "—"
+    );
+  }, [colores, pedido.carroceria?.color_zocalo_id]);
+
+  const hasDraft = useMemo(() => {
+    try {
+      const draftRaw = localStorage.getItem(
+        `control_carrozado_draft_${pedido.id}`,
+      );
+      if (draftRaw) {
+        const draft = JSON.parse(draftRaw);
+        return draft.data && Array.isArray(draft.data) && draft.data.length > 0;
+      }
+    } catch {}
+    return false;
+  }, [pedido.id]);
+
+  const controlStatus = useMemo(() => {
+    if (pedido.control_carrozado && pedido.control_carrozado.length > 0) {
+      return "controlado";
+    }
+    if (hasDraft) {
+      return "en_progreso";
+    }
+    return "pendiente";
+  }, [pedido.control_carrozado, hasDraft]);
+
+  const defaultValues = controlCarrozadoData.map((cc) => ({
+    pedido_id: pedido.id,
+    item_control_id: cc.item_control.id,
+    revision: 0,
+    resultado: null,
+  }));
+
+  const getInitialValues = (): ControlCarrozadoForm["control_carrozado"] => {
+    if (pedido.control_carrozado && pedido.control_carrozado.length > 0) {
+      return pedido.control_carrozado;
+    }
+    try {
+      const draftRaw = localStorage.getItem(
+        `control_carrozado_draft_${pedido.id}`,
+      );
+      if (draftRaw) {
+        const draft = JSON.parse(draftRaw);
+        if (draft.data && Array.isArray(draft.data) && draft.data.length > 0) {
+          return draft.data;
+        }
+      }
+    } catch {
+      // ignore corrupted draft
+    }
+    return defaultValues as ControlCarrozado[];
   };
+
+  const {
+    register,
+    control,
+    watch,
+    reset,
+    setValue,
+    clearErrors,
+    formState: { errors, dirtyFields, isDirty, isSubmitSuccessful },
+    handleSubmit,
+  } = useForm<ControlCarrozadoForm>({
+    defaultValues: {
+      control_carrozado: getInitialValues(),
+    },
+  });
+
   if (pedido?.carroceria_usada_id) {
     return (
       <section className="ps-4 w-full">
@@ -132,33 +207,222 @@ export default function PedidosControlesCalidad() {
       </section>
     );
   }
+  const InfoField = ({ label, value }: { label: string; value: any }) => (
+    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+      {label}: <strong>{value || "-"}</strong>
+    </p>
+  );
+  const onSubmit = async (data: ControlCarrozadoForm) => {
+    openModal("loading", {
+      props: {
+        title: "Actualizando control de carrozado...",
+      },
+    });
+    try {
+      if (data.control_carrozado && data.control_carrozado.length > 0) {
+        const controlCarrozadoWithRevision = data.control_carrozado.map(
+          (item) => ({
+            ...item,
+            revision: item.id ? (item.revision ?? 0) + 1 : 0,
+          }),
+        );
+        const { error } = await CUDcontrolCarrozado(
+          controlCarrozadoWithRevision,
+          [],
+        );
+        if (pedido.id) {
+          await updateStatusPedido(pedido.id, "controlada");
+        }
+        if (error) {
+          throw new Error(`Error al guardar control de carrozado: ${error}`);
+        }
+        openModal("success", {
+          props: {
+            title: "Control de carrozado actualizados",
+            message:
+              "El control de carrozado ha sido actualizado exitosamente.",
+          },
+        });
+        shouldResetAfterSave.current = true;
+        try {
+          localStorage.removeItem(`control_carrozado_draft_${pedido.id}`);
+        } catch {
+          // ignore
+        }
+      } else {
+        openModal("info", {
+          props: {
+            title: "Sin cambios",
+            message: "No se han realizado cambios en el control de carrozado.",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error en onSubmit de PedidosForm:", error);
+      openModal("error", {
+        props: {
+          title: "Error al guardar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Ocurrió un error al actualizar los trabajos en chasis. Por favor, intenta nuevamente.",
+        },
+      });
+    }
+  };
+  useFormNavigationBlock<PedidoFormValues>({
+    isDirty,
+    isSubmitSuccessful,
+    dirtyFields,
+  });
+  const handleOpenModal = (tipo: TipoOrden) => {
+    openModal("custom", {
+      title: "Generar Órden de Trabajo",
+      size: "4xl",
+      component: OrdenTrabajoModal,
+      pedido,
+      tipo,
+      order: ordenes_trabajo?.find((ot) => ot.tipo_orden === tipo),
+      controlCarrozado: controlCarrozadoData,
+    });
+  };
   return (
     <section className="ps-4 w-full">
       {pedido.carroceria && pedido.carroceria.id && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {tiposControles.map(
-            ({ name, description, icon: Icon, tipo, status }) => (
-              <Card
-                className="hover:bg-violet-100/50 dark:hover:bg-violet-900/15 transition-all duration-300 hover:scale-105 cursor-pointer"
-                key={tipo}
-                onClick={() => handleOpenModal(tipo)}
-              >
-                <div className="sm:mb-4 p-2.5 sm:p-3 rounded-xl  backdrop-blur-sm w-fit dark:bg-white/10 bg-gray-800/10">
-                  <Icon className="h-8 w-8 dark:text-violet-400 text-violet-500" />
-                </div>
-                <h2 className="text-lg sm:text-xl font-semibold dark:text-white text-gray-800">
-                  {name}
-                </h2>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
-                  {description}
+        <>
+          <Card className="w-full mx-auto mt-4 shadow-lg border border-violet-200 bg-white dark:bg-gray-800">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
+              <div>
+                <p className="text-xs text-violet-700 dark:text-violet-300 tracking-widest uppercase font-semibold">
+                  Tipo de carrozado
                 </p>
-                <span className="w-fit">
-                  <BadgeStatusOT status={status || ""} />
-                </span>
-              </Card>
-            ),
-          )}
-        </div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold text-gray-700 dark:text-white">
+                    {carrozadoNombre || "-"}
+                  </h2>
+                  <span
+                    className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                      controlStatus === "controlado"
+                        ? "text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30"
+                        : controlStatus === "en_progreso"
+                          ? "text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30"
+                          : "text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30"
+                    }`}
+                  >
+                    {controlStatus === "controlado"
+                      ? "Controlado"
+                      : controlStatus === "en_progreso"
+                        ? "En progreso"
+                        : "Pendiente"}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <button
+                  className="text-sm text-violet-700 dark:text-violet-300 underline"
+                  onClick={() => setCollapse(!collapse)}
+                >
+                  {collapse ? "Mostrar" : "Ocultar"} detalles
+                </button>
+              </div>
+            </div>
+            <div>
+              <Button
+                size="sm"
+                color={"red"}
+                onClick={() => handleOpenModal("control_carrozado")}
+                outline
+              >
+                <FaFilePdf className="me-2 w-4 h-4" />
+                Generar PDF para control manual{" "}
+              </Button>
+            </div>
+            <div
+              className={`flex flex-col gap-4 ${collapse ? "hidden" : "block"}`}
+            >
+              <div
+                className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 `}
+              >
+                <InfoField
+                  label="Ancho Ext"
+                  value={pedido.carroceria.ancho_ext || "-"}
+                />
+                <InfoField
+                  label="Ancho Int"
+                  value={pedido.carroceria.ancho_int || "-"}
+                />
+                <div className="col-span-2">
+                  <InfoField
+                    label="Puerta Trasera"
+                    value={puertaTraseraNombre || "-"}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <InfoField
+                    label="Color carrozado"
+                    value={colorCarrozadoNombre || "-"}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <InfoField
+                    label="Color zócalo"
+                    value={colorZocaloNombre || "-"}
+                  />
+                </div>
+                <div className="col-span-full border-t border-gray-300 dark:border-gray-500"></div>
+                <div
+                  className={`${pedido.carroceria.cuchetin ? "col-span-1" : "col-span-4"}`}
+                >
+                  <InfoField
+                    label="Cuchetín"
+                    value={pedido.carroceria.cuchetin ? "Sí" : "No"}
+                  />
+                </div>
+                {pedido.carroceria.cuchetin && (
+                  <>
+                    <InfoField
+                      label="Medida:"
+                      value={pedido.carroceria.med_cuchetin}
+                    />
+                    <InfoField
+                      label="Alto de puerta:"
+                      value={pedido.carroceria.alt_pta_cuchetin}
+                    />
+                    <InfoField
+                      label="Altura techo:"
+                      value={pedido.carroceria.alt_techo_cuchetin}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          </Card>
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+            <ControlCarrozadoForm
+              register={register}
+              setValue={setValue}
+              control={control}
+              controlCarrozadoData={controlCarrozadoData}
+              pedido={pedido}
+              watch={watch}
+              errors={errors}
+              clearErrors={clearErrors}
+              onPageChange={handlePageChange}
+            />
+            {isLastPage && (
+              <div className="space-y-2">
+                <Button
+                  type="submit"
+                  className="ml-auto block"
+                  disabled={false}
+                >
+                  Guardar pedido
+                </Button>
+              </div>
+            )}
+          </form>
+        </>
       )}
     </section>
   );

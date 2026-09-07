@@ -9,7 +9,7 @@ import type {
   FieldErrors,
   UseFormClearErrors,
 } from "react-hook-form";
-import type { ControlCarrozadoForm } from "~/routes/pedidos/$controlesCalidadId_Dev";
+import type { ControlCarrozadoForm } from "~/routes/pedidos/$controlesCalidadId";
 import type { ControlCarrozado } from "~/types/Configuraciones";
 import type { PedidoFormValues } from "~/types/pedido";
 import { atributosConMetadata } from "~/types/pedido";

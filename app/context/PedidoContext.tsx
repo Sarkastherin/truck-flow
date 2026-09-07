@@ -144,6 +144,7 @@ type PedidoContextType = {
     existingPedido: Pedido,
     dirtyFields: PedidoDirtyFields,
   ) => Promise<Response>;
+  updateStatusPedido: (idPedido: string, newStatus: string) => Promise<Response>
 };
 type HeadersType = {
   pedidos: SheetCellValue[] | null;
@@ -1161,6 +1162,7 @@ export const PedidosProvider = ({
         createCarroceriaUsadaBase,
         updateCarroceriaUsadaBase,
         updatePedidoBase,
+        updateStatusPedido
       }}
     >
       {children}

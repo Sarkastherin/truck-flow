@@ -33,6 +33,27 @@ export default function PedidosLayout() {
       pedido.formas_pago?.reduce((acc, forma) => acc + forma.monto, 0) ?? 0;
     return total;
   }, [pedido]);
+  const hasDraft = useMemo(() => {
+    try {
+      const draftRaw = localStorage.getItem(
+        `control_carrozado_draft_${pedido?.id}`,
+      );
+      if (draftRaw) {
+        const draft = JSON.parse(draftRaw);
+        return draft.data && Array.isArray(draft.data) && draft.data.length > 0;
+      }
+    } catch {}
+    return false;
+  }, [pedido?.id]);
+  const controlStatus = useMemo(() => {
+    if (pedido?.control_carrozado && pedido.control_carrozado.length > 0) {
+      return "controlado";
+    }
+    if (hasDraft) {
+      return "en_progreso";
+    }
+    return "pendiente";
+  }, [pedido?.control_carrozado, hasDraft]);
   const isMatch = sumFormasPago === pedido?.precio;
   const menuItems = (id: string | undefined) => {
     if (!id) return [];
@@ -106,13 +127,11 @@ export default function PedidosLayout() {
         href: `/pedidos/controles-calidad/${id}`,
         icon: LuShieldCheck,
         show: pedido?.tipo === "nueva",
-      },
-      {
-        key: "controles-calidad-beta",
-        name: "Testing",
-        href: `/pedidos/controles-calidad_beta/${id}`,
-        icon: LuFlaskConical,
-        show: pedido?.tipo === "nueva",
+        alert: {
+          showAlert: controlStatus !== "controlado",
+          alertMessage:
+            "El pedido no tiene control de calidad",
+        },
       },
     ];
   };

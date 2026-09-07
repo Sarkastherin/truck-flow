@@ -1,5 +1,5 @@
-import { Badge, Button, Card, ButtonGroup } from "flowbite-react";
-import { use, useEffect, useMemo, useState } from "react";
+import { Button, Card } from "flowbite-react";
+import { useEffect, useMemo, useState } from "react";
 import { Input, Select, Textarea } from "~/components/InputsForm";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
 import type {
@@ -26,7 +26,6 @@ import { FaFilePdf } from "react-icons/fa6";
 import { TfiReload } from "react-icons/tfi";
 import { Link } from "react-router";
 import type { IconType } from "react-icons";
-import { capitalize } from "~/utils/functions";
 import { OrdenMontajeTemplate } from "~/components/pdf/OrdenMontajeTemplate";
 import { ControlCarrozadoTemplate } from "~/components/pdf/ControlCarrozadoTemplate";
 import type { ControlCarrozado } from "~/types/Configuraciones";

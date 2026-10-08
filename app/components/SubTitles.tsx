@@ -30,7 +30,7 @@ export const SubTitles = ({
         <h2 className={`font-semibold ${textColor}`}>{title}</h2>
         {icon && (
           <icon.component
-            className={`self-center ${icon.color || "text-base-600 dark:text-base-300"}`}
+            className={`self-center h5 w-5 ${icon.color || "text-base-600 dark:text-base-300"}`}
           />
         )}
       </div>

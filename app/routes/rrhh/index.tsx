@@ -77,7 +77,7 @@ export default function RRHH() {
         back_path="/"
         icon={{
           component: GrupoDeRrhhIcon,
-          color: "text-purple-600 dark:text-purple-400 h-5 w-5",
+          color: "text-purple-600 dark:text-purple-400",
         }}
       />
       {MODE_DEV && (

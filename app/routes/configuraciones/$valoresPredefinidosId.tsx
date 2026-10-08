@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router";
-import type { ValoresPredefinidosFormValues, ValorPredefinido } from "~/types/Configuraciones";
+import type { ValoresPredefinidosFormValues, ValorPredefinido } from "~/types/configuraciones";
 import { atributosConMetadata } from "~/types/pedido";
 import { Input, Select } from "~/components/InputsForm";
 import { LuTrash2, LuCircleAlert } from "react-icons/lu";

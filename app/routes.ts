@@ -37,10 +37,6 @@ export default [
           "controles-calidad/:pedidoId",
           "routes/pedidos/$controlesCalidadId.tsx",
         ),
-        /* route(
-          "controles-calidad_beta/:pedidoId",
-          "routes/pedidos/$controlesCalidadId_Dev.tsx",
-        ), */
       ]),
     ]),
     ...prefix("configuraciones", [
@@ -78,6 +74,13 @@ export default [
       ),
       route("cheques", "routes/administracion/cheques.tsx"),
       route("cheques/:chequeId", "routes/administracion/$chequeId.tsx"),
+    ]),
+    ...prefix("rrhh",[
+      index("routes/rrhh/index.tsx"),
+      route("nomina", "routes/rrhh/nomina.tsx"),
+      route("premios", "routes/rrhh/premios.tsx"),
+      route("saldos", "routes/rrhh/saldos.tsx"),
+      route("liquidacion/:liquidacionId","routes/rrhh/liquidacion/$liquidacionId.tsx")
     ]),
     ...prefix("carrocerias-usadas", [
       index("routes/carrocerias-usadas/index.tsx"),

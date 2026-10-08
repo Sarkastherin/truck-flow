@@ -5,7 +5,6 @@ import type { SocioComercial } from "~/types/socios";
 import { useModal } from "~/context/ModalContext";
 import { LuUserRoundPlus } from "react-icons/lu";
 import { useSocio } from "~/hooks/useSocio";
-import { SocioModal } from "../modals/customs/SocioModal";
 import { capitalize } from "~/utils/functions";
 
 interface SocioComponentFormProps<T> {

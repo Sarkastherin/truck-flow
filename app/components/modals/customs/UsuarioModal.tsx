@@ -15,7 +15,6 @@ export function UsuarioModal({
   };
 }) {
   const { form } = props;
-  const [showMore, setShowMore] = useState(false);
 
   return (
     <fieldset

@@ -16,7 +16,7 @@ import {
   DatosCamion,
   DatosCarroceria,
 } from "./commonDataTemplate";
-import type { TipoTrabajo } from "~/types/Configuraciones";
+import type { TipoTrabajo } from "~/types/configuraciones";
 
 interface OrdenMontajeProps {
   pedidoData?: Pedido;

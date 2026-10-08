@@ -22,7 +22,7 @@ import type {
   ItemControl,
   ValorPredefinido,
   ControlCarrozado,
-} from "~/types/Configuraciones";
+} from "~/types/configuraciones";
 import { useAuth } from "~/context/AuthContext";
 import {
   getCompleteSheetRange,

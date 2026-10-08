@@ -16,20 +16,19 @@ import {
   CurrencyInput,
   ToggleSwitch,
   Select,
-  InputGroupWithIcon
+  InputGroupWithIcon,
+  MorphingInput,
 } from "~/components/InputsForm";
 import { LuRuler, LuBanknote, LuPencil, LuTrash2, LuX, LuCheck } from "react-icons/lu";
 import CuchetinForm from "~/forms/CuchetinForm";
 import AlarguesForm from "~/forms/AlarguesForm";
 import AccesoriosForm from "~/forms/AccesoriosForm";
 import { BsCalendar2Week } from "react-icons/bs";
-import { TbDimensions } from "react-icons/tb";
 import { SocioComponentForm } from "~/components/specials/SocioComponent";
 import type { SocioComercial } from "~/types/socios";
 import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
 import { useModal } from "~/context/ModalContext";
 import { useNavigate } from "react-router";
-import { capitalize } from "~/utils/functions";
 import { formatDateUStoES } from "~/backend/Database/helperTransformData";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 import { usePedido } from "~/context/PedidoContext";
@@ -50,7 +49,6 @@ import {
   zocaloOptions,
 } from "~/types/pedido";
 import { useState } from "react";
-import { LuRotateCcw } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";
 import { useSociosComercial } from "~/context/SociosComercialesContext";
 import InfoFieldsComponent from "~/components/InfoFieldsComponent";
@@ -306,78 +304,6 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
     setIsEditingPhotos(false);
   };
 
-  const MorphingInput = ({
-    options,
-    label,
-    keyAttribute,
-    required = false,
-  }: {
-    options: { value: string; label: string }[];
-    label: string;
-    keyAttribute: keyof FormValues;
-    required?: boolean;
-  }) => {
-    const [isCustom, setIsCustom] = useState(false);
-    const [custmOptions, setCustomOptions] = useState(options);
-    if (isCustom) {
-      return (
-        <div className="flex flex-col gap-2 transition-all duration-300">
-          <div className="relative flex items-center">
-            <Input
-              autoFocus
-              type="text"
-              label={`Especificar ${label}`}
-              placeholder="Escribe tu opción..."
-              onChange={(e) => {
-                setValue(keyAttribute, e.target.value);
-                setCustomOptions([
-                  ...options,
-                  {
-                    value: e.target.value,
-                    label: e.target.value,
-                  },
-                ]);
-              }}
-              requiredField={required}
-              error={errors[keyAttribute]?.message}
-            />
-            <button
-              onClick={() => {
-                setIsCustom(false);
-                setValue(keyAttribute, "");
-              }}
-              className="absolute top-9 right-2 p-1 text-slate-400 hover:text-indigo-600 transition-colors"
-              title="Volver a la lista"
-            >
-              <LuRotateCcw size={18} />
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col gap-2">
-        <Select
-          label={label}
-          {...register(keyAttribute, {
-            required: required ? `El campo ${label} es requerido` : false,
-          })}
-          onChange={(e) => {
-            if (e.target.value === "otro") {
-              setIsCustom(true);
-            } else {
-              setValue(keyAttribute, e.target.value);
-            }
-          }}
-          options={custmOptions}
-          otro
-          requiredField={required}
-          error={errors[keyAttribute]?.message}
-        />
-      </div>
-    );
-  };
   return (
     <>
       {isEditMode && (
@@ -577,13 +503,15 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                 </div>
                 <div className="col-span-1 md:col-span-2">
                   <MorphingInput
+                    label="Carrozado"
+                    name="tipo_carrozado"
+                    control={control}
                     options={carrozadosOptions.map((tipo) => ({
                       value: tipo.label,
                       label: tipo.label,
                     }))}
-                    label="Carrozado"
-                    keyAttribute="tipo_carrozado"
-                    required
+                    error={errors.tipo_carrozado?.message}
+                    requiredField
                   />
                 </div>
                 <Input
@@ -689,9 +617,11 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   />
                 </div>
                 <MorphingInput
-                  options={materialOptions}
                   label="Material"
-                  keyAttribute="material"
+                  name="material"
+                  control={control}
+                  options={materialOptions}
+                  error={errors.material?.message}
                 />
                 <InputNumberIcon
                   label="Largo"
@@ -700,9 +630,11 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   icon={LuRuler}
                 />
                 <MorphingInput
-                  options={anchoOptionsExt}
                   label="Ancho"
-                  keyAttribute="ancho"
+                  name="ancho"
+                  control={control}
+                  options={anchoOptionsExt}
+                  error={errors.ancho?.message}
                 />
                 <InputNumberIcon
                   label="Alto"
@@ -723,39 +655,51 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   icon={LuRuler}
                 />
                 <MorphingInput
-                  options={arcosOptions}
                   label="Arcos por puerta"
-                  keyAttribute="arcos_por_puerta"
+                  name="arcos_por_puerta"
+                  control={control}
+                  options={arcosOptions}
+                  error={errors.arcos_por_puerta?.message}
                 />
                 <MorphingInput
-                  options={tiposArcosOptions}
                   label="Tipo de arcos"
-                  keyAttribute="tipos_arcos"
+                  name="tipos_arcos"
+                  control={control}
+                  options={tiposArcosOptions}
+                  error={errors.tipos_arcos?.message}
                 />
                 <div className="col-span-1 md:col-span-2 lg:col-span-3">
                   <MorphingInput
+                    label="Puerta trasera"
+                    name="puerta_trasera"
+                    control={control}
                     options={puertasOptions.map((puerta) => ({
                       value: puerta.label,
                       label: puerta.label,
                     }))}
-                    label="Puerta trasera"
-                    keyAttribute="puerta_trasera"
+                    error={errors.puerta_trasera?.message}
                   />
                 </div>
                 <MorphingInput
-                  options={lineasRefOptions}
                   label="Líneas de refuerzo"
-                  keyAttribute="lineas_refuerzo"
+                  name="lineas_refuerzo"
+                  control={control}
+                  options={lineasRefOptions}
+                  error={errors.lineas_refuerzo?.message}
                 />
                 <MorphingInput
-                  options={zocaloOptions}
                   label="Tipo zócalo"
-                  keyAttribute="tipo_zocalo"
+                  name="tipo_zocalo"
+                  control={control}
+                  options={zocaloOptions}
+                  error={errors.tipo_zocalo?.message}
                 />
                 <MorphingInput
-                  options={pisoOptions}
                   label="Tipo piso"
-                  keyAttribute="tipo_piso"
+                  name="tipo_piso"
+                  control={control}
+                  options={pisoOptions}
+                  error={errors.tipo_piso?.message}
                 />
                 <div className="flex gap-4 md:col-span-2 mt-2">
                   <ToggleSwitch

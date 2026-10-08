@@ -10,7 +10,7 @@ import type {
   UseFormClearErrors,
 } from "react-hook-form";
 import type { ControlCarrozadoForm } from "~/routes/pedidos/$controlesCalidadId";
-import type { ControlCarrozado } from "~/types/Configuraciones";
+import type { ControlCarrozado } from "~/types/configuraciones";
 import type { PedidoFormValues } from "~/types/pedido";
 import { atributosConMetadata } from "~/types/pedido";
 import { Textarea, ToggleSwitch } from "~/components/InputsForm";

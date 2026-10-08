@@ -29,7 +29,7 @@ import {
   useState,
 } from "react";
 import type { IconType } from "react-icons";
-import { LuIdCard, LuPhone } from "react-icons/lu";
+import { LuIdCard, LuPhone, LuRotateCcw } from "react-icons/lu";
 
 const getNumberSeparators = (locale: string) => {
   const parts = new Intl.NumberFormat(locale).formatToParts(12345.6);
@@ -374,6 +374,110 @@ export const SelectWithSearch = <T extends { id: string; name: string }>({
     </div>
   );
 };
+type MorphingInputProps<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+> = {
+  label: string;
+  name: TName;
+  control: Control<TFieldValues>;
+  options: { value: string; label: string; disabled?: boolean }[];
+  rules?: RegisterOptions<TFieldValues, TName>;
+  error?: string;
+  requiredField?: boolean;
+};
+
+export function MorphingInput<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>({
+  label,
+  name,
+  control,
+  options,
+  rules,
+  error,
+  requiredField = false,
+}: MorphingInputProps<TFieldValues, TName>) {
+  const [isCustom, setIsCustom] = useState(false);
+  const [customOptions, setCustomOptions] = useState(options);
+
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={{
+        required: requiredField ? `El campo ${label} es requerido` : undefined,
+        ...rules,
+      }}
+      render={({ field }) => {
+        const value = field.value == null ? "" : String(field.value);
+
+        if (isCustom) {
+          return (
+            <div className="flex flex-col gap-2 transition-all duration-300">
+              <div className="relative flex items-center">
+                <Input
+                  autoFocus
+                  type="text"
+                  label={`Especificar ${label}`}
+                  placeholder="Escribe tu opción..."
+                  value={value}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    setCustomOptions([
+                      ...options,
+                      {
+                        value: e.target.value,
+                        label: e.target.value,
+                      },
+                    ]);
+                  }}
+                  requiredField={requiredField}
+                  error={error}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustom(false);
+                    field.onChange("");
+                  }}
+                  className="absolute top-9 right-2 p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                  title="Volver a la lista"
+                >
+                  <LuRotateCcw size={18} />
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex flex-col gap-2">
+            <Select
+              label={label}
+              name={field.name}
+              value={value}
+              onBlur={field.onBlur}
+              onChange={(e) => {
+                if (e.target.value === "otro") {
+                  setIsCustom(true);
+                } else {
+                  field.onChange(e.target.value);
+                }
+              }}
+              options={customOptions}
+              otro
+              requiredField={requiredField}
+              error={error}
+            />
+          </div>
+        );
+      }}
+    />
+  );
+}
+
 type TextareaProps = ComponentPropsWithoutRef<typeof FlowbiteTextarea> & {
   label?: string;
   error?: string;
@@ -864,3 +968,4 @@ export function ToggleSwitch({
     />
   );
 }
+

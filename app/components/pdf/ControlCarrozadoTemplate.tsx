@@ -10,7 +10,7 @@ import {
   MultiPageTemplate,
   TitleBox,
 } from "./pdfComponents";
-import type { ControlCarrozado } from "~/types/Configuraciones";
+import type { ControlCarrozado } from "~/types/configuraciones";
 //import type { ControlPorCarrozadoDB } from "~/types/settings";
 //import { atributosConMetadata } from "~/config/atributosMetadata";
 

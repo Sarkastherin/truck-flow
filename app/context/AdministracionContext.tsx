@@ -519,7 +519,7 @@ export const AdministracionProvider = ({
         }
 
         // 2. Crear movimiento deuda para reversar el pago
-        const payload: Omit<MovimientoDetalle, "id"> = {
+        const payload: Omit<MovimientoDetalle,  "id" | "created_at" | "active"> = {
           cliente_id,
           fecha_movimiento: fechaAnulacion,
           tipo_movimiento: "deuda",

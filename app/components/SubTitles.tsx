@@ -1,32 +1,38 @@
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { NavLink } from "react-router";
 import type { IconType } from "react-icons";
-
+import type { ColorsTypes } from "./TableComponentNew";
 export const SubTitles = ({
   title,
   back_path,
   icon,
+  color = "primary",
 }: {
   title: string;
   back_path?: string;
   icon?: { component: IconType; color?: string };
+  color?: ColorsTypes;
 }) => {
+  const textColor = `text-${color}-500 dark:text-${color}-400`;
+
   return (
-    <div className="flex items-center gap-2 mb-4  text-[1.4em]">
+    <div className="flex items-start gap-1 text-2xl">
       {back_path && (
         <NavLink
           to={back_path}
-          className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-purple-100 dark:hover:bg-gray-800 rounded-full transition-all duration-200"
+          className="p-2 text-base-500 dark:text-base-400 hover:text-base-700 dark:hover:text-base-200 hover:bg-primary-100 dark:hover:bg-base-800 rounded-full transition-all duration-200"
           title="Volver"
         >
-          <RiArrowGoBackFill className="text-gray-600 dark:text-gray-400" />
+          <RiArrowGoBackFill className="text-base-600 dark:text-base-400 size-5" />
         </NavLink>
       )}
-      <div className="flex gap-2 items-center ">
-        <h2 className="font-semibold">
-          {title}
-        </h2>
-        {icon && <icon.component className={`${icon.color}`} />}
+      <div className="flex gap-1.5 items-end">
+        <h2 className={`font-semibold ${textColor}`}>{title}</h2>
+        {icon && (
+          <icon.component
+            className={`self-center ${icon.color || "text-base-600 dark:text-base-300"}`}
+          />
+        )}
       </div>
     </div>
   );

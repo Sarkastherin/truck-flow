@@ -13,7 +13,7 @@ export const SHEET_NAMES_PEDIDOS = {
   ordenes_trabajo: "ordenes_trabajo",
   documentos: "documentos",
   carroceria_usada: "carroceria_usada",
-  control_carrozado_resultado: "control_carrozado_resultado"
+  control_carrozado_resultado: "control_carrozado_resultado",
 };
 export const SHEET_NAMES_CONFIGURACIONES = {
   carrozados: "carrozados",
@@ -36,6 +36,15 @@ export const SHEET_NAMES_CTAS_CORRIENTES = {
 export const SHEET_NAMES_USUARIOS = {
   usuarios: "usuarios",
 };
+export const SHEET_NAMES_SUELDOS = {
+  nomina: "nomina",
+  premios: "premios",
+  mvto_empleados: "mvto_empleados",
+  liquidaciones: "liquidaciones",
+  fichadas: "fichadas",
+  reportes: "reportes",
+  
+};
 
 export const SHEET_ID_PEDIDO = MODE_DEV
   ? import.meta.env.VITE_SHEET_ID_PEDIDOS_DEV
@@ -55,5 +64,8 @@ export const SHEET_ID_INVENTARIO = MODE_DEV
 export const SHEET_ID_USUARIOS = MODE_DEV
   ? import.meta.env.VITE_SHEET_ID_USERS_DEV
   : import.meta.env.VITE_SHEET_ID_USERS;
+export const SHEET_ID_SUELDOS = MODE_DEV
+  ? import.meta.env.VITE_SHEET_ID_SUELDOS_DEV
+  : import.meta.env.VITE_SHEET_ID_SUELDOS;
 export const getCompleteSheetRange = (sheetNames: Record<string, string>) =>
   Object.values(sheetNames).map((name) => `${name}!A:ZZZ`);

@@ -53,18 +53,22 @@ function NavLinks() {
 
   return (
     <NavbarCollapse>
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          onClick={() => setIsOpen(false)}
-          className={({ isActive }) =>
-            `${isActive ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500 hover:bg-violet-600 hover:text-white hover:dark:bg-violet-500" : "hover:bg-violet-300 hover:dark:bg-violet-600/50 "}  m-2 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
-          }
-        >
-          {item.name}
-        </NavLink>
-      ))}
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={() => setIsOpen(false)}
+            className={({ isActive }) =>
+              `${isActive ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500 hover:bg-violet-600 hover:text-white hover:dark:bg-violet-500" : "hover:bg-violet-300 hover:dark:bg-violet-600/50 "}  m-2 inline-flex items-center gap-1.5 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
+            }
+          >
+            {Icon && <Icon className="h-4 w-4 shrink-0" />}
+            {item.name}
+          </NavLink>
+        );
+      })}
     </NavbarCollapse>
   );
 }

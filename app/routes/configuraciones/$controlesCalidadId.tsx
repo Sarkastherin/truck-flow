@@ -2,7 +2,7 @@ import { useOutletContext } from "react-router";
 import type {
   ControlCarrozado,
   ControlCalidadFormValues,
-} from "~/types/Configuraciones";
+} from "~/types/configuraciones";
 import { Input, Select } from "~/components/InputsForm";
 import { LuTrash2 } from "react-icons/lu";
 import { useConfiguracion } from "~/context/ConfiguracionesContext";

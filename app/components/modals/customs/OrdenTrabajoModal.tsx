@@ -28,7 +28,7 @@ import { Link } from "react-router";
 import type { IconType } from "react-icons";
 import { OrdenMontajeTemplate } from "~/components/pdf/OrdenMontajeTemplate";
 import { ControlCarrozadoTemplate } from "~/components/pdf/ControlCarrozadoTemplate";
-import type { ControlCarrozado } from "~/types/Configuraciones";
+import type { ControlCarrozado } from "~/types/configuraciones";
 import { BadgeStatusOT } from "~/components/specials/Badges";
 import { mergePDFs } from "~/utils/pdfMerge";
 type ModalStep = {

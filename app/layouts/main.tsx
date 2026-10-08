@@ -7,6 +7,7 @@ import { ConfiguracionesProvider } from "~/context/ConfiguracionesContext";
 import { AdministracionProvider } from "~/context/AdministracionContext";
 import { CarroceriasUsadasProvider } from "~/context/CarroceriasUsadasContext";
 import { SociosProvider } from "~/context/SociosComercialesContext";
+import { RRHHProvider } from "~/context/RRHHContext";
 import { useAuth } from "~/context/AuthContext";
 import { useEffect } from "react";
 
@@ -23,9 +24,10 @@ export default function Layout() {
       <NavBar />
       <div className="">
         <ProtectedRoute>
-            <SociosProvider>
-              <ConfiguracionesProvider>
-                <AdministracionProvider>
+          <SociosProvider>
+            <ConfiguracionesProvider>
+              <AdministracionProvider>
+                <RRHHProvider>
                   <CarroceriasUsadasProvider>
                     <PedidosProvider>
                       <div className="container mx-auto px-6 md:px-8 xl:px-0 pb-4">
@@ -34,9 +36,10 @@ export default function Layout() {
                       <ModalManager />
                     </PedidosProvider>
                   </CarroceriasUsadasProvider>
-                </AdministracionProvider>
-              </ConfiguracionesProvider>
-            </SociosProvider>
+                </RRHHProvider>
+              </AdministracionProvider>
+            </ConfiguracionesProvider>
+          </SociosProvider>
         </ProtectedRoute>
       </div>
     </main>

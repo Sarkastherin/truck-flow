@@ -54,12 +54,14 @@ export const optionSector: { value: SectorTypes; label: string }[] = [
   { value: "pintura", label: "Pintura" },
   { value: "plegado", label: "Plegado" },
 ];
+export type GrupoEmployee = "Cacho" | "No aplica";
 export type Employee = CommonTypes & {
   nombre_completo: string;
   dni: string | number;
   tipo_pago: TipoPago;
   valor_salario_semanal: number | null;
   valor_hora_extra: number | null;
+  grupo: GrupoEmployee | null;
   fecha_nacimiento: string | null;
   telefono: string | null;
   direccion: string | null;
@@ -124,4 +126,3 @@ export type CtaCteEmpleados = {
 } & {
   movimientos: MvtoEmpleados[];
 };
-

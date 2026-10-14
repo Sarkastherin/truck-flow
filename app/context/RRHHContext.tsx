@@ -29,7 +29,7 @@ import type {
   MvtoEmpleados,
   CtaCteEmpleados,
 } from "~/types/rrhh";
-import type { Fichada, Liquidacion } from "~/types/liquidaciones"
+import type { Fichada, Liquidacion, Reporte } from "~/types/liquidaciones";
 type RRHHContextType = {
   getSueldosData: () => Promise<void>;
   isReady: boolean;
@@ -54,14 +54,16 @@ type RRHHContextType = {
   removeMvtoEmpleado: ToggleConfigMethod;
   reactivateMvtoEmpleado: ToggleConfigMethod;
   /* Liquidaciones */
-  liquidaciones: Liquidacion[]
+  liquidaciones: Liquidacion[];
   createNewLiquidacion: CreateGlobalMethod<Liquidacion>;
   updateLiquidacion: UpdateGlobalMethod<Liquidacion>;
   removeLiquidacion: ToggleConfigMethod;
   reactivateLiquidacion: ToggleConfigMethod;
   /* Fichadas */
-  CUDFichadas: (fichadas: Fichada[], deletedIds: string[]) => Promise<CrudGlobalResponse>
-  
+  CUDFichadas: (
+    fichadas: Fichada[],
+    deletedIds: string[],
+  ) => Promise<CrudGlobalResponse>;
 };
 
 type HeadersType = {
@@ -70,7 +72,7 @@ type HeadersType = {
   mvto_empleados: SheetCellValue[];
   liquidaciones: SheetCellValue[];
   fichadas: SheetCellValue[];
-  //reportes: SheetCellValue[];
+  reportes: SheetCellValue[];
   //
 };
 type ParamsFromSheetsData = {
@@ -89,7 +91,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [premios, setPremios] = useState<Premios[]>([]);
   const [saldoEmpleados, setSaldoEmpleados] = useState<CtaCteEmpleados[]>([]);
-  const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([])
+  const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([]);
 
   const [paramsFromSheets, setParamsFromSheets] =
     useState<ParamsFromSheetsData | null>(null);
@@ -119,7 +121,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           mvto_empleados: data[2]?.[0] || null,
           liquidaciones: data[3]?.[0] || null,
           fichadas: data[4]?.[0] || null,
-          //reportes: data[4]?.[0] || null,
+          reportes: data[5]?.[0] || null,
           //
         },
         values: {
@@ -128,7 +130,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           mvto_empleados: data[2] || [],
           liquidaciones: data[3] || [],
           fichadas: data[4] || [],
-          //reportes: data[4] || [],
+          reportes: data[5] || [],
           //
         },
       };
@@ -139,6 +141,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       const mvtoEmpleadosData = getDataInJSONFormat<MvtoEmpleados>(data[2]);
       const liquidacionesData = getDataInJSONFormat<Liquidacion>(data[3]);
       const fichadasData = getDataInJSONFormat<Fichada>(data[4]);
+      const reportesData = getDataInJSONFormat<Reporte>(data[5]);
       const ctasCorrientes = mvtoEmpleadosData.reduce(
         (acc, cta) => {
           const key = cta.empleado_id;
@@ -178,20 +181,22 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           active: true,
         });
       });
-      const combinedLiqData = liquidacionesData.map((liq)=> {
-        const fichadas = fichadasData.filter((fich)=> fich.liquidacion_id=== liq.id)||[];
+      const combinedData = liquidacionesData.map((liq) => {
+        const fichadas =
+          fichadasData.filter((fich) => fich.liquidacion_id === liq.id) || [];
+        const reportes = reportesData.filter(
+          (rep) => rep.liquidacion_id === liq.id,
+        );
         return {
           ...liq,
-          fichada: fichadas
-        }
-      })
-      //const normalizedreportes = getDataInJSONFormat<Employee>(data[4]);
-      //const normalizedLiquidaciones = getDataInJSONFormat<Employee>(data[5]);
+          fichada: fichadas,
+          reporte: reportes,
+        };
+      });
       setEmployees(employeesData);
       setPremios(premiosData);
       setSaldoEmpleados(ctasCorrientesArray);
-      setLiquidaciones(combinedLiqData)
-      //setFichadas(fichadasData);
+      setLiquidaciones(combinedData);
       setIsReady(true);
     } catch (error) {
       setIsReady(false);
@@ -327,7 +332,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         updateLiquidacion,
         removeLiquidacion,
         reactivateLiquidacion,
-        CUDFichadas
+        CUDFichadas,
       }}
     >
       {children}

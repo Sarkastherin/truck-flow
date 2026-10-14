@@ -1,18 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState, useRef } from "react";
 import type { Route } from "../../+types/home";
 import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
-import { Button, Card } from "flowbite-react";
+import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
 import { LuArrowRight, LuCalendarDays } from "react-icons/lu";
-import type { Fichada } from "~/types/liquidaciones";
+import type { Fichada, Reporte } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
 import { formatDateUStoES } from "~/backend/Database/helperTransformData";
 import { getDiasPeriodo } from "~/components/modals/customs/SeleccionarLiquidacionModal";
 import { TbFileSettingsFilled } from "react-icons/tb";
 import { BiSolidReport } from "react-icons/bi";
 import { FaBox } from "react-icons/fa6";
-import { TabItem, Tabs, type TabsRef } from "flowbite-react";
-import { useState, useRef } from "react";
 import type { IconType } from "react-icons";
 import Import from "~/components/liquidacion/import";
 import FichadasTableModal, {
@@ -21,7 +19,8 @@ import FichadasTableModal, {
 import type { FichadasFileUI, FichadaFormValues } from "~/types/fichadas";
 import { useModal } from "~/context/ModalContext";
 import type { TableColumn } from "react-data-table-component";
-
+import TableComponent from "~/components/TableComponentNew";
+import type { Employee } from "~/types/rrhh";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Liquidación" },
@@ -76,7 +75,12 @@ const parseHora = (raw: string | number | null | undefined): string | null => {
   }
   return null;
 };
-
+type TableProduccionProps = {
+  empleado: Employee;
+  total: number;
+  reportes?: Reporte[]
+};
+//const columns: TableColumn<TableProduccionProps[]> = [{ name: "Empleado" }];
 export default function Liquidacion() {
   const { liquidaciones, employees, CUDFichadas } = useRRHH();
   const { liquidacionId } = useParams();
@@ -88,7 +92,6 @@ export default function Liquidacion() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [importKey, setImportKey] = useState(0);
   const { openModal, closeModal } = useModal();
-
   const liquidacion = useMemo(() => {
     return liquidaciones.find((liq) => liq.id === liquidacionId);
   }, [liquidaciones, liquidacionId]);
@@ -125,7 +128,9 @@ export default function Liquidacion() {
   ];
 
   const fichadasGuardadas = liquidacion?.fichada ?? [];
+  const reportesGuardados = liquidacion?.reporte ?? [];
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
+  const hayReportesGuardados = reportesGuardados.length > 0;
 
   const hasNoEncontrados = fichadasFile.some((fich) => !fich.empleado);
   const hasFaltanSalidas = fichadasFile.some((fich) => !fich.salida);
@@ -235,7 +240,6 @@ export default function Liquidacion() {
       setIsSaving(false);
     }
   };
-
   return (
     <>
       <Card>
@@ -274,7 +278,7 @@ export default function Liquidacion() {
         ref={tabsRef}
         onActiveTabChange={(tab) => setActiveTab(tab)}
       >
-        {items.map(({ key, name, description, icon }) => (
+        {items.map(({ name, icon }) => (
           <TabItem className="cursor-pointer" active title={name} icon={icon}>
             {activeTab === 0 && (
               <div>
@@ -312,7 +316,11 @@ export default function Liquidacion() {
                 )}
               </div>
             )}
-            {activeTab === 1 && <div>produccion</div>}
+            {activeTab === 1 && (
+              <div className="mt-4">
+                {/* <TableComponent columns={columns} /> */}
+              </div>
+            )}
             {activeTab === 2 && <div>resumen</div>}
           </TabItem>
         ))}

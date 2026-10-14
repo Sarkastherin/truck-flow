@@ -66,11 +66,12 @@ export default function EmployeeModal({ props }: { props: Props }) {
       />
 
       <Select
-        label="Área"
-        {...register("area", { required: "El area es obligatorio" })}
-        error={errors.tipo_pago?.message}
-        requiredField
-        options={optionsAreas}
+        label="Grupo"
+        {...register("grupo")}
+        options={[
+          {value: "Cacho", label: "Cacho"},
+          {value: "No aplica", label: "No aplica"}
+        ]}
       />
       <Select
         label="Tipo de contrato"
@@ -119,6 +120,13 @@ export default function EmployeeModal({ props }: { props: Props }) {
         <h6 className="border-t border-base-200 mt-4 col-span-full pt-2 pb-4 uppercase font-medium tracking-widest text-xs text-base-500 dark:text-base-300">
           Otros datos
         </h6>
+        <Select
+          label="Área"
+          {...register("area", { required: "El area es obligatorio" })}
+          error={errors.tipo_pago?.message}
+          requiredField
+          options={optionsAreas}
+        />
         <Input
           label="Fecha nacimiento"
           type="date"
@@ -213,7 +221,7 @@ export default function EmployeeModal({ props }: { props: Props }) {
             <ButtonGroup className="mt-1 flex" outline>
               {tallesRemera.map((talle) => (
                 <Button
-                color={"primary"}
+                  color={"primary"}
                   key={talle}
                   type="button"
                   className={`flex-1 ${

@@ -1,4 +1,5 @@
 import type { CommonTypes } from "./commonTypes";
+import type { Employee } from "./rrhh";
 export type StatusLiquidacion = "nueva" | "en_proceso" | "cerrada";
 export const optionsStatusLiq: { value: StatusLiquidacion; label: string }[] = [
   { value: "nueva", label: "Nueva" },
@@ -7,7 +8,7 @@ export const optionsStatusLiq: { value: StatusLiquidacion; label: string }[] = [
 ];
 export type Fichada = CommonTypes & {
   fecha: string;
-  liquidacion_id:string;
+  liquidacion_id: string;
   empleado_id: string;
   entrada: string;
   salida: string | null;
@@ -16,13 +17,29 @@ export type Fichada = CommonTypes & {
   horas_extras: number;
   active: boolean;
 };
-export type Reporte = CommonTypes & {};
+export type Reporte = CommonTypes & {
+  empleado_id: string;
+  liquidacion_id: string;
+  premio_id: string;
+  cantidad: number;
+  pedido_id?: string;
+};
+
 export type Liquidacion = CommonTypes & {
   desde: string;
   hasta: string;
   status: StatusLiquidacion;
   fichada?: Fichada[];
   reporte?: Reporte[];
+};
+export type LiquidacionResumen = {
+  empleado: Employee[];
+  total_horas_regulares: number;
+  total_horas_extras: number;
+  monto_salario: number;
+  monto_premio: number;
+  fichadas:Fichada[];
+  reportes: Reporte[];
 };
 export type LiquidacionFormValues = Omit<Liquidacion, keyof CommonTypes> & {
   id?: string;

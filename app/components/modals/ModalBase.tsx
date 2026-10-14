@@ -13,28 +13,53 @@ export function Modal({
   size,
   children,
   footer,
+  onClose,
 }: {
   open: boolean;
   title?: string;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl";
+  size?:
+    | "sm"
+    | "md"
+    | "lg"
+    | "xl"
+    | "2xl"
+    | "3xl"
+    | "4xl"
+    | "5xl"
+    | "6xl"
+    | "7xl"
+    | "full";
   children: React.ReactNode;
   footer?: React.ReactNode;
+  onClose?: () => void;
 }) {
   const { closeModal } = useModal();
+  const handleClose = onClose ?? closeModal;
   return (
     <>
       <FlowbiteModal
         show={open}
-        onClose={closeModal}
+        onClose={handleClose}
         className="relative"
         size={size}
+        theme={
+          size === "full"
+            ? {
+                root: {
+                  sizes: {
+                    full: "max-w-[calc(100vw-2rem)]",
+                  },
+                },
+              }
+            : undefined
+        }
       >
         {title ? (
           <>
-            <ModalHeader className="border-gray-400">{title}</ModalHeader>
+            <ModalHeader className="border-base-400">{title}</ModalHeader>
             <button
               type="button"
-              onClick={closeModal}
+              onClick={handleClose}
               className="absolute top-2 right-2 rounded-full p-2 text-slate-400 transition-colors hover:bg-red-100 hover:text-red-600 focus:outline-none dark:text-slate-500 dark:hover:bg-red-800/30 dark:hover:text-red-400 cursor-pointer"
               aria-label="Close"
             >

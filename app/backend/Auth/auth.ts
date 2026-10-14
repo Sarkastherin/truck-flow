@@ -67,11 +67,15 @@ declare const google: {
   };
 };
 
+const SILENT_REFRESH_TIMEOUT_MS = 6000;
+
 let tokenClient: TokenClient | null = null;
 let gapiInited = false;
 let gisInited = false;
 let tokenMonitorInterval: ReturnType<typeof setInterval> | null = null;
 let onTokenRefreshCallback: AuthOptions["onTokenRefresh"] | null = null;
+let visibilityHandlerAttached = false;
+let isRefreshing = false;
 
 function gapiLoaded(apiKey: string): Promise<void> {
   return new Promise((resolve) => {
@@ -128,39 +132,87 @@ function needsTokenRefresh(token: GoogleAccessToken | null): boolean {
   return expiresAt - now <= tenMinutes;
 }
 
-async function refreshTokenSilently(): Promise<boolean> {
+function requestToken(
+  prompt: "" | "consent",
+  timeoutMs?: number,
+): Promise<boolean> {
   return new Promise((resolve, reject) => {
     if (!tokenClient || !gapiInited || !gisInited) {
       reject(new Error("Cliente no inicializado"));
       return;
     }
 
+    let settled = false;
+    const timer = timeoutMs
+      ? setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            reject(new Error("Timeout solicitando token de acceso"));
+          }
+        }, timeoutMs)
+      : null;
+
     tokenClient.callback = async (response: TokenClientResponse) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+
       if (response.error !== undefined) {
-        console.error("Error renovando token:", response.error);
-        reject(response.error);
+        console.error("Error obteniendo token:", response.error);
+        reject(new Error(String(response.error)));
         return;
       }
 
-      const token = gapi.client.getToken();
-      if (!token) {
-        reject(new Error("No se pudo obtener el token renovado"));
+      const responseToken = response as unknown as GoogleAccessToken;
+      const token = responseToken.access_token
+        ? responseToken
+        : gapi.client.getToken();
+      if (!token || !token.access_token) {
+        reject(new Error("No se pudo obtener el token"));
         return;
       }
 
       token.created_at = Date.now();
+      gapi.client.setToken(token);
       localStorage.setItem("google_auth_token", JSON.stringify(token));
 
       if (onTokenRefreshCallback) {
         onTokenRefreshCallback(token);
       }
 
-      console.log("Token renovado automáticamente");
       resolve(true);
     };
 
-    tokenClient.requestAccessToken({ prompt: "" });
+    tokenClient.requestAccessToken({ prompt });
   });
+}
+
+async function refreshTokenSilently(): Promise<boolean> {
+  return requestToken("", SILENT_REFRESH_TIMEOUT_MS);
+}
+
+async function refreshIfNeeded(): Promise<void> {
+  if (isRefreshing) return;
+
+  const savedToken = readStoredToken();
+  if (!savedToken || !needsTokenRefresh(savedToken)) return;
+
+  isRefreshing = true;
+  try {
+    console.log("Token necesita renovación, renovando automáticamente...");
+    await refreshTokenSilently();
+    console.log("Token renovado automáticamente");
+  } catch (error) {
+    console.error("Error en el monitoreo automático del token:", error);
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+function handleVisibilityChange(): void {
+  if (document.visibilityState === "visible") {
+    void refreshIfNeeded();
+  }
 }
 
 function startTokenMonitoring(): void {
@@ -168,28 +220,25 @@ function startTokenMonitoring(): void {
     clearInterval(tokenMonitorInterval);
   }
 
-  tokenMonitorInterval = setInterval(
-    async () => {
-      try {
-        const savedToken = readStoredToken();
-        if (savedToken && needsTokenRefresh(savedToken)) {
-          console.log(
-            "Token necesita renovación, renovando automáticamente...",
-          );
-          await refreshTokenSilently();
-        }
-      } catch (error) {
-        console.error("Error en el monitoreo automático del token:", error);
-      }
-    },
-    5 * 60 * 1000,
-  );
+  tokenMonitorInterval = setInterval(refreshIfNeeded, 5 * 60 * 1000);
+
+  if (!visibilityHandlerAttached) {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", refreshIfNeeded);
+    visibilityHandlerAttached = true;
+  }
 }
 
 function stopTokenMonitoring(): void {
   if (tokenMonitorInterval) {
     clearInterval(tokenMonitorInterval);
     tokenMonitorInterval = null;
+  }
+
+  if (visibilityHandlerAttached) {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    window.removeEventListener("focus", refreshIfNeeded);
+    visibilityHandlerAttached = false;
   }
 }
 
@@ -220,39 +269,34 @@ function checkExistingAuth(): Promise<boolean> {
   });
 }
 
-function handleAuthClick(): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    if (!gapiInited || !gisInited || !tokenClient) {
-      reject(new Error("Cliente no inicializado"));
-      return;
+async function handleAuthClick(): Promise<boolean> {
+  if (!gapiInited || !gisInited || !tokenClient) {
+    throw new Error("Cliente no inicializado");
+  }
+
+  const parsedToken = readStoredToken();
+  if (parsedToken) {
+    gapi.client.setToken(parsedToken);
+
+    if (isTokenValid(parsedToken)) {
+      return true;
     }
+  }
 
-    tokenClient.callback = async (response: TokenClientResponse) => {
-      if (response.error !== undefined) {
-        reject(response.error);
-        return;
-      }
+  // 1er intento: silencioso (sin popup) si hay sesión de Google y consent previo.
+  try {
+    await requestToken("", SILENT_REFRESH_TIMEOUT_MS);
+    return true;
+  } catch (silentError) {
+    console.warn(
+      "Renovación silenciosa no disponible, solicitando consentimiento...",
+      silentError,
+    );
+  }
 
-      const token = gapi.client.getToken();
-      if (token) {
-        token.created_at = Date.now();
-        localStorage.setItem("google_auth_token", JSON.stringify(token));
-      }
-      resolve(true);
-    };
-
-    const parsedToken = readStoredToken();
-    if (parsedToken) {
-      gapi.client.setToken(parsedToken);
-
-      if (isTokenValid(parsedToken)) {
-        resolve(true);
-        return;
-      }
-    }
-
-    tokenClient.requestAccessToken({ prompt: "consent" });
-  });
+  // Fallback: popup de consentimiento (solo primera vez o sesión de Google caída).
+  await requestToken("consent");
+  return true;
 }
 
 async function getUserEmail(): Promise<string | null> {

@@ -3,7 +3,6 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { LuTrash2, LuUpload } from "react-icons/lu";
 import { useImportFichadas } from "~/hooks/useImportFichadas";
 import type { FichadaFile } from "~/types/fichadas";
-import type { StepsType } from "~/routes/rrhh/$liquidacionId";
 
 const MAX_ERRORS_SHOWN = 20;
 
@@ -53,7 +52,7 @@ export function ImportFichadasButton({
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-base-500">
           <Spinner aria-label="Procesando archivo..." size="sm" />
           <span>Procesando {fileName}…</span>
         </div>

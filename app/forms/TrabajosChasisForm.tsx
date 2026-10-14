@@ -95,8 +95,8 @@ export function TrabajosChasisForm<
   return (
     <div className="space-y-6">
       {fields.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+        <div className="text-center py-12 border-2 border-dashed border-base-300 dark:border-base-600 rounded-lg">
+          <p className="text-base-500 dark:text-base-400 text-sm mb-3">
             No hay trabajos en chasis agregados
           </p>
           <Button
@@ -118,7 +118,7 @@ export function TrabajosChasisForm<
                 <col />
                 <col className="w-[1%]" />
               </colgroup>
-              <TableHead className="bg-violet-50 dark:bg-violet-400/30">
+              <TableHead className="bg-primary-50 dark:bg-primary-400/30">
                 <TableRow className="dark:text-white">
                   <th scope="col" className="px-6 py-3">
                     Descripción
@@ -135,7 +135,7 @@ export function TrabajosChasisForm<
                 {fields.map((field, index) => (
                   <TableRow
                     key={field.id}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
+                    className="bg-white border-b dark:bg-base-800 dark:border-base-700 border-base-200"
                   >
                     <TableCell scope="row" className="py-4 ps-6 pe-2">
                       <Select
@@ -192,9 +192,9 @@ export function TrabajosChasisForm<
           <button
             type="button"
             onClick={() => append(buildNewItem())}
-            className="w-full p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full p-4 rounded-lg border-2 border-dashed border-base-300 dark:border-base-600 bg-base-50/50 dark:bg-base-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <span className="text-sm font-medium text-base-600 dark:text-base-400 hover:text-indigo-600 dark:hover:text-indigo-400">
               + Agregar otro trabajo en chasis
             </span>
           </button>

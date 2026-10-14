@@ -45,7 +45,7 @@ function FormModalContent({
         <>
           {stepForm === "form" && (
             <div className="flex justify-between items-center w-full">
-              <div className="text-xs text-gray-500 dark:text-gray-300">
+              <div className="text-xs text-base-500 dark:text-base-300">
                 Los campos marcados con <span className="text-red-600">*</span>{" "}
                 son obligatorios
               </div>
@@ -130,8 +130,8 @@ export default function ModalManager() {
             title={confirmationModalProps.title}
           >
             <div className="text-center">
-              <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+              <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-base-400 dark:text-base-200" />
+              <h3 className="mb-5 text-lg font-normal text-base-500 dark:text-base-400">
                 {confirmationModalProps.message}
               </h3>
               <div className="flex justify-center gap-4">
@@ -156,7 +156,7 @@ export default function ModalManager() {
         <Modal open={true} size="md" title={successProps.title}>
           <div className="text-center">
             <LuCheckCheck className="mx-auto mb-4 h-14 w-14 text-green-400" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500">
+            <h3 className="mb-5 text-lg font-normal text-base-500">
               {successProps.message ||
                 messageForm ||
                 "¡Operación realizada con éxito!"}
@@ -182,7 +182,7 @@ export default function ModalManager() {
         <Modal open={true} size="md" title={errorProps.title}>
           <div className="text-center">
             <LuBan className="mx-auto mb-4 h-14 w-14 text-red-400" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500">
+            <h3 className="mb-5 text-lg font-normal text-base-500">
               {errorProps.message ||
                 messageForm ||
                 "Ha ocurrido un error. Inténtalo de nuevo."}
@@ -202,7 +202,7 @@ export default function ModalManager() {
         <Modal open={true} size="md" title={loadingProps.title}>
           <div className="text-center">
             <Spinner size="xl" light={true} className="mx-auto mb-4" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500">
+            <h3 className="mb-5 text-lg font-normal text-base-500">
               {loadingProps.message || messageForm || "Cargando..."}
             </h3>
           </div>
@@ -215,7 +215,7 @@ export default function ModalManager() {
         <Modal open={true} size="md" title={infoProps.title}>
           <div className="text-center">
             <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-blue-400" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500">
+            <h3 className="mb-5 text-lg font-normal text-base-500">
               {infoProps.message || messageForm || "Información"}
             </h3>
             <div className="flex justify-center gap-4">

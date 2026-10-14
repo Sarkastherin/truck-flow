@@ -116,7 +116,7 @@ export default function EmployeeModal({ props }: { props: Props }) {
         </>
       )}
       <div className="col-span-full  grid grid-cols-2 gap-2">
-        <h6 className="border-t border-gray-200 mt-4 col-span-full pt-2 pb-4 uppercase font-medium tracking-widest text-xs text-gray-500 dark:text-gray-300">
+        <h6 className="border-t border-base-200 mt-4 col-span-full pt-2 pb-4 uppercase font-medium tracking-widest text-xs text-base-500 dark:text-base-300">
           Otros datos
         </h6>
         <Input
@@ -198,7 +198,7 @@ export default function EmployeeModal({ props }: { props: Props }) {
         }
       />
       <Input label="Siniestro" {...register("siniestros")} />
-      <h6 className="border-t border-gray-200 mt-4 col-span-full pt-2 pb-4 uppercase font-medium tracking-widest text-xs text-gray-500 dark:text-gray-300">
+      <h6 className="border-t border-base-200 mt-4 col-span-full pt-2 pb-4 uppercase font-medium tracking-widest text-xs text-base-500 dark:text-base-300">
         Talles de ropa
       </h6>
       <Input label="Camisa" {...register("talle_camisa")} />
@@ -213,12 +213,12 @@ export default function EmployeeModal({ props }: { props: Props }) {
             <ButtonGroup className="mt-1 flex" outline>
               {tallesRemera.map((talle) => (
                 <Button
-                color={"violet"}
+                color={"primary"}
                   key={talle}
                   type="button"
                   className={`flex-1 ${
                     field.value === talle
-                      ? "bg-violet-600 border-violet-600 text-white"
+                      ? "bg-primary-600 border-primary-600 text-white"
                       : ""
                   }`}
                   onClick={() => field.onChange(talle)}

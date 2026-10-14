@@ -29,10 +29,10 @@ function StatCard({
     <Card className="rounded-2xl max-w-sm">
       <div className="flex justify-between items-center gap-4">
         <div className="flex flex-col items-start gap-1">
-          <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+          <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
             {label}
           </span>
-          <span className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
+          <span className="mt-1 text-3xl font-semibold text-base-900 dark:text-white">
             {value}
           </span>
         </div>
@@ -158,7 +158,7 @@ export default function HomeSeller() {
     <>
       {/* HEADER */}
       <div className="flex gap-y-4 justify-between items-center">
-        <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+        <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
           panel de vendedor
         </span>
         <div className="flex gap-2">
@@ -208,13 +208,13 @@ export default function HomeSeller() {
         />
       </div>
       {/* STOCK OPERATIVO */}
-      <div className="mt-6 border-t border-gray-300 dark:border-gray-700 pt-6">
+      <div className="mt-6 border-t border-base-300 dark:border-base-700 pt-6">
         <div className="flex justify-between items-center gap-4">
           <div className="flex flex-col items-start gap-2">
-            <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+            <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
               Stock operativo
             </span>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">
+            <span className="text-xl font-semibold text-base-900 dark:text-white">
               Últimas unidades
             </span>
           </div>
@@ -229,35 +229,35 @@ export default function HomeSeller() {
             <NavLink
               key={carroceria.id}
               to={`/carrocerias-usadas/${carroceria.id}`}
-              className="block rounded-[1.25rem] border border-gray-200 bg-white px-4 py-4 transition hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+              className="block rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold text-base-900 dark:text-white">
                       {carroceria.numero_carroceria}
                     </p>
                     <BadgeStatusCarroceriaUsada status={carroceria.status} />
                   </div>
-                  <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                  <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
                     {carroceria.tipo_carrozado || "Sin tipo de carrozado"}
                   </p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-xs text-base-500 dark:text-base-400">
                     {carroceria.duenno?.razon_social ||
                       "Sin propietario asociado"}
                   </p>
                 </div>
-                <LuArrowRight className="mt-1 h-4 w-4 shrink-0 text-gray-400" />
+                <LuArrowRight className="mt-1 h-4 w-4 shrink-0 text-base-400" />
               </div>
             </NavLink>
           ))}
           {(carroceriasUsadas?.length ?? 0) === 0 && carroceriasUsadas ? (
-            <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+            <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
               No hay carrocerías cargadas para mostrar.
             </div>
           ) : null}
           {!carroceriasUsadas ? (
-            <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+            <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
               Cargando inventario...
             </div>
           ) : null}

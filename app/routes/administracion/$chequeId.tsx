@@ -217,17 +217,17 @@ export default function ChequeForm() {
           <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-base-500 dark:text-base-400">
                   Razón social
                 </p>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg sm:text-xl font-semibold text-base-900 dark:text-white">
                   {cheque?.cliente.razon_social || "-"}
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                <p className="text-sm text-base-600 dark:text-base-300 mt-1">
                   CUIT: {formatCuit(cheque?.cliente.cuit_cuil || "")}
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  <p className="text-sm text-base-600 dark:text-base-300 mt-1">
                     Estado actual:{" "}
                   </p>
                   <div className="w-fit">
@@ -238,7 +238,7 @@ export default function ChequeForm() {
             </div>
 
             <div className="flex flex-col items-end">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-base-500 dark:text-base-400">
                 Importe del cheque
               </span>
               <div
@@ -253,45 +253,45 @@ export default function ChequeForm() {
           </div>
           {cheque?.status !== "en_cartera" && (
             <>
-              <hr className="text-gray-300 dark:text-gray-600" />
-              <h2 className="font-medium mb-2 uppercase tracking-widest text-gray-500 dark:text-gray-400">
+              <hr className="text-base-300 dark:text-base-600" />
+              <h2 className="font-medium mb-2 uppercase tracking-widest text-base-500 dark:text-base-400">
                 Detalles del cheque
               </h2>
               <div className="grid grid-cols-3 gap-3">
-                <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                <p className="text-sm text-base-600 dark:text-base-300 ">
                   Tipo de cheque:{" "}
                   <strong>{capitalize(cheque?.tipo || "") || "-"}</strong>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                <p className="text-sm text-base-600 dark:text-base-300 ">
                   Banco:{" "}
                   <strong>
                     {bancos?.find((banco) => banco.value === cheque?.banco)
                       ?.label || "-"}
                   </strong>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                <p className="text-sm text-base-600 dark:text-base-300 ">
                   Número de cheque: <strong>{cheque?.numero || "-"}</strong>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                <p className="text-sm text-base-600 dark:text-base-300 ">
                   Fecha de pago: <strong>{cheque?.fecha_cobro || "-"}</strong>
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                <p className="text-sm text-base-600 dark:text-base-300 ">
                   Fecha de ingreso:{" "}
                   <strong>{cheque?.fecha_ingreso || "-"}</strong>
                 </p>
                 {cheque?.status === "depositado" && (
-                  <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                  <p className="text-sm text-base-600 dark:text-base-300 ">
                     Fecha de depósito:{" "}
                     <strong>{cheque?.fecha_deposito || "-"}</strong>
                   </p>
                 )}
                 {cheque?.status === "endosado" && (
                   <>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                    <p className="text-sm text-base-600 dark:text-base-300 ">
                       Fecha de endoso:{" "}
                       <strong>{cheque?.fecha_endoso || "-"}</strong>
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 flex-2">
+                    <p className="text-sm text-base-600 dark:text-base-300 flex-2">
                       Destino (Proveedor):{" "}
                       <strong>{cheque?.proveedor?.razon_social || "-"}</strong>
                     </p>
@@ -299,11 +299,11 @@ export default function ChequeForm() {
                 )}
                 {cheque?.status === "anulado" && (
                   <>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                    <p className="text-sm text-base-600 dark:text-base-300 ">
                       Fecha de anulación:{" "}
                       <strong>{cheque?.fecha_anulacion || "-"}</strong>
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+                    <p className="text-sm text-base-600 dark:text-base-300 ">
                       Motivo de anulación:{" "}
                       <strong>{cheque?.motivo_anulacion || "-"}</strong>
                     </p>
@@ -316,8 +316,8 @@ export default function ChequeForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
           {/* Campos editables generales (siempre que sea editable) */}
           {isEditable && (
-            <fieldset className="border border-gray-300 dark:border-gray-600 rounded-lg p-5 bg-white dark:bg-gray-800">
-              <legend className="px-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <fieldset className="border border-base-300 dark:border-base-600 rounded-lg p-5 bg-white dark:bg-base-800">
+              <legend className="px-2 text-sm font-semibold text-base-700 dark:text-base-300">
                 ✍️​ Campos editables
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -370,8 +370,8 @@ export default function ChequeForm() {
           )}
           {/* Acciones disponibles según la máquina de estados */}
           {isEditable && (
-            <fieldset className="border border-gray-300 dark:border-gray-600 rounded-lg p-5 bg-white dark:bg-gray-800">
-              <legend className="px-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <fieldset className="border border-base-300 dark:border-base-600 rounded-lg p-5 bg-white dark:bg-base-800">
+              <legend className="px-2 text-sm font-semibold text-base-700 dark:text-base-300">
                 🔀​ Acciones disponibles
               </legend>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -553,7 +553,7 @@ export default function ChequeForm() {
           )}
           {isEditable && (
             <div className="w-fit">
-              <Button color="violet" type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Guardando..." : "Guardar cambios"}
               </Button>
             </div>

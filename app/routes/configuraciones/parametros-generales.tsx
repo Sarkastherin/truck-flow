@@ -93,7 +93,7 @@ export default function ParametrosGenerales() {
                 }}
               />
               <div>
-                <Button size="sm" color="violet" onClick={activeItem.onOpenNew}>
+                <Button size="sm" onClick={activeItem.onOpenNew}>
                   <FaPlus className="mr-2" />
                   Nuevo {activeItem.singularName}
                 </Button>

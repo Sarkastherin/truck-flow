@@ -65,7 +65,7 @@ export function SocioComponentForm<T>({
         color="alternative"
         onClick={handleOpenNuevoSocioModal}
       >
-        <LuUserRoundPlus className="size-4.5 text-gray-500" />
+        <LuUserRoundPlus className="size-4.5 text-base-500" />
       </Button>
     </div>
   );

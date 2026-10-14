@@ -149,7 +149,7 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No aplica.
             </p>
           </div>
@@ -165,11 +165,11 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No hay carrocería asociada a este pedido.
             </p>
             <Button
-              color={"violet"}
+              color={"primary"}
               className="w-fit mx-auto"
               onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
             >
@@ -188,7 +188,7 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No hay controles de calidad disponibles para este pedido.
             </p>
             <Button
@@ -208,7 +208,7 @@ export default function PedidosControlesCalidad() {
     );
   }
   const InfoField = ({ label, value }: { label: string; value: any }) => (
-    <p className="text-sm text-gray-600 dark:text-gray-300 ">
+    <p className="text-sm text-base-600 dark:text-base-300 ">
       {label}: <strong>{value || "-"}</strong>
     </p>
   );
@@ -290,14 +290,14 @@ export default function PedidosControlesCalidad() {
     <section className="ps-4 w-full">
       {pedido.carroceria && pedido.carroceria.id && (
         <>
-          <Card className="w-full mx-auto mt-4 shadow-lg border border-violet-200 bg-white dark:bg-gray-800">
+          <Card className="w-full mx-auto mt-4 shadow-lg border border-primary-200 bg-white dark:bg-base-800">
             <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
               <div>
-                <p className="text-xs text-violet-700 dark:text-violet-300 tracking-widest uppercase font-semibold">
+                <p className="text-xs text-primary-700 dark:text-primary-300 tracking-widest uppercase font-semibold">
                   Tipo de carrozado
                 </p>
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-gray-700 dark:text-white">
+                  <h2 className="text-2xl font-bold text-base-700 dark:text-white">
                     {carrozadoNombre || "-"}
                   </h2>
                   <span
@@ -319,7 +319,7 @@ export default function PedidosControlesCalidad() {
               </div>
               <div>
                 <button
-                  className="text-sm text-violet-700 dark:text-violet-300 underline"
+                  className="text-sm text-primary-700 dark:text-primary-300 underline"
                   onClick={() => setCollapse(!collapse)}
                 >
                   {collapse ? "Mostrar" : "Ocultar"} detalles
@@ -370,7 +370,7 @@ export default function PedidosControlesCalidad() {
                     value={colorZocaloNombre || "-"}
                   />
                 </div>
-                <div className="col-span-full border-t border-gray-300 dark:border-gray-500"></div>
+                <div className="col-span-full border-t border-base-300 dark:border-base-500"></div>
                 <div
                   className={`${pedido.carroceria.cuchetin ? "col-span-1" : "col-span-4"}`}
                 >

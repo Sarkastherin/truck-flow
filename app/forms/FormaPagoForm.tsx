@@ -200,7 +200,7 @@ export default function FormaPagoForm({
           )}
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-4">
-          <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
+          <div className="rounded-lg bg-white/70 p-3 dark:bg-base-900/30">
             <p className="text-xs uppercase tracking-wide opacity-70">
               Precio total
             </p>
@@ -208,7 +208,7 @@ export default function FormaPagoForm({
               {formatCurrency.format(totalPrecio)}
             </p>
           </div>
-          <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
+          <div className="rounded-lg bg-white/70 p-3 dark:bg-base-900/30">
             <p className="text-xs uppercase tracking-wide opacity-70">
               Total asignado
             </p>
@@ -216,7 +216,7 @@ export default function FormaPagoForm({
               {formatCurrency.format(totalAsignado)}
             </p>
           </div>
-          <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
+          <div className="rounded-lg bg-white/70 p-3 dark:bg-base-900/30">
             <p className="text-xs uppercase tracking-wide opacity-70">
               {diferenciaPago >= 0 ? "Saldo pendiente" : "Excedente"}
             </p>
@@ -224,7 +224,7 @@ export default function FormaPagoForm({
               {formatCurrency.format(Math.abs(diferenciaPago))}
             </p>
           </div>
-          <div className="rounded-lg bg-white/70 p-3 dark:bg-gray-900/30">
+          <div className="rounded-lg bg-white/70 p-3 dark:bg-base-900/30">
             <p className="text-xs uppercase tracking-wide opacity-70">Estado</p>
             <p className="mt-1 text-base font-semibold">{paymentStatusLabel}</p>
           </div>
@@ -232,12 +232,12 @@ export default function FormaPagoForm({
       </div>
       <fieldset className="mt-4 space-y-3">
         {fields.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
+          <div className="text-center py-12 border-2 border-dashed border-base-300 dark:border-base-600 rounded-lg">
+            <p className="text-base-500 dark:text-base-400 text-sm mb-3">
               No hay formas de pago agregadas
             </p>
             {diferenciaPago > 0 && (
-              <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mb-3 text-xs text-base-500 dark:text-base-400">
                 La primera forma de pago se precargará con{" "}
                 {formatCurrency.format(diferenciaPago)}.
               </p>
@@ -257,7 +257,7 @@ export default function FormaPagoForm({
             {fields.map((field, index) => (
               <div
                 key={field.fieldId}
-                className="grid grid-cols-1 lg:grid-cols-6 gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 hover:shadow-md transition-shadow"
+                className="grid grid-cols-1 lg:grid-cols-6 gap-2 rounded-lg border border-base-200 dark:border-base-700 bg-white dark:bg-base-800 p-3 hover:shadow-md transition-shadow"
               >
                 <div className="col-span-6 lg:col-span-2">
                   <Select
@@ -350,13 +350,13 @@ export default function FormaPagoForm({
             <button
               type="button"
               onClick={appendPayment}
-              className="w-full p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full p-4 rounded-lg border-2 border-dashed border-base-300 dark:border-base-600 bg-base-50/50 dark:bg-base-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <span className="text-sm font-medium text-base-600 dark:text-base-400 hover:text-indigo-600 dark:hover:text-indigo-400">
                 + Agregar otra forma de pago
               </span>
               {diferenciaPago > 0 && (
-                <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
+                <span className="mt-1 block text-xs text-base-500 dark:text-base-400">
                   Se completará con el saldo pendiente de{" "}
                   {formatCurrency.format(diferenciaPago)}.
                 </span>

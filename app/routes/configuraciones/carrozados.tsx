@@ -33,10 +33,10 @@ export default function ProductosSettings() {
       {carrozados.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full gap-4">
           <img src={logo} alt="No hay datos" className="w-32 h-32 opacity-50" />
-          <div className="text-gray-500 text-lg text-center">
+          <div className="text-base-500 text-lg text-center">
             <p>No hay carrozados configurados.</p>
             
-            <p>Ve a <NavLink className={"dark:text-violet-400 text-violet-600 hover:underline"} to="/configuraciones/parametros-generales">parámetros generales</NavLink> y agrega uno</p>
+            <p>Ve a <NavLink className={"dark:text-primary-400 text-primary-600 hover:underline"} to="/configuraciones/parametros-generales">parámetros generales</NavLink> y agrega uno</p>
           </div>
         </div>
       ) : (
@@ -44,7 +44,7 @@ export default function ProductosSettings() {
           {carrozados.map((carrozado) => (
             <Card
               key={carrozado.id}
-              className="hover:bg-violet-100/50 dark:hover:bg-violet-900/15 transition-all duration-300 hover:scale-105 cursor-pointer"
+              className="hover:bg-primary-100/50 dark:hover:bg-primary-900/15 transition-all duration-300 hover:scale-105 cursor-pointer"
               onClick={() =>
                 navigate(
                   `/configuraciones/carrozados/valores-predefinidos/${carrozado.id}`,
@@ -52,7 +52,7 @@ export default function ProductosSettings() {
               }
             >
               <img src={carrozado.imagen_url || logo} alt={carrozado.nombre} />
-              <h5 className="text-md font-bold tracking-tight text-gray-700 dark:text-white">
+              <h5 className="text-md font-bold tracking-tight text-base-700 dark:text-white">
                 {carrozado.nombre}
               </h5>
             </Card>

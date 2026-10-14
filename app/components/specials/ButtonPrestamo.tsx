@@ -157,7 +157,7 @@ export default function ButtonPrestamo({ pedido }: { pedido: Pedido }) {
       ) : (
         <Button
           size="sm"
-          color={"violet"}
+          color={"primary"}
           outline
           className="w-full mt-4 flex items-center justify-center gap-2"
           onClick={handleSelectCarroceria}

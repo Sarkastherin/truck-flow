@@ -155,7 +155,7 @@ export default function MvtoEmpleadosPage() {
             return (
               <TableRow
                 key={mov.id}
-                className="cursor-pointer hover:bg-violet-50 dark:hover:bg-violet-950/50"
+                className="cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-950/50"
                 onClick={() => handleRowClick(mov)}
               >
                 <td className="py-2 px-2">

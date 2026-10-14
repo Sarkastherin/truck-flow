@@ -76,10 +76,10 @@ export function SeleccionarCarroceriaModal({
       <div
         className={`flex flex-col justify-start items-start ${className && className}`}
       >
-        <span className="font-bold text-[0.8rem] text-violet-500 dark:text-violet-400">
+        <span className="font-bold text-[0.8rem] text-primary-500 dark:text-primary-400">
           {label}:{" "}
         </span>
-        <span className="text-gray-700 dark:text-gray-300">{item}</span>
+        <span className="text-base-700 dark:text-base-300">{item}</span>
       </div>
     );
   };
@@ -105,7 +105,7 @@ export function SeleccionarCarroceriaModal({
               <div
                 key={item.id}
                 onClick={() => onSelect(item)}
-                className={`${index % 2 === 0 ? "bg-gray-100/80 dark:bg-gray-950/30" : ""} flex flex-col md:flex-row font-mono gap-2 rounded p-2 hover:bg-violet-200/50 dark:hover:bg-violet-950/50 cursor-pointer`}
+                className={`${index % 2 === 0 ? "bg-base-100/80 dark:bg-base-950/30" : ""} flex flex-col md:flex-row font-mono gap-2 rounded p-2 hover:bg-primary-200/50 dark:hover:bg-primary-950/50 cursor-pointer`}
               >
                 <ListItemComponent
                   label="Número"

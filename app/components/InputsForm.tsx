@@ -157,7 +157,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
           {otro && (
-            <option value="otro" className={"font-bold text-violet-500"}>
+            <option value="otro" className={"font-bold text-primary-500"}>
             Otro...
           </option>
           )}
@@ -340,7 +340,7 @@ export const SelectWithSearch = <T extends { id: string; name: string }>({
             aria-autocomplete="list"
           />
           {open && (
-            <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+            <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-base-200 bg-white shadow-lg dark:border-base-700 dark:bg-base-800">
               <ListGroup
                 id={listboxId}
                 className="max-h-60 overflow-y-auto p-1"
@@ -357,7 +357,7 @@ export const SelectWithSearch = <T extends { id: string; name: string }>({
                     </ListGroupItem>
                   ))
                 ) : (
-                  <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="px-4 py-3 text-sm text-base-500 dark:text-base-400">
                     Sin resultados
                   </div>
                 )}

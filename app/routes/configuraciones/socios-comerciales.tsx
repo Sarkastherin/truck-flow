@@ -166,7 +166,7 @@ export default function SociosComerciales() {
             back_path="/configuraciones"
             icon={{ component: LuUsers, color: "text-blue-500" }}
           />
-          <Button size="sm" color="violet" onClick={handleOpenNuevo}>
+          <Button size="sm" onClick={handleOpenNuevo}>
             <FaPlus className="mr-2" />
             Nuevo {singularName}
           </Button>

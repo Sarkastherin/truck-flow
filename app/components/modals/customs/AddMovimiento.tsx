@@ -104,8 +104,8 @@ export default function AddMovimiento({
   }, [optionMediosPago]);
   const renderRegularForm = () => {
     return (
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
-        <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+        <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📅 Información del Movimiento
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-end gap-4">
@@ -169,8 +169,8 @@ export default function AddMovimiento({
     return (
       <div className="space-y-4">
         {/* Sección 1: Datos del Movimiento */}
-        <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
-          <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+          <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
             📅 Información del Movimiento
           </legend>
 
@@ -212,8 +212,8 @@ export default function AddMovimiento({
           </div>
         </fieldset>
         {/* Sección 2: Lista de Cheques */}
-        <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
-          <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+          <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
             💳 Cheques a registrar
           </legend>
           {/* Cards de cheques */}
@@ -224,7 +224,7 @@ export default function AddMovimiento({
                 className="bg-blue-100/20 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-600 rounded-lg p-4"
               >
                 <div className="flex items-center justify-between pb-2 border-b border-blue-200 dark:border-blue-600">
-                  <div className="font-bold text-gray-700 dark:text-gray-300 text-sm flex items-center gap-4">
+                  <div className="font-bold text-base-700 dark:text-base-300 text-sm flex items-center gap-4">
                     <span>Cheque #{index + 1}</span>
                   </div>
                   {chequeRows.length > 1 && (
@@ -359,10 +359,10 @@ export default function AddMovimiento({
           <button
             type="button"
             onClick={handleAddCheque}
-            className="mt-4 w-full p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 w-full p-4 rounded-lg border-2 border-dashed border-base-300 dark:border-base-600 bg-base-50/50 dark:bg-base-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!ultimaFechaIngreso}
           >
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400">
+            <span className="text-sm font-medium text-base-600 dark:text-base-400 hover:text-indigo-600 dark:hover:text-indigo-400">
               {`${ultimaFechaIngreso ? "+ Agregar otro cheque" : "Cargue la fecha de ingreso del último cheque para agregar otro"}`}
             </span>
           </button>
@@ -375,8 +375,8 @@ export default function AddMovimiento({
       {form.watch("medio_pago") === "cheque"
         ? renderChequesForm()
         : renderRegularForm()}
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
-        <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+        <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📝 Detalles Adicionales
         </legend>
         <div className="flex flex-col gap-2">

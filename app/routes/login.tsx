@@ -35,7 +35,7 @@ export default function Login() {
         <div className="absolute inset-0 bg-linear-to-br from-black/50 via-black/60 to-black/70"></div>
       </div>
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
-        <Card className="relative w-full max-w-md bg-white/10 dark:bg-white/10 dark:border-gray-400 backdrop-blur-sm shadow-lg rounded-xl p-6">
+        <Card className="relative w-full max-w-md bg-white/10 dark:bg-white/10 dark:border-base-400 backdrop-blur-sm shadow-lg rounded-xl p-6">
           <div className="mb-8 text-center">
             {/* Logo con mejor contraste */}
             <div className="w-16 h-16 backdrop-blur-sm bg-white/30 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/40 shadow-lg">
@@ -51,7 +51,7 @@ export default function Login() {
               Organiza tus procesos de manera eficiente
             </p>
           </div>
-          <Button color="violet" className="w-full" onClick={getAuth}>
+          <Button className="w-full" onClick={getAuth}>
             Iniciar sesión con Google
           </Button>
           {errorMessage && (

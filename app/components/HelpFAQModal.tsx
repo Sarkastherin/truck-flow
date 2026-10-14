@@ -88,23 +88,23 @@ function AccordionItem({
   onToggle: () => void;
 }) {
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="border border-base-200 dark:border-base-700 rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 text-left bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 transition-colors"
+        className="w-full flex items-center justify-between p-4 text-left bg-base-50 hover:bg-base-100 dark:bg-base-800 dark:hover:bg-base-750 transition-colors"
       >
-        <span className="font-medium text-gray-900 dark:text-white text-sm">
+        <span className="font-medium text-base-900 dark:text-white text-sm">
           {item.question}
         </span>
         <LuChevronDown
-          className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+          className={`h-4 w-4 text-base-500 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
       {isOpen && (
-        <div className="p-4 bg-white dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-200 dark:border-gray-700">
+        <div className="p-4 bg-white dark:bg-base-900 text-sm text-base-600 dark:text-base-400 leading-relaxed border-t border-base-200 dark:border-base-700">
           {item.answer}
         </div>
       )}
@@ -132,10 +132,10 @@ export default function HelpFAQModal() {
       {faqSections.map((section) => (
         <div key={section.title}>
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-violet-600 dark:text-violet-400">
+            <span className="text-primary-600 dark:text-primary-400">
               {section.icon}
             </span>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-base-900 dark:text-white">
               {section.title}
             </h3>
           </div>

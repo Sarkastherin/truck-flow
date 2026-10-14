@@ -420,14 +420,14 @@ export default function OrdenTrabajoModal({
     }) => {
       return (
         <div className="flex items-start gap-2">
-          <span className="text-violet-400 dark:text-violet-400 shrink-0 mt-0.5">
+          <span className="text-primary-400 dark:text-primary-400 shrink-0 mt-0.5">
             {Icon && <Icon className="size-4" />}
           </span>
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400 dark:text-gray-300 leading-none mb-0.5">
+            <span className="text-xs text-base-400 dark:text-base-300 leading-none mb-0.5">
               {label}
             </span>
-            <span className="font-semibold text-gray-700 dark:text-gray-200">
+            <span className="font-semibold text-base-700 dark:text-base-200">
               {value}
             </span>
           </div>
@@ -435,22 +435,22 @@ export default function OrdenTrabajoModal({
       );
     };
     return (
-      <div className="rounded-xl border border-violet-200 dark:border-violet-700/50 overflow-hidden shadow-sm">
-        <div className="bg-linear-to-r from-violet-500 to-purple-600 px-4 py-2.5 flex items-center justify-between">
-          <span className="text-xs font-semibold uppercase tracking-widest text-violet-100">
+      <div className="rounded-xl border border-primary-200 dark:border-primary-700/50 overflow-hidden shadow-sm">
+        <div className="bg-linear-to-r from-primary-500 to-purple-600 px-4 py-2.5 flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary-100">
             Resumen del pedido
           </span>
           <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
             #{pedido.numero_pedido}
           </span>
         </div>
-        <div className="bg-violet-50/60 dark:bg-violet-900/20 px-4 py-3 flex flex-col gap-2.5 text-sm">
+        <div className="bg-primary-50/60 dark:bg-primary-900/20 px-4 py-3 flex flex-col gap-2.5 text-sm">
           <Item
             label="Cliente"
             value={pedido.cliente.razon_social}
             icon={LuUser}
           />
-          <div className="border-t border-violet-200/60 dark:border-violet-700/30" />
+          <div className="border-t border-primary-200/60 dark:border-primary-700/30" />
           <Item
             label="Tipo de carrozado"
             value={carrozadoNombre}
@@ -482,7 +482,7 @@ export default function OrdenTrabajoModal({
           <Button
             size="sm"
             className="float-end"
-            color="violet"
+            color="primary"
             outline
             onClick={handleGenerarOrden}
             disabled={!responsable.id}
@@ -509,18 +509,18 @@ export default function OrdenTrabajoModal({
                       Esta/e {titles.sing.toLowerCase()} ya fue generada/o
                       anteriormente
                     </p>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <div className="text-xs text-base-500 dark:text-base-400 mt-1">
                       <span className="font-medium ">Fecha de creación: </span>
                       <span className="ml-2">
                         {formatDateUStoES(order?.created_at)}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <div className="text-xs text-base-500 dark:text-base-400 mt-0.5">
                       <span className="font-medium ">Responsable: </span>
                       <span className="ml-2">{order?.responsable_nombre}</span>
                     </div>
                     {order?.fecha_finalizado && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <div className="text-xs text-base-500 dark:text-base-400 mt-1">
                         <span className="font-medium ">
                           Fecha de finalización:{" "}
                         </span>
@@ -529,7 +529,7 @@ export default function OrdenTrabajoModal({
                         </span>
                       </div>
                     )}
-                    <div className="w-fit text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                    <div className="w-fit text-xs text-base-500 dark:text-base-400 mt-1 flex items-center gap-1">
                       <span className="font-medium ">Estado: </span>
                       <BadgeStatusOT status={order?.status || ""} />
                     </div>
@@ -561,17 +561,17 @@ export default function OrdenTrabajoModal({
             </div>
             {order?.status === "generada" && (
               <>
-                <div className="border-t border-gray-300/60 dark:border-gray-700/30" />
+                <div className="border-t border-base-300/60 dark:border-base-700/30" />
                 <div className="flex items-center gap-2 mb-3">
                   <LuTriangleAlert className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-base-700 dark:text-base-300">
                     Cerrar {titles.sing.toLowerCase()}
                   </span>
                 </div>
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-base-600 dark:text-base-400 mb-1">
                         Fecha de finalización
                       </label>
                       <Input
@@ -584,7 +584,7 @@ export default function OrdenTrabajoModal({
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      <label className="block text-xs font-medium text-base-600 dark:text-base-400 mb-1">
                         Estado final
                       </label>
                       <Select
@@ -602,7 +602,7 @@ export default function OrdenTrabajoModal({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    <label className="block text-xs font-medium text-base-600 dark:text-base-400 mb-1">
                       Observaciones finales
                     </label>
                     <Textarea
@@ -615,7 +615,7 @@ export default function OrdenTrabajoModal({
                   </div>
 
                   <Button
-                    color="violet"
+                    color="primary"
                     className="w-full flex items-center justify-center gap-2"
                     outline
                     onClick={handleCloseOrder}
@@ -633,10 +633,10 @@ export default function OrdenTrabajoModal({
       {step.type === "preview" && (
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-base-900 dark:text-white mb-2">
               Vista previa de la orden
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-base-600 dark:text-base-300">
               Revisa la información antes de guardar
             </p>
           </div>
@@ -673,7 +673,7 @@ export default function OrdenTrabajoModal({
           <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-2">
             ¡Éxito!
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-base-600 dark:text-base-300">
             {step.message || "Operación realizada correctamente."}
           </p>
           {pdfUrl && (
@@ -695,10 +695,10 @@ export default function OrdenTrabajoModal({
       )}
       {step.type === "confirmRegenerate" && (
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-base-900 dark:text-white mb-2">
             ¿Estás seguro de que deseas regenerar {titles.sing.toLowerCase()}?
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-base-600 dark:text-base-300">
             Esta acción eliminará {titles.sing.toLowerCase()} existente, y no
             podrá deshacerse.
           </p>
@@ -722,12 +722,12 @@ export default function OrdenTrabajoModal({
       )}
       {step.type === "regenerating" && (
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-base-900 dark:text-white mb-2">
             {step.message?.includes("Error al eliminar el archivo de Drive")
               ? "Advertencia"
               : `${titles.sing} eliminada`}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-base-600 dark:text-base-300">
             {step.message?.includes("Error al eliminar el archivo de Drive")
               ? step.message
               : `El/la ${titles.sing.toLowerCase()} anterior ha sido eliminado/a. Ahora puedes generar un/a nuevo/a ${titles.sing.toLowerCase()}.`}

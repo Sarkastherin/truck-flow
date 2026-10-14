@@ -71,17 +71,17 @@ export default function EditMovimiento({
   }) => {
     return (
       <div className="space-y-1">
-        <span className="text-xs font-medium text-gray-500 dark:text-violet-300 uppercase tracking-wide">
+        <span className="text-xs font-medium text-base-500 dark:text-primary-300 uppercase tracking-wide">
           {label}
         </span>
-        <p className="text-sm text-gray-700 dark:text-gray-300">{value}</p>
+        <p className="text-sm text-base-700 dark:text-base-300">{value}</p>
       </div>
     );
   };
   return (
     <>
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting}>
-        <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+        <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📃 Información del movimiento
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-end gap-2">
@@ -118,8 +118,8 @@ export default function EditMovimiento({
           />
         </div>
       </fieldset>
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
-        <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
+        <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📝 Campos editables
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 items-end gap-2 space-y-2">
@@ -154,8 +154,8 @@ export default function EditMovimiento({
         </div>
       </fieldset>
       {form.watch("medio_pago") === "cheque" && (
-      <fieldset className="border-t border-gray-300 dark:border-gray-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
-          <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
+          <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
             💳 Cheques asociados
           </legend>
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200">
@@ -165,7 +165,7 @@ export default function EditMovimiento({
             {cheques.map((cheque) => (
               <Card
                 key={cheque.id}
-                className="hover:border-violet-400 hover:shadow-md transition-shadow cursor-pointer"
+                className="hover:border-primary-400 hover:shadow-md transition-shadow cursor-pointer"
                 title="Ir al cheque"
                 onClick={() => {
                   openModal("loading", { props: { title: "Cargando cheque..." } });
@@ -192,7 +192,7 @@ export default function EditMovimiento({
                     })}`}
                   />
                   <div className="space-y-1">
-                    <span className="text-xs font-medium text-gray-500 dark:text-violet-300 uppercase tracking-wide">
+                    <span className="text-xs font-medium text-base-500 dark:text-primary-300 uppercase tracking-wide">
                       {"Estado"}
                     </span>
                     <div className="w-fit">
@@ -211,7 +211,7 @@ export default function EditMovimiento({
                   <InfoField label="Tipo" value={capitalize(cheque.tipo)} />
                 </div>
                 {cheque.notas && (
-                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="mt-3 pt-3 border-t border-base-200 dark:border-base-700">
                     <InfoField label="Notas" value={capitalize(cheque.notas)} />
                   </div>
                 )}
@@ -224,10 +224,10 @@ export default function EditMovimiento({
         form.watch("medio_pago") !== "cheque" &&
         !isAnulado && (
           <fieldset
-            className="border-t border-gray-300 dark:border-gray-600 pt-5"
+            className="border-t border-base-300 dark:border-base-600 pt-5"
             disabled={form.formState.isSubmitting}
           >
-            <legend className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
               ⚠️ Anulación de pago
             </legend>
             <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
@@ -252,11 +252,11 @@ export default function EditMovimiento({
         )}
       {showAnulacionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-base-800 rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
+            <h3 className="text-lg font-semibold text-base-900 dark:text-white">
               Confirmar Anulación de Pago
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-base-600 dark:text-base-400">
               Se creará un movimiento de deuda por $
               {(form.getValues("haber") || 0).toLocaleString("es-AR", {
                 minimumFractionDigits: 2,

@@ -58,7 +58,7 @@ export function ItemConfigModal({
 
       {/* Botón de dar de baja/reactivar */}
       {props.onDelete && props.form.watch("created_at") && (
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="pt-4 border-t border-base-200 dark:border-base-700">
           <Button
             color={props.form.watch("active") ? "red" : "green"}
             onClick={

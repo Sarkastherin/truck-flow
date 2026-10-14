@@ -55,7 +55,7 @@ export function Sidebar({
             {props.title && (
               <span>
                 <h5
-                  className={`${collapsed ? "hidden" : "font-bold text-center w-full text-sm bg-violet-200/50 rounded py-2 text-gray-700"}`}
+                  className={`${collapsed ? "hidden" : "font-bold text-center w-full text-sm bg-primary-200/50 rounded py-2 text-base-700"}`}
                 >
                   {props.title}
                 </h5>
@@ -109,7 +109,7 @@ export function Sidebar({
       {collapsible && (
         <button
           onClick={() => setCollapsed((c) => !c)}
-          className="flex absolute -right-3 top-5 z-10 h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="flex absolute -right-3 top-5 z-10 h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-base-800 border border-base-200 dark:border-base-700 text-base-500 dark:text-base-400 shadow-sm hover:bg-base-50 dark:hover:bg-base-700 transition-colors"
           title={collapsed ? "Expandir menú" : "Contraer menú"}
         >
           {collapsed ? (

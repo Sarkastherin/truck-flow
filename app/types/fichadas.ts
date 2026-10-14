@@ -1,5 +1,6 @@
 import type { CommonTypes } from "./commonTypes";
 import type { Fichada } from "./liquidaciones";
+import type { Employee } from "./rrhh";
 export type FichadaFile = {
   fecha: Date;
   hora: string;
@@ -21,6 +22,11 @@ export type FichadaFileAgrupada = {
   horasRegular: number
   horasExtras: number
   active: boolean
+};
+
+export type FichadasFileUI = FichadaFileAgrupada & {
+  empleado: Employee | undefined;
+  id?: string;
 };
 
 export type FichadaFormValues = Omit<Fichada, keyof CommonTypes> & {

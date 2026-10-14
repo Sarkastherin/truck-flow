@@ -207,10 +207,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
     value?: string | number;
   }) => (
     <div className="flex flex-col">
-      <span className="text-xs text-gray-500 dark:text-gray-400 tracking-widest uppercase mb-1">
+      <span className="text-xs text-base-500 dark:text-base-400 tracking-widest uppercase mb-1">
         {label}
       </span>
-      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+      <span className="text-sm font-medium text-base-600 dark:text-base-300">
         {value || "-"}
       </span>
     </div>
@@ -310,10 +310,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
         <Card className="w-full mb-4">
           <div className="flex justify-between items-center md:items-end mb-4 gap-4">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 tracking-widest uppercase">
+              <p className="text-sm text-base-500 dark:text-base-400 tracking-widest uppercase">
                 Tipo de carrozado
               </p>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-600 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-base-600 dark:text-white">
                 {data?.tipo_carrozado}
               </h2>
             </div>
@@ -383,14 +383,14 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                         className={`w-full h-32 object-cover rounded-lg transition-all ${
                           selectedPhotos.has(foto.id)
                             ? "ring-4 ring-red-500 opacity-70"
-                            : "ring-2 ring-transparent hover:ring-gray-300"
+                            : "ring-2 ring-transparent hover:ring-base-300"
                         }`}
                       />
                       <div
                         className={`absolute top-2 left-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                           selectedPhotos.has(foto.id)
                             ? "bg-red-500 border-red-500"
-                            : "bg-white/80 border-gray-400"
+                            : "bg-white/80 border-base-400"
                         }`}
                       >
                         {selectedPhotos.has(foto.id) && (
@@ -409,7 +409,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
               )}
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-base-300">
             <InfoField label="Color" value={data?.color} />
             <InfoField
               label="Precio lista"
@@ -445,8 +445,8 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
           </div>
           {/* datos de préstamo */}
           {data?.status === "prestada" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-gray-300">
-              <p className="col-span-full text-gray-500 dark:text-gray-400 tracking-widest uppercase text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-base-300">
+              <p className="col-span-full text-base-500 dark:text-base-400 tracking-widest uppercase text-xs">
                 Datos de préstamo
               </p>
               <InfoField
@@ -582,8 +582,8 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
                   icon={LuRuler}
                 />
 
-                <div className="md:col-span-4 mt-4 border-t pt-4 border-gray-300">
-                  <h6 className="mb-2 font-semibold tracking-widest uppercase text-gray-500 text-sm">
+                <div className="md:col-span-4 mt-4 border-t pt-4 border-base-300">
+                  <h6 className="mb-2 font-semibold tracking-widest uppercase text-base-500 text-sm">
                     Datos del camión donde estaba instalada
                   </h6>
                   <div className="grid md:grid-cols-3 gap-2">

@@ -171,24 +171,24 @@ export function ControlCarrozadoForm({
 
   return (
     <>
-      <h3 className="my-6 text-lg font-semibold text-gray-700 dark:text-white">
+      <h3 className="my-6 text-lg font-semibold text-base-700 dark:text-white">
         Ítems de Control
       </h3>
 
       {/* Barra de progreso */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-base-700 dark:text-base-300">
             {completedCount} / {orderedFields.length} completados
           </span>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-base-500 dark:text-base-400">
               Página {currentPage} / {totalPages}
             </span>
             <select
               value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              className="text-xs border border-base-300 dark:border-base-600 rounded-md px-2 py-1 bg-white dark:bg-base-800 text-base-700 dark:text-base-300 focus:outline-none focus:ring-1 focus:ring-primary-500"
             >
               {ITEMS_PER_PAGE_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -198,9 +198,9 @@ export function ControlCarrozadoForm({
             </select>
           </div>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+        <div className="w-full bg-base-200 dark:bg-base-700 rounded-full h-2.5">
           <div
-            className="bg-violet-600 h-2.5 rounded-full transition-all duration-300"
+            className="bg-primary-600 h-2.5 rounded-full transition-all duration-300"
             style={{
               width: `${orderedFields.length > 0 ? (completedCount / orderedFields.length) * 100 : 0}%`,
             }}
@@ -256,21 +256,21 @@ export function ControlCarrozadoForm({
                           : watch(
                                 `control_carrozado.${originalIndex}.resultado`,
                               ) === null
-                            ? "border-gray-200 dark:border-gray-600"
+                            ? "border-base-200 dark:border-base-600"
                             : ""
                 }  rounded-lg p-4 flex flex-col gap-3`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 font-bold text-sm">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-bold text-sm">
                     {itemControl?.order}
                   </span>
-                  <span className="font-medium text-gray-700 dark:text-gray-200">
+                  <span className="font-medium text-base-700 dark:text-base-200">
                     {itemControl?.item_control.nombre}
                   </span>
                 </div>
                 {valueAtributo && (
-                  <span className="text-sm font-semibold text-violet-600 dark:text-violet-400">
+                  <span className="text-sm font-semibold text-primary-600 dark:text-primary-400">
                     {valueAtributo} {unit}
                   </span>
                 )}
@@ -331,7 +331,7 @@ export function ControlCarrozadoForm({
                             [originalIndex]: false,
                           }))
                         }
-                        className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-end"
+                        className="text-xs text-base-500 hover:text-base-700 dark:text-base-400 dark:hover:text-base-200 self-end"
                       >
                         ✕ Cerrar
                       </button>
@@ -345,7 +345,7 @@ export function ControlCarrozadoForm({
                           [originalIndex]: true,
                         }))
                       }
-                      className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 border border-violet-300 dark:border-violet-700 rounded px-2 py-1 self-start"
+                      className="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 border border-primary-300 dark:border-primary-700 rounded px-2 py-1 self-start"
                     >
                       📝 Obs.
                     </button>
@@ -376,7 +376,7 @@ export function ControlCarrozadoForm({
             type="button"
             onClick={() => handleSetPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-base-300 dark:border-base-600 bg-white dark:bg-base-800 text-base-700 dark:text-base-300 hover:bg-base-50 dark:hover:bg-base-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             <HiChevronLeft className="w-4 h-4" />
             Anterior
@@ -389,8 +389,8 @@ export function ControlCarrozadoForm({
                 onClick={() => handleSetPage(page)}
                 className={`w-8 h-8 text-sm rounded-md transition ${
                   page === currentPage
-                    ? "bg-violet-600 text-white font-semibold"
-                    : "border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    ? "bg-primary-600 text-white font-semibold"
+                    : "border border-base-300 dark:border-base-600 bg-white dark:bg-base-800 text-base-700 dark:text-base-300 hover:bg-base-50 dark:hover:bg-base-700"
                 }`}
               >
                 {page}
@@ -401,7 +401,7 @@ export function ControlCarrozadoForm({
             type="button"
             onClick={() => handleSetPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md border border-base-300 dark:border-base-600 bg-white dark:bg-base-800 text-base-700 dark:text-base-300 hover:bg-base-50 dark:hover:bg-base-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             Siguiente
             <HiChevronRight className="w-4 h-4" />

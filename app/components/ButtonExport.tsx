@@ -111,7 +111,7 @@ export const ButtonExport = ({
   };
 
   return (
-    <div className="text-sm inline-flex divide-x divide-gray-300 overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800">
+    <div className="text-sm inline-flex divide-x divide-base-300 overflow-hidden rounded-md border border-base-300 bg-white shadow-sm dark:divide-base-700 dark:border-base-700 dark:bg-base-800">
       <button
         type="button"
         onClick={handleExport}
@@ -123,7 +123,7 @@ export const ButtonExport = ({
       </button>
       <div className="relative">
         <select
-          className="dark:bg-gray-800 appearance-none w-full h-full px-3 py-1.5 text-gray-700 dark:text-gray-200 bg-transparent pr-8 focus:outline-none cursor-pointer"
+          className="dark:bg-base-800 appearance-none w-full h-full px-3 py-1.5 text-base-700 dark:text-base-200 bg-transparent pr-8 focus:outline-none cursor-pointer"
           onChange={(e) => setSeparator(e.target.value as "," | ";")}
           value={separator}
         >
@@ -135,7 +135,7 @@ export const ButtonExport = ({
         {/* Ícono de flecha */}
         <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
           <svg
-            className="h-4 w-4 text-gray-500 dark:text-gray-400"
+            className="h-4 w-4 text-base-500 dark:text-base-400"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
             viewBox="0 0 20 20"

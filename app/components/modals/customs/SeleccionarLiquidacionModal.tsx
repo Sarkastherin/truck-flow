@@ -54,7 +54,7 @@ export function SeleccionarLiquidacionModal({
   return (
     <div>
       <div className="relative">
-        <LuSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+        <LuSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-base-400" />
         <TextInput
           type="search"
           className="pl-9"
@@ -70,15 +70,15 @@ export function SeleccionarLiquidacionModal({
         </div>
       ) : (
         <>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-300">
+          <p className="mt-2 text-xs text-base-500 dark:text-base-300">
             {filteredData.length === 0
               ? "Sin liquidaciones disponibles"
               : `${filteredData.length} liquidación${filteredData.length === 1 ? "" : "es"} disponible${filteredData.length === 1 ? "" : "s"}`}
           </p>
-          <ListGroup className="mt-1 max-h-64 overflow-y-auto p-1 dark:bg-gray-800">
+          <ListGroup className="mt-1 max-h-64 overflow-y-auto p-1 dark:bg-base-800">
             {filteredData.length === 0 ? (
               <ListGroupItem disabled className="justify-center">
-                <div className="flex flex-col items-center gap-1 py-2 text-gray-400">
+                <div className="flex flex-col items-center gap-1 py-2 text-base-400">
                   <LuInbox className="size-6" />
                   <span className="text-sm">Sin resultados</span>
                 </div>
@@ -90,20 +90,20 @@ export function SeleccionarLiquidacionModal({
                   <ListGroupItem
                     key={item.id}
                     onClick={() => onSelect(item)}
-                    className="cursor-pointer transition-colors hover:bg-violet-50 dark:hover:bg-gray-700/60"
+                    className="cursor-pointer transition-colors hover:bg-primary-50 dark:hover:bg-base-700/60"
                   >
                     <div className="flex w-full items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-violet-500 to-indigo-500 text-white shadow-sm shadow-violet-500/30">
+                        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary-500 to-indigo-500 text-white shadow-sm shadow-primary-500/30">
                           <LuCalendarDays className="size-5" />
                         </span>
                         <div className="flex min-w-0 flex-col">
-                          <span className="flex items-center gap-1.5 font-semibold text-gray-800 dark:text-gray-100">
+                          <span className="flex items-center gap-1.5 font-semibold text-base-800 dark:text-base-100">
                             {formatDateUStoES(item.desde)}
-                            <LuArrowRight className="size-3.5 shrink-0 text-gray-400" />
+                            <LuArrowRight className="size-3.5 shrink-0 text-base-400" />
                             {formatDateUStoES(item.hasta)}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-base-500 dark:text-base-400">
                             {dias
                               ? `Periodo de ${dias} día${dias === 1 ? "" : "s"}`
                               : "Periodo"}
@@ -112,7 +112,7 @@ export function SeleccionarLiquidacionModal({
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
                         <BadgeStatusLiq status={item.status} />
-                        <LuChevronRight className="size-4 text-gray-400" />
+                        <LuChevronRight className="size-4 text-base-400" />
                       </div>
                     </div>
                   </ListGroupItem>

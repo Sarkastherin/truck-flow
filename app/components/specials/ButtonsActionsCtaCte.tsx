@@ -94,8 +94,8 @@ export default function ButtonsActionsCtaCte({ clienteId }: { clienteId: string 
   };
   return (
     <div className="">
-      <fieldset className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 w-full gap-4 border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
-        <legend className="px-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <fieldset className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 w-full gap-4 border border-base-300 dark:border-base-600 rounded-lg p-3 bg-white dark:bg-base-800">
+        <legend className="px-2 text-sm font-semibold text-base-700 dark:text-base-300">
           💳 Registrar movimientos
         </legend>
         <Button

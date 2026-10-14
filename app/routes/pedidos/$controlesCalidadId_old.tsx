@@ -74,7 +74,7 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No aplica.
             </p>
           </div>
@@ -90,11 +90,11 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No hay carrocería asociada a este pedido.
             </p>
             <Button
-              color={"violet"}
+              color={"primary"}
               className="w-fit mx-auto"
               onClick={() => navigate(`/pedidos/carroceria/${pedido.id}`)}
             >
@@ -113,7 +113,7 @@ export default function PedidosControlesCalidad() {
           style={{ minHeight: "calc(100vh - 115px)" }}
         >
           <div className="flex flex-col gap-6">
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-base-500 dark:text-base-400">
               No hay controles de calidad disponibles para este pedido.
             </p>
             <Button
@@ -139,17 +139,17 @@ export default function PedidosControlesCalidad() {
           {tiposControles.map(
             ({ name, description, icon: Icon, tipo, status }) => (
               <Card
-                className="hover:bg-violet-100/50 dark:hover:bg-violet-900/15 transition-all duration-300 hover:scale-105 cursor-pointer"
+                className="hover:bg-primary-100/50 dark:hover:bg-primary-900/15 transition-all duration-300 hover:scale-105 cursor-pointer"
                 key={tipo}
                 onClick={() => handleOpenModal(tipo)}
               >
-                <div className="sm:mb-4 p-2.5 sm:p-3 rounded-xl  backdrop-blur-sm w-fit dark:bg-white/10 bg-gray-800/10">
-                  <Icon className="h-8 w-8 dark:text-violet-400 text-violet-500" />
+                <div className="sm:mb-4 p-2.5 sm:p-3 rounded-xl  backdrop-blur-sm w-fit dark:bg-white/10 bg-base-800/10">
+                  <Icon className="h-8 w-8 dark:text-primary-400 text-primary-500" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold dark:text-white text-gray-800">
+                <h2 className="text-lg sm:text-xl font-semibold dark:text-white text-base-800">
                   {name}
                 </h2>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm dark:text-base-300 text-base-600">
                   {description}
                 </p>
                 <span className="w-fit">

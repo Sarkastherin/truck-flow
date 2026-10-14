@@ -248,11 +248,11 @@ export function Welcome() {
 
   return (
     <main className="mt-8">
-      <section className="overflow-hidden rounded-4xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-        <div className="border-b border-gray-200 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_28%)] p-6 dark:border-gray-800 md:p-8">
+      <section className="overflow-hidden rounded-4xl border border-base-200 bg-white shadow-sm dark:border-base-800 dark:bg-base-950">
+        <div className="border-b border-base-200 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_28%)] p-6 dark:border-base-800 md:p-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <span className="inline-flex items-center rounded-full border border-gray-300 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gray-500 backdrop-blur dark:border-gray-700 dark:bg-gray-900/70 dark:text-gray-300">
+              <span className="inline-flex items-center rounded-full border border-base-300 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-base-500 backdrop-blur dark:border-base-700 dark:bg-base-900/70 dark:text-base-300">
                 {isSeller ? "Panel de vendedor" : "Dashboard operativo"}
               </span>
              
@@ -261,14 +261,14 @@ export function Welcome() {
               <div className="flex flex-wrap gap-3">
                 <NavLink
                   to="/carrocerias-usadas"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-300 dark:border-gray-800 dark:bg-gray-950 dark:text-white dark:hover:border-gray-700"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-base-200 bg-white px-4 py-3 text-sm font-semibold text-base-900 shadow-sm transition hover:-translate-y-0.5 hover:border-base-300 dark:border-base-800 dark:bg-base-950 dark:text-white dark:hover:border-base-700"
                 >
                   <LuPackageSearch className="h-4 w-4" />
                   Ver inventario
                 </NavLink>
                 <NavLink
                   to="/carrocerias-usadas/nueva"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-base-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-base-800 dark:bg-white dark:text-base-900 dark:hover:bg-base-100"
                 >
                   <LuPlus className="h-4 w-4" />
                   Cargar usada
@@ -309,14 +309,14 @@ export function Welcome() {
               <div className="space-y-3">
                 <div className="space-y-3">
                   <div className="hidden">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
                       Accesos rapidos
                     </p>
-                    <h2 className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                    <h2 className="mt-1 text-lg font-semibold text-base-900 dark:text-white">
                       Operaciones frecuentes
                     </h2>
                   </div>
-                  <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+                  <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
                     Accesos rapidos
                   </p>
                   <div className="flex flex-col gap-3">
@@ -325,19 +325,19 @@ export function Welcome() {
                         <NavLink
                           key={to}
                           to={to}
-                          className="group rounded-[1.35rem] border border-gray-200 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+                          className="group rounded-[1.35rem] border border-base-200 bg-white p-3.5 transition hover:-translate-y-0.5 hover:border-base-300 hover:shadow-lg dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
                         >
                           <div
                             className={`rounded-[1.1rem] bg-linear-to-br p-3 ${accent}`}
                           >
                             <div className="flex items-center gap-2 mb-2">
                               <Icon className="h-5 w-5" />
-                              <h3 className="text-sm font-semibold text-gray-900 dark:text-white md:text-[15px]">
+                              <h3 className="text-sm font-semibold text-base-900 dark:text-white md:text-[15px]">
                                 {title}
                               </h3>
                             </div>
 
-                            <p className="hidden text-xs leading-5 text-gray-600 dark:text-gray-300">
+                            <p className="hidden text-xs leading-5 text-base-600 dark:text-base-300">
                               {description}
                             </p>
                           </div>
@@ -348,13 +348,13 @@ export function Welcome() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-gray-200 bg-gray-50/90 p-5 shadow-inner dark:border-gray-800 dark:bg-gray-900/90">
+              <div className="rounded-[1.75rem] border border-base-200 bg-base-50/90 p-5 shadow-inner dark:border-base-800 dark:bg-base-900/90">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <p className="text-sm font-medium text-base-500 dark:text-base-400">
                       Unidades vendidas
                     </p>
-                    <p className="mt-2 text-4xl font-semibold text-gray-900 dark:text-white">
+                    <p className="mt-2 text-4xl font-semibold text-base-900 dark:text-white">
                       {isLoading && pedidos === null
                         ? "..."
                         : unidadesVendidasMes}
@@ -364,7 +364,7 @@ export function Welcome() {
                     <LuCircleDollarSign className="h-6 w-6" />
                   </span>
                 </div>
-                <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+                <p className="mt-4 text-sm text-base-600 dark:text-base-300">
                   Pedidos generados en {mesActual}.
                 </p>
                 <div className="mt-6 space-y-3">
@@ -372,24 +372,24 @@ export function Welcome() {
                     pedidosRecientes.map((pedido) => (
                       <div
                         key={pedido.id}
-                        className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950"
+                        className="flex items-center justify-between rounded-2xl border border-base-200 bg-white px-4 py-3 dark:border-base-800 dark:bg-base-950"
                       >
                         <div>
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          <p className="text-sm font-semibold text-base-900 dark:text-white">
                             {pedido.numero_pedido}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-base-500 dark:text-base-400">
                             {pedido.cliente?.razon_social ||
                               "Cliente sin asignar"}
                           </p>
                         </div>
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span className="text-xs font-medium text-base-500 dark:text-base-400">
                           {formatDateUStoES(pedido.fecha_pedido)}
                         </span>
                       </div>
                     ))
                   ) : (
-                    <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    <div className="rounded-2xl border border-dashed border-base-300 px-4 py-6 text-sm text-base-500 dark:border-base-700 dark:text-base-400">
                       No hay pedidos recientes para mostrar.
                     </div>
                   )}
@@ -400,13 +400,13 @@ export function Welcome() {
           {isSeller && (
             <div className="grid gap-6 p-6 md:p-8">
               <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="rounded-[1.75rem] border border-gray-200 bg-gray-50/70 p-5 dark:border-gray-800 dark:bg-gray-900/40 md:p-6">
+                <div className="rounded-[1.75rem] border border-base-200 bg-base-50/70 p-5 dark:border-base-800 dark:bg-base-900/40 md:p-6">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
                         Alertas de devolución
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+                      <h2 className="mt-1 text-xl font-semibold text-base-900 dark:text-white">
                         Próximas a devolver o vencidas
                       </h2>
                     </div>
@@ -428,31 +428,31 @@ export function Welcome() {
                             <NavLink
                               key={carroceria.id}
                               to={`/carrocerias-usadas/${carroceria.id}`}
-                              className="flex items-center justify-between gap-4 rounded-[1.25rem] border border-gray-200 bg-white px-4 py-4 transition hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+                              className="flex items-center justify-between gap-4 rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
                             >
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  <p className="text-sm font-semibold text-base-900 dark:text-white">
                                     {carroceria.numero_carroceria}
                                   </p>
                                   <BadgeStatusCarroceriaUsada
                                     status={carroceria.status}
                                   />
                                 </div>
-                                <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                                <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
                                   {carroceria.tipo_carrozado ||
                                     "Sin tipo de carrozado"}
                                 </p>
                               </div>
                               <div className="shrink-0 text-right">
-                                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                <p className="text-sm font-semibold text-base-900 dark:text-white">
                                   {dias === null
                                     ? "Sin fecha"
                                     : dias < 0
                                       ? `Vencida hace ${Math.abs(dias)} d`
                                       : `Devuelve en ${dias} d`}
                                 </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <p className="text-xs text-base-500 dark:text-base-400">
                                   {carroceria.prestamo?.fecha_devolucion_estimada
                                     ? formatDateUStoES(
                                         carroceria.prestamo
@@ -466,7 +466,7 @@ export function Welcome() {
                         },
                       )
                     ) : (
-                      <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+                      <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                         {carroceriasUsadas
                           ? "No hay carrocerías con devolución próxima."
                           : "Cargando carrocerías usadas..."}
@@ -475,20 +475,20 @@ export function Welcome() {
                   </div>
 
                   {sellerInventory.withoutDueDate.length > 0 && (
-                    <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                    <p className="mt-4 text-xs text-base-500 dark:text-base-400">
                       {sellerInventory.withoutDueDate.length} prestadas sin fecha
                       de devolución cargada.
                     </p>
                   )}
                 </div>
 
-                <div className="rounded-[1.75rem] border border-gray-200 bg-gray-50/70 p-5 dark:border-gray-800 dark:bg-gray-900/40 md:p-6">
+                <div className="rounded-[1.75rem] border border-base-200 bg-base-50/70 p-5 dark:border-base-800 dark:bg-base-900/40 md:p-6">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
                         Stock operativo
                       </p>
-                      <h2 className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+                      <h2 className="mt-1 text-xl font-semibold text-base-900 dark:text-white">
                         Últimas unidades
                       </h2>
                     </div>
@@ -502,37 +502,37 @@ export function Welcome() {
                       <NavLink
                         key={carroceria.id}
                         to={`/carrocerias-usadas/${carroceria.id}`}
-                        className="block rounded-[1.25rem] border border-gray-200 bg-white px-4 py-4 transition hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+                        className="block rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              <p className="text-sm font-semibold text-base-900 dark:text-white">
                                 {carroceria.numero_carroceria}
                               </p>
                               <BadgeStatusCarroceriaUsada
                                 status={carroceria.status}
                               />
                             </div>
-                            <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                            <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
                               {carroceria.tipo_carrozado || "Sin tipo de carrozado"}
                             </p>
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p className="mt-1 text-xs text-base-500 dark:text-base-400">
                               {carroceria.duenno?.razon_social ||
                                 "Sin propietario asociado"}
                             </p>
                           </div>
-                          <LuArrowRight className="mt-1 h-4 w-4 shrink-0 text-gray-400" />
+                          <LuArrowRight className="mt-1 h-4 w-4 shrink-0 text-base-400" />
                         </div>
                       </NavLink>
                     ))}
                     {(carroceriasUsadas?.length ?? 0) === 0 && carroceriasUsadas ? (
-                      <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+                      <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                         No hay carrocerías cargadas para mostrar.
                       </div>
                     ) : null}
                     {!carroceriasUsadas ? (
-                      <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+                      <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                         Cargando inventario...
                       </div>
                     ) : null}
@@ -544,17 +544,17 @@ export function Welcome() {
         </div>
         {activeUser?.role !== "SELLER" && (
           <div className="grid gap-6 p-6 md:p-8">
-            <section className="rounded-[1.75rem] border border-gray-200 bg-gray-50/70 p-5 dark:border-gray-800 dark:bg-gray-900/40 md:p-6">
+            <section className="rounded-[1.75rem] border border-base-200 bg-base-50/70 p-5 dark:border-base-800 dark:bg-base-900/40 md:p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
                     Cuenta corriente
                   </p>
-                  <h2 className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+                  <h2 className="mt-1 text-xl font-semibold text-base-900 dark:text-white">
                     Ultimos 5 movimientos cargados
                   </h2>
                 </div>
-                <span className="inline-flex rounded-2xl bg-gray-900 p-3 text-white dark:bg-white dark:text-gray-900">
+                <span className="inline-flex rounded-2xl bg-base-900 p-3 text-white dark:bg-white dark:text-base-900">
                   <LuClipboardPlus className="h-5 w-5" />
                 </span>
               </div>
@@ -573,24 +573,24 @@ export function Welcome() {
                       <NavLink
                         key={movimiento.id}
                         to={`/administracion/cuentas-corrientes/${movimiento.clienteId}`}
-                        className="block rounded-[1.25rem] border border-gray-200 bg-white px-4 py-4 transition hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+                        className="block rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
                       >
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                              <span className="rounded-full bg-base-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-base-700 dark:bg-base-800 dark:text-base-300">
                                 {movementTypeLabels[
                                   movimiento.tipo_movimiento
                                 ] ?? movimiento.tipo_movimiento}
                               </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-xs text-base-500 dark:text-base-400">
                                 {formatDateUStoES(movimiento.fecha_movimiento)}
                               </span>
                             </div>
-                            <p className="mt-2 truncate text-base font-semibold text-gray-900 dark:text-white">
+                            <p className="mt-2 truncate text-base font-semibold text-base-900 dark:text-white">
                               {movimiento.clienteNombre}
                             </p>
-                            <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                            <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
                               {movimiento.concepto || "Sin concepto cargado"}
                             </p>
                           </div>
@@ -604,7 +604,7 @@ export function Welcome() {
                                 currency: "ARS",
                               })}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-base-500 dark:text-base-400">
                               {movimiento.medio_pago === "no_aplica"
                                 ? "Sin medio de pago"
                                 : movimiento.medio_pago.replaceAll("_", " ")}
@@ -615,7 +615,7 @@ export function Welcome() {
                     );
                   })
                 ) : (
-                  <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+                  <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                     {isLoading
                       ? "Cargando movimientos recientes..."
                       : "Todavia no hay movimientos cargados para mostrar."}
@@ -627,7 +627,7 @@ export function Welcome() {
         )}
       </section>
       <footer>
-        <div className="flex items-center justify-center gap-2 mt-6 text-center text-sm text-gray-500 dark:text-gray-400 scale-75">
+        <div className="flex items-center justify-center gap-2 mt-6 text-center text-sm text-base-500 dark:text-base-400 scale-75">
           <LogoComponent />
           <span>- Versión {appVersion}</span>
         </div>
@@ -707,13 +707,13 @@ function StatCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+    <div className="rounded-3xl border border-base-200 bg-white p-4 shadow-sm dark:border-base-800 dark:bg-base-950">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-base-500 dark:text-base-400">
             {label}
           </p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">
+          <p className="mt-2 text-3xl font-semibold text-base-900 dark:text-white">
             {value}
           </p>
         </div>

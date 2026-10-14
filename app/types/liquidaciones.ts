@@ -7,6 +7,7 @@ export const optionsStatusLiq: { value: StatusLiquidacion; label: string }[] = [
 ];
 export type Fichada = CommonTypes & {
   fecha: string;
+  liquidacion_id:string;
   empleado_id: string;
   entrada: string;
   salida: string | null;

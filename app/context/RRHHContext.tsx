@@ -4,6 +4,7 @@ import {
   useContext,
   useState,
   useMemo,
+  useRef,
 } from "react";
 import {
   getAllSheets,
@@ -59,7 +60,6 @@ type RRHHContextType = {
   removeLiquidacion: ToggleConfigMethod;
   reactivateLiquidacion: ToggleConfigMethod;
   /* Fichadas */
-  fichadas: Fichada[];
   CUDFichadas: (fichadas: Fichada[], deletedIds: string[]) => Promise<CrudGlobalResponse>
   
 };
@@ -72,6 +72,10 @@ type HeadersType = {
   fichadas: SheetCellValue[];
   //reportes: SheetCellValue[];
   //
+};
+type ParamsFromSheetsData = {
+  headers: HeadersType;
+  values: Record<string, SheetCellValue[][]>;
 };
 type ToggleConfigMethod = (entityId: string) => Promise<CrudGlobalResponse>;
 const RRHHContext = createContext<RRHHContextType | undefined>(undefined);
@@ -86,12 +90,10 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
   const [premios, setPremios] = useState<Premios[]>([]);
   const [saldoEmpleados, setSaldoEmpleados] = useState<CtaCteEmpleados[]>([]);
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([])
-  const [fichadas, setFichadas] = useState<Fichada[]>([]);
 
-  const [paramsFromSheets, setParamsFromSheets] = useState<{
-    headers: HeadersType;
-    values: Record<string, SheetCellValue[][]>;
-  } | null>(null);
+  const [paramsFromSheets, setParamsFromSheets] =
+    useState<ParamsFromSheetsData | null>(null);
+  const paramsFromSheetsRef = useRef<ParamsFromSheetsData | null>(null);
   const getSueldosData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -110,7 +112,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         setIsReady(true);
         return;
       }
-      setParamsFromSheets({
+      const nextParams: ParamsFromSheetsData = {
         headers: {
           nomina: data[0]?.[0] || null,
           premios: data[1]?.[0] || null,
@@ -129,7 +131,9 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           //reportes: data[4] || [],
           //
         },
-      });
+      };
+      setParamsFromSheets(nextParams);
+      paramsFromSheetsRef.current = nextParams;
       const employeesData = getDataInJSONFormat<Employee>(data[0]);
       const premiosData = getDataInJSONFormat<Premios>(data[1]);
       const mvtoEmpleadosData = getDataInJSONFormat<MvtoEmpleados>(data[2]);
@@ -174,13 +178,20 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           active: true,
         });
       });
+      const combinedLiqData = liquidacionesData.map((liq)=> {
+        const fichadas = fichadasData.filter((fich)=> fich.liquidacion_id=== liq.id)||[];
+        return {
+          ...liq,
+          fichada: fichadas
+        }
+      })
       //const normalizedreportes = getDataInJSONFormat<Employee>(data[4]);
       //const normalizedLiquidaciones = getDataInJSONFormat<Employee>(data[5]);
       setEmployees(employeesData);
       setPremios(premiosData);
       setSaldoEmpleados(ctasCorrientesArray);
-      setLiquidaciones(liquidacionesData)
-      setFichadas(fichadasData);
+      setLiquidaciones(combinedLiqData)
+      //setFichadas(fichadasData);
       setIsReady(true);
     } catch (error) {
       setIsReady(false);
@@ -252,12 +263,27 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
   );
   const CUDFichadas = useCallback(
     async (fichadas: Fichada[], deletedIds: string[]) => {
+      const needsFreshRows =
+        deletedIds.length > 0 || fichadas.some((fich) => Boolean(fich.id));
+      if (needsFreshRows) {
+        // Vuelve a leer el Sheet para ubicar las filas por id con datos
+        // actuales (evita escribir fuera del grid si la hoja cambió externamente)
+        paramsFromSheetsRef.current = null;
+        await getSueldosData();
+        if (!paramsFromSheetsRef.current) {
+          return {
+            success: false,
+            message: "No se pudo actualizar las fichadas",
+            error: "No se pudieron leer los datos actuales del Sheet",
+          };
+        }
+      }
       return cudGlobalFieldsArrayEntities({
         entities: fichadas,
         deletedIds,
         sheetKey: "fichadas",
         entityLabel: "fichada",
-        paramsFromSheets,
+        paramsFromSheets: paramsFromSheetsRef.current ?? paramsFromSheets,
         sheetId: SHEET_ID_SUELDOS,
         sheetName: SHEET_NAMES_SUELDOS.fichadas,
         successMessage: "Fichadas actualizados exitosamente",
@@ -301,7 +327,6 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         updateLiquidacion,
         removeLiquidacion,
         reactivateLiquidacion,
-        fichadas,
         CUDFichadas
       }}
     >

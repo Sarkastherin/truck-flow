@@ -41,14 +41,14 @@ function EmptyTableState({
   onAction,
 }: EmptyTableStateProps) {
   return (
-    <div className="py-10 px-4 text-center text-gray-600 dark:text-gray-300">
+    <div className="py-10 px-4 text-center text-base-600 dark:text-base-300">
       <p className="text-base font-semibold">{title}</p>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <p className="mt-1 text-sm text-base-500 dark:text-base-400">
         {description}
       </p>
       {actionLabel && onAction && (
         <div className="mt-4 mx-auto w-max">
-          <Button color="violet" size="sm" onClick={onAction}>
+          <Button size="sm" onClick={onAction}>
             {actionLabel}
           </Button>
         </div>
@@ -202,7 +202,7 @@ type TableProps<T> = {
   btnOnClick?: {
     onClick: () => void;
     title: string;
-    color?: "blue" | "primary" | "success" | "cyan" | "indigo" | "orange" | "pink" | "purple" | "red" | "teal" | "violet" | "yellow" | "default";
+    color?: "blue" | "primary" | "success" | "cyan" | "indigo" | "orange" | "pink" | "purple" | "red" | "teal" | "primary" | "yellow" | "default";
   };
   emptyState?: {
     title?: string;
@@ -578,7 +578,7 @@ export function TableComponent<T>({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <div className="overflow-hidden rounded-lg border border-base-200 dark:border-base-700 bg-white dark:bg-base-900">
         <DataTable
           columns={processedColumns}
           data={visibleData}
@@ -638,7 +638,7 @@ export function TableComponent<T>({
       {(btnExport || btnNavigate || btnOnClick) && (
         <span className="fixed bottom-0 left-0 w-full">
           <div
-            className={`flex justify-between w-full  py-3 px-8 hover:bg-gray-200 hover:dark:bg-gray-950`}
+            className={`flex justify-between w-full  py-3 px-8 hover:bg-base-200 hover:dark:bg-base-950`}
           >
             {btnExport && (
               <ButtonExport

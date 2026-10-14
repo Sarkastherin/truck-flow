@@ -52,10 +52,10 @@ function StatCard({
     <Card className="rounded-2xl max-w-sm">
       <div className="flex justify-between items-center gap-4">
         <div className="flex flex-col items-start gap-1">
-          <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+          <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
             {label}
           </span>
-          <span className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
+          <span className="mt-1 text-3xl font-semibold text-base-900 dark:text-white">
             {value}
           </span>
         </div>
@@ -307,11 +307,11 @@ export default function HomeAdmin() {
   return (
     <>
       {/* HEADER */}
-      <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+      <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
         panel de administrador
       </span>
       {/* ACCESOS RÁPIDOS */}
-      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+      <span className="text-lg font-semibold text-base-900 dark:text-white">
         Accesos rápidos
       </span>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -329,16 +329,16 @@ export default function HomeAdmin() {
         ))}
       </div>
       {/* UNIDADES VENDIDAS*/}
-      <div className="mt-6 border-t border-gray-300 dark:border-gray-700 pt-6">
+      <div className="mt-6 border-t border-base-300 dark:border-base-700 pt-6">
         <div className="flex justify-between items-center gap-4">
           <div className="flex flex-col items-start gap-2">
-            <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+            <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
               UNIDADAS VENDIDAS
             </span>
-            <p className="mt-2 text-4xl font-semibold text-gray-900 dark:text-white">
+            <p className="mt-2 text-4xl font-semibold text-base-900 dark:text-white">
               {unidadesVendidasMes}
             </p>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            <p className="mt-4 text-sm text-base-600 dark:text-base-300">
               Pedidos generados en {mesActual}.
             </p>
           </div>
@@ -353,36 +353,36 @@ export default function HomeAdmin() {
             pedidosRecientes.map((pedido) => (
               <div
                 key={pedido.id}
-                className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950"
+                className="flex items-center justify-between rounded-2xl border border-base-200 bg-white px-4 py-3 dark:border-base-800 dark:bg-base-950"
               >
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm font-semibold text-base-900 dark:text-white">
                     {pedido.numero_pedido}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-base-500 dark:text-base-400">
                     {pedido.cliente?.razon_social || "Cliente sin asignar"}
                   </p>
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <span className="text-xs font-medium text-base-500 dark:text-base-400">
                   {formatDateUStoES(pedido.fecha_pedido)}
                 </span>
               </div>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+            <div className="rounded-2xl border border-dashed border-base-300 px-4 py-6 text-sm text-base-500 dark:border-base-700 dark:text-base-400">
               No hay pedidos recientes para mostrar.
             </div>
           )}
         </div>
       </div>
       {/* ULTIMOS MOVIMIENTOS */}
-      <div className="mt-6 border-t border-gray-300 dark:border-gray-700 pt-6">
+      <div className="mt-6 border-t border-base-300 dark:border-base-700 pt-6">
         <div className="flex justify-between items-center gap-4">
           <div className="flex flex-col items-start gap-2">
-            <span className="tracking-widest uppercase font-semibold text-gray-500 dark:text-gray-400 text-xs md:text-sm">
+            <span className="tracking-widest uppercase font-semibold text-base-500 dark:text-base-400 text-xs md:text-sm">
               Cuenta corriente
             </span>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">
+            <span className="text-xl font-semibold text-base-900 dark:text-white">
               Ultimos 5 movimientos cargados
             </span>
           </div>
@@ -407,23 +407,23 @@ export default function HomeAdmin() {
                   <NavLink
                     key={movimiento.id}
                     to={`/administracion/cuentas-corrientes/${movimiento.clienteId}`}
-                    className="block rounded-[1.25rem] border border-gray-200 bg-white px-4 py-4 transition hover:border-gray-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 dark:hover:border-gray-700"
+                    className="block rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                          <span className="rounded-full bg-base-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-base-700 dark:bg-base-800 dark:text-base-300">
                             {movementTypeLabels[movimiento.tipo_movimiento] ??
                               movimiento.tipo_movimiento}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-base-500 dark:text-base-400">
                             {formatDateUStoES(movimiento.fecha_movimiento)}
                           </span>
                         </div>
-                        <p className="mt-2 truncate text-base font-semibold text-gray-900 dark:text-white">
+                        <p className="mt-2 truncate text-base font-semibold text-base-900 dark:text-white">
                           {movimiento.clienteNombre}
                         </p>
-                        <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                        <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
                           {movimiento.concepto || "Sin concepto cargado"}
                         </p>
                       </div>
@@ -435,7 +435,7 @@ export default function HomeAdmin() {
                             currency: "ARS",
                           })}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-base-500 dark:text-base-400">
                           {movimiento.medio_pago === "no_aplica"
                             ? "Sin medio de pago"
                             : movimiento.medio_pago.replaceAll("_", " ")}
@@ -446,7 +446,7 @@ export default function HomeAdmin() {
                 );
               })
             ) : (
-              <div className="rounded-[1.25rem] border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-400">
+              <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                 {false
                   ? "Cargando movimientos recientes..."
                   : "Todavia no hay movimientos cargados para mostrar."}

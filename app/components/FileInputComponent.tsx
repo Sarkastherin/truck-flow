@@ -48,7 +48,7 @@ export function FileInputComponent<
   return (
     <>
       {filteredDocs.length > 0 && (
-        <div className="flex flex-col gap-2 w-full bg-blue-50 dark:bg-gray-700/30 border border-blue-300 dark:border-gray-600 rounded p-4">
+        <div className="flex flex-col gap-2 w-full bg-blue-50 dark:bg-base-700/30 border border-blue-300 dark:border-base-600 rounded p-4">
           <div className="dark:text-white font-semibold mb-2">
             Documentos cargados:
           </div>

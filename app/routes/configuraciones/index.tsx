@@ -28,12 +28,12 @@ export default function Configuraciones() {
         {configItems.map(
           ({ path, name, description, icon: { component: Icon, color } }) => (
             <NavLink key={path} to={path}>
-              <Card className="hover:shadow-2xl hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 h-full flex flex-col cursor-pointer">
+              <Card className="hover:shadow-2xl hover:scale-105 hover:bg-base-50 dark:hover:bg-base-800 transition-all duration-200 h-full flex flex-col cursor-pointer">
                 <div className="flex items-center space-x-4">
                   <Icon className={`text-2xl ${color}`} />
                   <h2 className="text-xl font-semibold">{name}</h2>
                 </div>
-                <p className="text-gray-500 dark:text-gray-400">
+                <p className="text-base-500 dark:text-base-400">
                   {description}
                 </p>
               </Card>

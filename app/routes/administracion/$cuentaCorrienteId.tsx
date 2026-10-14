@@ -60,27 +60,27 @@ export default function CuentaCorriente() {
           <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div className="flex items-start gap-4">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-base-500 dark:text-base-400">
                   Razón social
                 </p>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-lg sm:text-xl font-semibold text-base-900 dark:text-white">
                   {socio?.razon_social || "Cargando..."}
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                <p className="text-sm text-base-600 dark:text-base-300 mt-1">
                   CUIT: {formatCuit(socio?.cuit_cuil || "")}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-sm text-base-600 dark:text-base-300">
                   Cond. IVA: {socio?.condicion_iva || "-"}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col items-end">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-base-500 dark:text-base-400">
                 Saldo actual
               </span>
               <div
-                className={`mt-2 inline-flex items-center px-4 py-3 rounded-2xl text-white text-2xl font-bold ${saldo < 0 ? "bg-red-500" : saldo > 0 ? "bg-green-500" : "bg-gray-500"}`}
+                className={`mt-2 inline-flex items-center px-4 py-3 rounded-2xl text-white text-2xl font-bold ${saldo < 0 ? "bg-red-500" : saldo > 0 ? "bg-green-500" : "bg-base-500"}`}
               >
                 {saldo.toLocaleString("es-AR", {
                   style: "currency",
@@ -92,13 +92,13 @@ export default function CuentaCorriente() {
         </Card>
         <div className="w-full mt-6">
           <ButtonsActionsCtaCte clienteId={socio?.id || ""} />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white my-4">
+          <h2 className="text-xl font-semibold text-base-900 dark:text-white my-4">
             Movimientos
           </h2>
           {ctaCte ? (
             <TableMovimientos movimientos={ctaCte.movimientos} />
           ) : (
-            <p className="text-gray-500 italic">
+            <p className="text-base-500 italic">
               No hay movimientos registrados.
             </p>
           )}

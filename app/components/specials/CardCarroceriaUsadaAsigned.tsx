@@ -237,10 +237,10 @@ export default function CardCarroceriaUsadaAsigned({
     <>
       {value ? (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-700 dark:text-gray-400 font-medium mb-1">
+          <span className="text-sm text-base-700 dark:text-base-400 font-medium mb-1">
             {label}
           </span>
-          <span className="text-gray-800 dark:text-gray-200 text-sm">
+          <span className="text-base-800 dark:text-base-200 text-sm">
             {String(value) ?? "-"}
           </span>
         </div>
@@ -249,19 +249,19 @@ export default function CardCarroceriaUsadaAsigned({
   );
 
   return (
-    <Card className="w-full mx-auto mt-4 shadow-lg border border-violet-200 bg-white dark:bg-gray-800">
+    <Card className="w-full mx-auto mt-4 shadow-lg border border-primary-200 bg-white dark:bg-base-800">
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4 gap-2">
         <div>
-          <p className="text-xs text-violet-700 dark:text-violet-300 tracking-widest uppercase font-semibold">
+          <p className="text-xs text-primary-700 dark:text-primary-300 tracking-widest uppercase font-semibold">
             Tipo de carrozado
           </p>
-          <h2 className="text-2xl font-bold text-gray-700 dark:text-white">
+          <h2 className="text-2xl font-bold text-base-700 dark:text-white">
             {carroceriaUsada.tipo_carrozado || "-"}
           </h2>
         </div>
         <div>
           <button
-            className="text-sm text-violet-700 dark:text-violet-300 underline"
+            className="text-sm text-primary-700 dark:text-primary-300 underline"
             onClick={() => setCollapse(!collapse)}
           >
             {collapse ? "Mostrar" : "Ocultar"} detalles
@@ -282,11 +282,11 @@ export default function CardCarroceriaUsadaAsigned({
               />
             ))}
         </div>
-        <p className="col-span-full border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+        <p className="col-span-full border-t border-base-300 pt-2 text-xs tracking-widest uppercase text-base-500 dark:text-base-400 font-semibold">
           Cuchetín
         </p>
         {carroceriaUsada.cuchetin ? null : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-base-500 dark:text-base-400">
             No hay cuchetín agregado.
           </p>
         )}
@@ -306,12 +306,12 @@ export default function CardCarroceriaUsadaAsigned({
             />
           </div>
         )}
-        <p className="col-span-full border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+        <p className="col-span-full border-t border-base-300 pt-2 text-xs tracking-widest uppercase text-base-500 dark:text-base-400 font-semibold">
           Alargues
         </p>
         {carroceriaUsada.alargue_tipo_1 ||
         carroceriaUsada.alargue_tipo_2 ? null : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-base-500 dark:text-base-400">
             No hay alargues agregados.
           </p>
         )}
@@ -339,12 +339,12 @@ export default function CardCarroceriaUsadaAsigned({
             <InfoField label="Observaciones" value={carroceriaUsada.notas} />
           </div>
         )}
-        <p className="border-t border-gray-300 pt-2 text-xs tracking-widest uppercase text-gray-500 dark:text-gray-400 font-semibold">
+        <p className="border-t border-base-300 pt-2 text-xs tracking-widest uppercase text-base-500 dark:text-base-400 font-semibold">
           Datos del camión donde estaba instalada:
         </p>
         {carroceriaUsada.marca_camion ||
         carroceriaUsada.modelo_camion ? null : (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-base-500 dark:text-base-400">
             No hay datos del camión donde estaba instalada esta carrocería.
           </p>
         )}
@@ -362,7 +362,7 @@ export default function CardCarroceriaUsadaAsigned({
         )}
         <NavLink
           to={`/carrocerias-usadas/${carroceriaUsada.id}`}
-          className="mt-4 inline-block text-sm text-violet-700 dark:text-violet-300 underline"
+          className="mt-4 inline-block text-sm text-primary-700 dark:text-primary-300 underline"
         >
           Ir al registro de esta carrocería usada
         </NavLink>

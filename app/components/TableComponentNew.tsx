@@ -142,9 +142,9 @@ export default function TableComponent<T extends { active?: boolean }>({
       when: (row) => !row.active,
       classNames: [
         "border-l-4",
-        "border-gray-300",
-        "!bg-gray-200/30",
-        "!text-gray-400",
+        "border-base-300",
+        "!bg-base-200/30",
+        "!text-base-400",
       ],
     },
   ];
@@ -181,7 +181,7 @@ export default function TableComponent<T extends { active?: boolean }>({
         resizable
         title={
           <div className="flex w-full items-center justify-between gap-4">
-            <SubTitles title={title} back_path={backPath} color={color} />
+            <SubTitles title={title} back_path={backPath} />
             <div className="flex items-center gap-3">
               <TextInput
                 type="search"

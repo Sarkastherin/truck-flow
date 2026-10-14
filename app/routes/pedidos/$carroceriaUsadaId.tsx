@@ -215,7 +215,7 @@ export default function PedidosCarroceriaUsada() {
         </>
       ) : (
         <div className="flex flex-col justify-center items-center h-50 gap-4">
-          <p className="text-lg text-center text-gray-500 dark:text-gray-400">
+          <p className="text-lg text-center text-base-500 dark:text-base-400">
             Seleccione un carrocería usada para este pedido.
           </p>
           <Button onClick={handleOpenModal}>

@@ -31,8 +31,8 @@ export function PrestarCarroceriaModal({
   return (
     <>
       {form.watch("id") && (
-        <div className="flex flex-col gap-2 border-b border-gray-200 dark:border-gray-700 pb-4">
-          <p className="text-xs tracking-widest font-bold uppercase text-gray-500">
+        <div className="flex flex-col gap-2 border-b border-base-200 dark:border-base-700 pb-4">
+          <p className="text-xs tracking-widest font-bold uppercase text-base-500">
             Datos de la carrocería usada
           </p>
           <InfoField
@@ -60,7 +60,7 @@ export function PrestarCarroceriaModal({
           className="grid grid-cols-1 gap-2"
           disabled={form.formState.isSubmitting}
         >
-          <p className="text-xs tracking-widest font-bold uppercase text-gray-500">
+          <p className="text-xs tracking-widest font-bold uppercase text-base-500">
             Datos del préstamo
           </p>
           <Input
@@ -89,7 +89,7 @@ export function PrestarCarroceriaModal({
           className="grid grid-cols-1 gap-2"
           disabled={form.formState.isSubmitting}
         >
-          <p className="text-xs tracking-widest font-bold uppercase text-gray-500">
+          <p className="text-xs tracking-widest font-bold uppercase text-base-500">
             Datos de devolución
           </p>
           <Input

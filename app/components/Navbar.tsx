@@ -19,33 +19,11 @@ import {
   DropdownHeader,
   DropdownItem,
   Navbar,
-  NavbarBrand,
   NavbarCollapse,
-  NavbarLink,
   NavbarToggle,
   DarkThemeToggle,
   useNavbarContext,
 } from "flowbite-react";
-const NavLinkComponent = ({
-  children,
-  to,
-}: {
-  children: React.ReactNode;
-  to: string;
-}) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `inline-flex w-full items-center justify-center rounded-full text-sm font-semibold transition-all duration-200 md:w-auto md:justify-start py-2 px-3 ${
-        isActive
-          ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500"
-          : "text-gray-600 hover:bg-white hover:text-violet-700 dark:text-gray-300 dark:hover:bg-gray-700/80 dark:hover:text-violet-300"
-      }`
-    }
-  >
-    {children}
-  </NavLink>
-);
 
 function NavLinks() {
   const { setIsOpen } = useNavbarContext();
@@ -61,7 +39,7 @@ function NavLinks() {
             to={item.to}
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
-              `${isActive ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30 dark:bg-violet-500 hover:bg-violet-600 hover:text-white hover:dark:bg-violet-500" : "hover:bg-violet-300 hover:dark:bg-violet-600/50 "}  m-2 inline-flex items-center gap-1.5 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
+              `${isActive ? "bg-primary-600 dark:bg-primary-500 text-white dark:text-base-800" : " hover:bg-primary-400/50 hover:dark:bg-base-700/70"}  m-2 inline-flex items-center gap-1.5 px-2.5 py-2 rounded-full font-medium text-sm transition-colors duration-200`
             }
           >
             {Icon && <Icon className="h-4 w-4 shrink-0" />}
@@ -98,7 +76,7 @@ export function NavBar() {
   return (
     <Navbar
       rounded
-      className="sticky top-0 z-50 border-b border-white/50 bg-linear-to-r from-slate-50 via-white to-violet-50/80 shadow-sm backdrop-blur-xl dark:border-gray-700/70 dark:from-gray-900 dark:via-gray-900 dark:to-violet-950/40"
+      className="sticky top-0 z-50 border-b border-white/50 bg-linear-to-r from-slate-50 via-white to-primary-50/80 shadow-sm backdrop-blur-xl dark:border-base-700/70 dark:from-base-900 dark:via-base-900 dark:to-primary-950/40"
     >
       <NavLink to="/">
         <LogoComponent />
@@ -112,7 +90,7 @@ export function NavBar() {
               placeholderInitials={initials}
               rounded
               bordered
-              color="purple"
+              color="primary"
             />
           }
         >
@@ -121,8 +99,8 @@ export function NavBar() {
             <span className="block truncate text-sm font-medium">
               {activeUser?.email}
             </span>
-            <span className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2">
-              <LuShieldCheck className="h-3.5 w-3.5 text-violet-500" />
+            <span className="inline-flex items-center gap-2 text-sm text-base-500 dark:text-base-400 mt-2">
+              <LuShieldCheck className="h-3.5 w-3.5 text-primary-500" />
               {isLoading
                 ? "Sincronizando"
                 : optionsRoles.find((r) => r.value === activeUser?.role)
@@ -148,12 +126,12 @@ export function NavBar() {
               size: "3xl"
             })
           }
-          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-white/80 text-gray-500 hover:bg-white hover:text-violet-600 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-400 transition-colors"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-base-200 bg-white/80 text-base-500 hover:bg-white hover:text-primary-600 dark:border-base-700 dark:bg-base-800/80 dark:text-base-400 dark:hover:bg-base-800 dark:hover:text-primary-400 transition-colors"
           title="Centro de Ayuda"
         >
           <LuCircleHelp className="h-5 w-5" />
         </button>
-        <DarkThemeToggle className="ml-2 flex h-11 w-full items-center justify-center rounded-2xl border border-gray-200 bg-white/80 hover:bg-white dark:border-gray-700 dark:bg-gray-800/80 dark:hover:bg-gray-800 md:w-auto md:rounded-full" />
+        <DarkThemeToggle className="ml-2 flex h-11 w-full items-center justify-center rounded-2xl border border-base-200 bg-white/80 hover:bg-white dark:border-base-700 dark:bg-base-800/80 dark:hover:bg-base-800 md:w-auto md:rounded-full" />
       </div>
       <NavLinks />
     </Navbar>

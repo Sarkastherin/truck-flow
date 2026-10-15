@@ -12,7 +12,7 @@ import { useRRHH } from "~/context/RRHHContext";
 import { LoadingComponent } from "~/components/LoadingComponent";
 import { SeleccionarLiquidacionModal } from "~/components/modals/customs/SeleccionarLiquidacionModal";
 import type { Liquidacion } from "~/types/liquidaciones";
-import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+//import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -20,12 +20,12 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Recursos Humanos" },
   ];
 }
-
+const MODE_DEV = true
 export default function RRHH() {
   const navigate = useNavigate();
   const { rrhhItems } = useNavItems();
   const { openModal, closeModal } = useModal();
-  const { form, onCreate, onUpdate, onDelete, onReactivate } = useLiquidacion();
+  const { form, onCreate } = useLiquidacion();
   const { getSueldosData, isReady } = useRRHH();
 
   useEffect(() => {

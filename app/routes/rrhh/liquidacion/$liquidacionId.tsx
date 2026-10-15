@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
 import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
 import { LuArrowRight, LuCalendarDays } from "react-icons/lu";
-import type { Fichada, Reporte } from "~/types/liquidaciones";
+import type { Fichada, Reporte, LiquidacionResumen, ReporteFormValues } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
 import { formatDateUStoES } from "~/backend/Database/helperTransformData";
 import { getDiasPeriodo } from "~/components/modals/customs/SeleccionarLiquidacionModal";
@@ -16,6 +16,7 @@ import Import from "~/components/liquidacion/import";
 import FichadasTableModal, {
   aplicarEdicionCelda,
 } from "~/components/liquidacion/FichadasTableModal";
+import ReportesEmpleadoModal from "~/components/liquidacion/ReportesEmpleadoModal";
 import type { FichadasFileUI, FichadaFormValues } from "~/types/fichadas";
 import { useModal } from "~/context/ModalContext";
 import type { TableColumn } from "react-data-table-component";
@@ -75,14 +76,20 @@ const parseHora = (raw: string | number | null | undefined): string | null => {
   }
   return null;
 };
-type TableProduccionProps = {
-  empleado: Employee;
-  total: number;
-  reportes?: Reporte[]
-};
-//const columns: TableColumn<TableProduccionProps[]> = [{ name: "Empleado" }];
+const formatCurrency = (value: number) =>
+  value.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
+
+type ResumenRow = LiquidacionResumen & { active?: boolean };
+
 export default function Liquidacion() {
-  const { liquidaciones, employees, CUDFichadas } = useRRHH();
+  const {
+    liquidaciones,
+    employees,
+    premios,
+    isLoading,
+    CUDFichadas,
+    CUDReportes,
+  } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -91,6 +98,10 @@ export default function Liquidacion() {
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [importKey, setImportKey] = useState(0);
+  const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
+    null,
+  );
+  const [isSavingReportes, setIsSavingReportes] = useState(false);
   const { openModal, closeModal } = useModal();
   const liquidacion = useMemo(() => {
     return liquidaciones.find((liq) => liq.id === liquidacionId);
@@ -131,6 +142,81 @@ export default function Liquidacion() {
   const reportesGuardados = liquidacion?.reporte ?? [];
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
   const hayReportesGuardados = reportesGuardados.length > 0;
+
+  const resumen: ResumenRow[] = useMemo(() => {
+    const premioById = new Map(premios.map((premio) => [premio.id, premio]));
+    return employees
+      .filter((emp) => emp.active !== false)
+      .map((empleado) => {
+        const fichadas = fichadasGuardadas.filter(
+          (fich) => fich.empleado_id === empleado.id,
+        );
+        const reportes = reportesGuardados.filter(
+          (rep) => rep.empleado_id === empleado.id,
+        );
+        const total_horas_regulares = fichadas.reduce(
+          (acc, fich) => acc + (Number(fich.horas_regular) || 0),
+          0,
+        );
+        const total_horas_extras = fichadas.reduce(
+          (acc, fich) => acc + (Number(fich.horas_extras) || 0),
+          0,
+        );
+        const monto_premio = reportes.reduce((acc, rep) => {
+          const premio = premioById.get(rep.premio_id);
+          const precio = Number(premio?.precio) || 0;
+          return acc + precio * (Number(rep.cantidad) || 0);
+        }, 0);
+        return {
+          empleado,
+          fichadas,
+          reportes,
+          total_horas_regulares,
+          total_horas_extras,
+          monto_salario: 0,
+          monto_premio,
+        };
+      });
+  }, [employees, premios, fichadasGuardadas, reportesGuardados]);
+
+  const totalPremiosGeneral = useMemo(
+    () => resumen.reduce((acc, row) => acc + row.monto_premio, 0),
+    [resumen],
+  );
+
+  const produccionColumns: TableColumn<ResumenRow>[] = [
+    {
+      name: "Empleado",
+      selector: (row) => row.empleado.nombre_completo,
+      sortable: true,
+      filterable: true,
+      filterType: "text",
+      grow: 1,
+    },
+    {
+      name: "DNI",
+      selector: (row) => String(row.empleado.dni),
+      width: "140px",
+      sortable: true,
+      filterable: true,
+    },
+    {
+      name: "Reportes",
+      selector: (row) => row.reportes.length,
+      width: "110px",
+      center: true,
+    },
+    {
+      name: "Total premios",
+      selector: (row) => row.monto_premio,
+      cell: (row) => (
+        <span className="font-semibold">{formatCurrency(row.monto_premio)}</span>
+      ),
+      width: "170px",
+      right: true,
+      sortable: true,
+    },
+  ];
 
   const hasNoEncontrados = fichadasFile.some((fich) => !fich.empleado);
   const hasFaltanSalidas = fichadasFile.some((fich) => !fich.salida);
@@ -240,6 +326,56 @@ export default function Liquidacion() {
       setIsSaving(false);
     }
   };
+
+  const selectedEmpleadoRow = selectedEmpleado
+    ? resumen.find((row) => row.empleado.id === selectedEmpleado.id)
+    : undefined;
+
+  const handleCloseReportesModal = () => {
+    setSelectedEmpleado(null);
+  };
+
+  const handleSaveReportes = async (
+    reportes: ReporteFormValues[],
+    deletedIds: string[],
+  ) => {
+    if (!liquidacionId || !selectedEmpleado) return;
+
+    setIsSavingReportes(true);
+    openModal("loading", {
+      props: {
+        title: "Guardando reportes",
+      },
+    });
+    try {
+      const result = await CUDReportes(reportes as Reporte[], deletedIds);
+      if (!result.success) {
+        throw new Error(
+          result.error || result.message || "No se pudieron guardar los reportes",
+        );
+      }
+      closeModal();
+      setSelectedEmpleado(null);
+      openModal("success", {
+        props: {
+          title: "Reportes guardados",
+          message: result.message || "Los reportes se guardaron correctamente",
+        },
+      });
+    } catch (error) {
+      openModal("error", {
+        props: {
+          title: "Error al guardar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Hubo un error al guardar los reportes. Inténtalo de nuevo.",
+        },
+      });
+    } finally {
+      setIsSavingReportes(false);
+    }
+  };
   return (
     <>
       <Card>
@@ -318,7 +454,28 @@ export default function Liquidacion() {
             )}
             {activeTab === 1 && (
               <div className="mt-4">
-                {/* <TableComponent columns={columns} /> */}
+                <div className="mb-3 flex items-center justify-end gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
+                  <span className="text-sm font-medium text-base-500 dark:text-base-400">
+                    Total general de premios
+                  </span>
+                  <span className="text-lg font-bold text-base-800 dark:text-base-100">
+                    {formatCurrency(totalPremiosGeneral)}
+                  </span>
+                </div>
+                <TableComponent
+                  columns={produccionColumns}
+                  data={resumen}
+                  title="Resumen de producción"
+                  backPath=""
+                  isLoading={isLoading}
+                  color="yellow"
+                  labelButton=""
+                  hasActiveColumn={false}
+                  onRowClicked={(row) => setSelectedEmpleado(row.empleado)}
+                  searchKeys={["empleado.nombre_completo", "empleado.dni"]}
+                  searchPlaceholder="Buscar por nombre o DNI"
+                  scrollHeightOffset={430}
+                />
               </div>
             )}
             {activeTab === 2 && <div>resumen</div>}
@@ -337,6 +494,16 @@ export default function Liquidacion() {
         isSaving={isSaving}
         hasNoEncontrados={hasNoEncontrados}
         hasFaltanSalidas={hasFaltanSalidas}
+      />
+      <ReportesEmpleadoModal
+        show={Boolean(selectedEmpleado)}
+        empleado={selectedEmpleado}
+        rows={selectedEmpleadoRow?.reportes ?? []}
+        premios={premios}
+        liquidacionId={liquidacionId ?? ""}
+        isSaving={isSavingReportes}
+        onSave={handleSaveReportes}
+        onClose={handleCloseReportesModal}
       />
     </>
   );

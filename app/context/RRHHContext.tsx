@@ -64,6 +64,11 @@ type RRHHContextType = {
     fichadas: Fichada[],
     deletedIds: string[],
   ) => Promise<CrudGlobalResponse>;
+  /* Reportes */
+  CUDReportes: (
+    reportes: Reporte[],
+    deletedIds: string[],
+  ) => Promise<CrudGlobalResponse>;
 };
 
 type HeadersType = {
@@ -266,10 +271,16 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
     activeUser!!,
     "id",
   );
-  const CUDFichadas = useCallback(
-    async (fichadas: Fichada[], deletedIds: string[]) => {
+  const CUDSueldosEntities = useCallback(
+    async <T extends { id?: string }>(
+      entities: T[],
+      deletedIds: string[],
+      sheetKey: "fichadas" | "reportes",
+      entityLabel: string,
+      successMessage: string,
+    ) => {
       const needsFreshRows =
-        deletedIds.length > 0 || fichadas.some((fich) => Boolean(fich.id));
+        deletedIds.length > 0 || entities.some((ent) => Boolean(ent.id));
       if (needsFreshRows) {
         // Vuelve a leer el Sheet para ubicar las filas por id con datos
         // actuales (evita escribir fuera del grid si la hoja cambió externamente)
@@ -278,26 +289,48 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         if (!paramsFromSheetsRef.current) {
           return {
             success: false,
-            message: "No se pudo actualizar las fichadas",
+            message: `No se pudo actualizar ${entityLabel}`,
             error: "No se pudieron leer los datos actuales del Sheet",
           };
         }
       }
       return cudGlobalFieldsArrayEntities({
-        entities: fichadas,
+        entities,
         deletedIds,
-        sheetKey: "fichadas",
-        entityLabel: "fichada",
+        sheetKey,
+        entityLabel,
         paramsFromSheets: paramsFromSheetsRef.current ?? paramsFromSheets,
         sheetId: SHEET_ID_SUELDOS,
-        sheetName: SHEET_NAMES_SUELDOS.fichadas,
-        successMessage: "Fichadas actualizados exitosamente",
+        sheetName: SHEET_NAMES_SUELDOS[sheetKey],
+        successMessage,
         onGetData: getSueldosData,
         activeUser: activeUser!!,
         nameColId: "id",
       });
     },
     [cudGlobalFieldsArrayEntities, getSueldosData, paramsFromSheets],
+  );
+  const CUDFichadas = useCallback(
+    (fichadas: Fichada[], deletedIds: string[]) =>
+      CUDSueldosEntities(
+        fichadas,
+        deletedIds,
+        "fichadas",
+        "fichada",
+        "Fichadas actualizados exitosamente",
+      ),
+    [CUDSueldosEntities],
+  );
+  const CUDReportes = useCallback(
+    (reportes: Reporte[], deletedIds: string[]) =>
+      CUDSueldosEntities(
+        reportes,
+        deletedIds,
+        "reportes",
+        "reporte",
+        "Reportes actualizados exitosamente",
+      ),
+    [CUDSueldosEntities],
   );
   const isDNIRegistered = useCallback(
     (dni: string | number) => {
@@ -333,6 +366,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         removeLiquidacion,
         reactivateLiquidacion,
         CUDFichadas,
+        CUDReportes,
       }}
     >
       {children}

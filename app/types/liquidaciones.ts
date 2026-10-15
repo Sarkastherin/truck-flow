@@ -33,13 +33,19 @@ export type Liquidacion = CommonTypes & {
   reporte?: Reporte[];
 };
 export type LiquidacionResumen = {
-  empleado: Employee[];
+  empleado: Employee;
   total_horas_regulares: number;
   total_horas_extras: number;
   monto_salario: number;
   monto_premio: number;
-  fichadas:Fichada[];
+  fichadas: Fichada[];
   reportes: Reporte[];
+};
+export type ReporteFormValues = Omit<Reporte, keyof CommonTypes> & {
+  id?: string;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 export type LiquidacionFormValues = Omit<Liquidacion, keyof CommonTypes> & {
   id?: string;

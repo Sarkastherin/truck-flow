@@ -7,8 +7,8 @@ import { FaBuildingUser } from "react-icons/fa6";
 import { TbSitemap } from "react-icons/tb";
 import type { Role } from "~/types/users";
 import { FaUsers, FaGift, FaMoneyBill } from "react-icons/fa";
-import { MODE_DEV } from "~/backend/Database/SheetsConfig";
-
+//import { MODE_DEV } from "~/backend/Database/SheetsConfig";
+const MODE_DEV = true
 export type NavItem = {
   name: string;
   to: string;

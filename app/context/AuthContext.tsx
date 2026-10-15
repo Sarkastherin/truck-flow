@@ -11,6 +11,7 @@ import Auth, {
   Logout,
   renewSession,
   getUserEmail,
+  type RenewStage,
 } from "../backend/Auth/auth";
 import { getAllSheets } from "~/backend/Database/apiGoogleSheets";
 import {
@@ -45,7 +46,7 @@ type AuthContextType = {
   logout: () => void;
   errorMessage: string | null;
   sessionStatus: SessionStatus;
-  renewSession: () => Promise<boolean>;
+  renewSession: (onStage?: (stage: RenewStage) => void) => Promise<boolean>;
 };
 type AuthProviderProps = {
   children: ReactNode;
@@ -104,28 +105,31 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       setSessionStatus("checking");
     }
   }, []);
-  const handleRenewSession = useCallback(async (): Promise<boolean> => {
-    const renewed = await renewSession();
-    if (!renewed) {
-      return false;
-    }
+  const handleRenewSession = useCallback(
+    async (onStage?: (stage: RenewStage) => void): Promise<boolean> => {
+      const renewed = await renewSession(onStage);
+      if (!renewed) {
+        return false;
+      }
 
-    // Restaurar identidad con el token nuevo sin tocar isLoading,
-    // para no desmontar el contenido que el usuario tiene en pantalla.
-    const freshEmail = await getUserEmail();
-    if (freshEmail) {
-      setEmail(freshEmail);
-      setErrorMessage(null);
+      // Restaurar identidad con el token nuevo sin tocar isLoading,
+      // para no desmontar el contenido que el usuario tiene en pantalla.
+      const freshEmail = await getUserEmail();
+      if (freshEmail) {
+        setEmail(freshEmail);
+        setErrorMessage(null);
+        return true;
+      }
+
+      // El userinfo sigue fallando tras renovar: reinicio limpio.
+      console.error(
+        "Sesión renovada pero no se pudo obtener el email; recargando la aplicación.",
+      );
+      window.location.reload();
       return true;
-    }
-
-    // El userinfo sigue fallando tras renovar: reinicio limpio.
-    console.error(
-      "Sesión renovada pero no se pudo obtener el email; recargando la aplicación.",
-    );
-    window.location.reload();
-    return true;
-  }, []);
+    },
+    [],
+  );
     return (
     <AuthContext.Provider
       value={{

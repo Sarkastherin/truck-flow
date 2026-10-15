@@ -20,6 +20,11 @@ type TokenClientResponse = {
   error?: unknown;
 };
 
+type TokenClientErrorResponse = {
+  type?: string;
+  [key: string]: unknown;
+};
+
 type TokenClient = {
   callback: "" | ((response: TokenClientResponse) => void | Promise<void>);
   requestAccessToken: (options: { prompt: "" | "consent" }) => void;
@@ -43,6 +48,8 @@ export type TokenStatus = {
   token?: GoogleAccessToken;
 };
 
+export type RenewStage = "silent" | "popup";
+
 declare const gapi: {
   load: (name: "client", callback: () => void) => void;
   client: {
@@ -64,12 +71,16 @@ declare const google: {
         callback:
           | ""
           | ((response: TokenClientResponse) => void | Promise<void>);
+        error_callback?: (error: TokenClientErrorResponse) => void;
       }) => TokenClient;
     };
   };
 };
 
 const SILENT_REFRESH_TIMEOUT_MS = 6000;
+const SILENT_MANUAL_TIMEOUT_MS = 3000;
+const CONSENT_TIMEOUT_MS = 120000;
+const GAPI_LOAD_TIMEOUT_MS = 10000;
 const USERINFO_TIMEOUT_MS = 5000;
 const REFRESH_RETRY_DELAYS_MS = [0, 2000, 5000];
 
@@ -82,37 +93,88 @@ let visibilityHandlerAttached = false;
 let gapiInitPromise: Promise<void> | null = null;
 let gisInitPromise: Promise<void> | null = null;
 let activeRefreshCycle: Promise<boolean> | null = null;
+let pendingRequestReject: ((reason: Error) => void) | null = null;
+let manualRenewInProgress = false;
 
 function gapiLoaded(apiKey: string): Promise<void> {
   if (!gapiInitPromise) {
-    gapiInitPromise = new Promise((resolve) => {
+    gapiInitPromise = new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        gapiInitPromise = null;
+        reject(
+          new Error(
+            "No se pudo cargar la API de Google (gapi). Verificá tu conexión.",
+          ),
+        );
+      }, GAPI_LOAD_TIMEOUT_MS);
+
       gapi.load("client", async () => {
-        await gapi.client.init({
-          apiKey,
-          discoveryDocs: [
-            DISCOVERY_DOC_GMAIL,
-            DISCOVERY_DOC_SHEET,
-            DISCOVERY_DOC_DRIVE,
-          ],
-        });
-        gapiInited = true;
-        resolve();
+        try {
+          await gapi.client.init({
+            apiKey,
+            discoveryDocs: [
+              DISCOVERY_DOC_GMAIL,
+              DISCOVERY_DOC_SHEET,
+              DISCOVERY_DOC_DRIVE,
+            ],
+          });
+          gapiInited = true;
+          clearTimeout(timer);
+          resolve();
+        } catch (error) {
+          clearTimeout(timer);
+          gapiInitPromise = null;
+          reject(
+            error instanceof Error
+              ? error
+              : new Error("No se pudo inicializar la API de Google."),
+          );
+        }
       });
     });
   }
   return gapiInitPromise;
 }
 
+function handleTokenClientError(error: TokenClientErrorResponse): void {
+  const messages: Record<string, string> = {
+    popup_failed_to_open:
+      "El navegador bloqueó la ventana de Google. Permití las ventanas emergentes de este sitio y probá de nuevo.",
+    popup_closed:
+      "Cerraste la ventana de Google antes de completar el inicio de sesión.",
+    unknown: "Google devolvió un error inesperado al pedir el token.",
+  };
+  const type = error.type ?? "unknown";
+  const message = messages[type] ?? messages.unknown;
+  console.error("Error de GIS (error_callback):", type, error);
+
+  if (pendingRequestReject) {
+    pendingRequestReject(new Error(message));
+  }
+}
+
 function gisLoaded(clientId: string): Promise<void> {
   if (!gisInitPromise) {
-    gisInitPromise = new Promise((resolve) => {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: SCOPES,
-        callback: "",
-      });
-      gisInited = true;
-      resolve();
+    gisInitPromise = new Promise<void>((resolve, reject) => {
+      try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: SCOPES,
+          callback: "",
+          error_callback: handleTokenClientError,
+        });
+        gisInited = true;
+        resolve();
+      } catch (error) {
+        reject(
+          error instanceof Error
+            ? error
+            : new Error("No se pudo cargar Google Identity Services."),
+        );
+      }
+    }).catch((error) => {
+      gisInitPromise = null;
+      throw error;
     });
   }
   return gisInitPromise;
@@ -144,6 +206,17 @@ function needsTokenRefresh(token: GoogleAccessToken | null): boolean {
   return expiresAt - now <= tenMinutes;
 }
 
+function persistToken(token: GoogleAccessToken): void {
+  token.created_at = Date.now();
+  gapi.client.setToken(token);
+  localStorage.setItem("google_auth_token", JSON.stringify(token));
+  setSessionStatus("valid");
+
+  if (onTokenRefreshCallback) {
+    onTokenRefreshCallback(token);
+  }
+}
+
 function requestToken(
   prompt: "" | "consent",
   timeoutMs?: number,
@@ -155,19 +228,39 @@ function requestToken(
     }
 
     let settled = false;
-    const timer = timeoutMs
-      ? setTimeout(() => {
-          if (!settled) {
-            settled = true;
-            reject(new Error("Timeout solicitando token de acceso"));
-          }
-        }, timeoutMs)
-      : null;
-
-    tokenClient.callback = async (response: TokenClientResponse) => {
+    const settleReject = (reason: Error) => {
       if (settled) return;
       settled = true;
       if (timer) clearTimeout(timer);
+      pendingRequestReject = null;
+      reject(reason);
+    };
+
+    const timer = timeoutMs
+      ? setTimeout(() => {
+          settleReject(new Error("Timeout solicitando token de acceso"));
+        }, timeoutMs)
+      : null;
+
+    pendingRequestReject = settleReject;
+
+    tokenClient.callback = async (response: TokenClientResponse) => {
+      if (settled) {
+        // El intento ya venció, pero si llegó un token válido igual lo guardamos
+        if (response.error === undefined) {
+          const lateToken = response as unknown as GoogleAccessToken;
+          if (lateToken.access_token) {
+            persistToken(lateToken);
+            console.warn(
+              "Token recibido después del vencimiento del intento; se guardó igual.",
+            );
+          }
+        }
+        return;
+      }
+      settled = true;
+      if (timer) clearTimeout(timer);
+      pendingRequestReject = null;
 
       if (response.error !== undefined) {
         console.error("Error obteniendo token:", response.error);
@@ -184,15 +277,7 @@ function requestToken(
         return;
       }
 
-      token.created_at = Date.now();
-      gapi.client.setToken(token);
-      localStorage.setItem("google_auth_token", JSON.stringify(token));
-      setSessionStatus("valid");
-
-      if (onTokenRefreshCallback) {
-        onTokenRefreshCallback(token);
-      }
-
+      persistToken(token);
       resolve(true);
     };
 
@@ -252,6 +337,8 @@ async function resolveCycleOutcome(ok: boolean): Promise<boolean> {
 }
 
 async function refreshIfNeeded(): Promise<void> {
+  if (manualRenewInProgress) return;
+
   const savedToken = readStoredToken();
   if (!savedToken || !needsTokenRefresh(savedToken)) return;
 
@@ -346,7 +433,7 @@ async function handleAuthClick(): Promise<boolean> {
   }
 
   // Fallback: popup de consentimiento (solo primera vez o sesión de Google caída).
-  await requestToken("consent");
+  await requestToken("consent", CONSENT_TIMEOUT_MS);
   return true;
 }
 
@@ -479,20 +566,45 @@ const checkTokenStatus = (): TokenStatus => {
   }
 };
 
-const renewSession = async (): Promise<boolean> => {
+const renewSession = async (
+  onStage?: (stage: RenewStage) => void,
+): Promise<boolean> => {
+  manualRenewInProgress = true;
   try {
-    const ok = await runRefreshCycle();
-    if (ok) {
-      console.log("Sesión renovada por el usuario");
-      return true;
+    onStage?.("silent");
+
+    // Si ya hay un ciclo automático en curso, esperar su resultado.
+    if (activeRefreshCycle) {
+      const activeOk = await activeRefreshCycle;
+      if (activeOk) {
+        console.log("Sesión renovada por el ciclo automático en curso");
+        return true;
+      }
     }
-    console.error("No se pudo renovar la sesión de forma silenciosa");
-    setSessionStatus("expired");
-    return false;
-  } catch (error) {
-    console.error("Error renovando la sesión:", error);
-    setSessionStatus("expired");
-    return false;
+
+    try {
+      await requestToken("", SILENT_MANUAL_TIMEOUT_MS);
+      console.log("Sesión renovada de forma silenciosa");
+      return true;
+    } catch (error) {
+      console.warn(
+        "Renovación silenciosa no disponible, pidiendo interacción del usuario...",
+        error,
+      );
+    }
+
+    onStage?.("popup");
+    try {
+      await requestToken("consent", CONSENT_TIMEOUT_MS);
+      console.log("Sesión renovada mediante consentimiento del usuario");
+      return true;
+    } catch (error) {
+      console.error("No se pudo renovar la sesión:", error);
+      setSessionStatus("expired");
+      return false;
+    }
+  } finally {
+    manualRenewInProgress = false;
   }
 };
 

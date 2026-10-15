@@ -1,24 +1,28 @@
 import { useEffect, useState } from "react";
 import { Button } from "flowbite-react";
 import { useAuth } from "~/context/AuthContext";
+import type { RenewStage } from "~/backend/Auth/auth";
 
 export default function SessionExpiredGuard() {
   const { sessionStatus, renewSession, logout } = useAuth();
   const [isRenewing, setIsRenewing] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
+  const [stage, setStage] = useState<RenewStage>("silent");
 
   useEffect(() => {
     if (sessionStatus !== "expired") {
       setHasFailed(false);
       setIsRenewing(false);
+      setStage("silent");
     }
   }, [sessionStatus]);
 
   const handleRenew = async () => {
     setIsRenewing(true);
     setHasFailed(false);
+    setStage("silent");
     try {
-      const renewed = await renewSession();
+      const renewed = await renewSession(setStage);
       if (!renewed) {
         setHasFailed(true);
       }
@@ -75,6 +79,12 @@ export default function SessionExpiredGuard() {
             )}
 
             <div className="flex flex-col gap-2">
+              {isRenewing && stage === "popup" && (
+                <p className="text-sm text-center text-base-600 dark:text-base-400">
+                  Se abrió una ventana de Google: completala ahí para renovar
+                  la sesión.
+                </p>
+              )}
               <Button
                 onClick={handleRenew}
                 disabled={isRenewing}

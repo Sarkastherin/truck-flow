@@ -60,6 +60,7 @@ export type Employee = CommonTypes & {
   dni: string | number;
   tipo_pago: TipoPago;
   valor_salario_semanal: number | null;
+  valor_hora_regular: number | null;
   valor_hora_extra: number | null;
   grupo: GrupoEmployee | null;
   fecha_nacimiento: string | null;

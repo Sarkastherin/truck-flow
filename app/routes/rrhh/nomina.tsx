@@ -49,6 +49,16 @@ const columns: TableColumn<Employee>[] = [
     width: "150px",
   },
   {
+    name: "Valor Hora Reg",
+    selector: (row) =>
+      (row.valor_hora_regular || "-").toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+      }) || "-",
+    sortable: true,
+    width: "150px",
+  },
+  {
     name: "Valor Hora Extra",
     selector: (row) =>
       (row.valor_hora_extra || "-").toLocaleString("es-AR", {

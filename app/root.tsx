@@ -15,6 +15,7 @@ import { flowbiteTheme } from "./theme/flowbite";
 import { UserProvider } from "./context/UserContext";
 import { ModalProvider } from "./context/ModalContext";
 import { GlobalProvider } from "./context/GlobalContext";
+import { LoadingComponent } from "./components/LoadingComponent";
 export const links: Route.LinksFunction = () => [
   { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -59,6 +60,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </body>
     </html>
   );
+}
+
+export function HydrateFallback() {
+  return <LoadingComponent message="Cargando la aplicación..." />;
 }
 
 export default function App() {

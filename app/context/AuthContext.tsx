@@ -7,7 +7,11 @@ import {
   type ReactNode,
   useMemo,
 } from "react";
-import Auth, { Logout } from "../backend/Auth/auth";
+import Auth, {
+  Logout,
+  renewSession,
+  getUserEmail,
+} from "../backend/Auth/auth";
 import { getAllSheets } from "~/backend/Database/apiGoogleSheets";
 import {
   SHEET_ID_USUARIOS,
@@ -15,6 +19,12 @@ import {
   getCompleteSheetRange,
 } from "~/backend/Database/SheetsConfig";
 import { getDataInJSONFormat } from "~/backend/Database/helperTransformData";
+import {
+  getSessionStatus,
+  setSessionStatus,
+  subscribeSessionStatus,
+  type SessionStatus,
+} from "~/utils/authEvents";
 import type { UsersTable } from "~/types/users";
 import {useNavigate} from "react-router";
 const apiKey =
@@ -34,6 +44,8 @@ type AuthContextType = {
   getAuth: () => Promise<void>;
   logout: () => void;
   errorMessage: string | null;
+  sessionStatus: SessionStatus;
+  renewSession: () => Promise<boolean>;
 };
 type AuthProviderProps = {
   children: ReactNode;
@@ -46,6 +58,13 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   const [email, setEmail] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [sessionStatus, setLocalSessionStatus] = useState<SessionStatus>(
+    getSessionStatus,
+  );
+
+  useEffect(() => {
+    return subscribeSessionStatus(setLocalSessionStatus);
+  }, []);
 
   const authGoogle = async () => {
     const authResult = await Auth(apiKey, clientId);
@@ -59,11 +78,19 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       if (authResult && authResult.success) {
         setAuth(true);
         setEmail(authResult.email);
+        setErrorMessage(null);
       } else {
         setAuth(false);
         setEmail(null);
         setErrorMessage(authResult.error);
       }
+    } catch (error) {
+      console.error("Error inesperado de autenticación:", error);
+      setAuth(false);
+      setEmail(null);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error de autenticación",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -73,10 +100,45 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     if (logoutResult) {
       setAuth(false);
       setEmail(null);
+      setErrorMessage(null);
+      setSessionStatus("checking");
     }
   }, []);
+  const handleRenewSession = useCallback(async (): Promise<boolean> => {
+    const renewed = await renewSession();
+    if (!renewed) {
+      return false;
+    }
+
+    // Restaurar identidad con el token nuevo sin tocar isLoading,
+    // para no desmontar el contenido que el usuario tiene en pantalla.
+    const freshEmail = await getUserEmail();
+    if (freshEmail) {
+      setEmail(freshEmail);
+      setErrorMessage(null);
+      return true;
+    }
+
+    // El userinfo sigue fallando tras renovar: reinicio limpio.
+    console.error(
+      "Sesión renovada pero no se pudo obtener el email; recargando la aplicación.",
+    );
+    window.location.reload();
+    return true;
+  }, []);
     return (
-    <AuthContext.Provider value={{ auth, isLoading, getAuth, logout, email, errorMessage }}>
+    <AuthContext.Provider
+      value={{
+        auth,
+        isLoading,
+        getAuth,
+        logout,
+        email,
+        errorMessage,
+        sessionStatus,
+        renewSession: handleRenewSession,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

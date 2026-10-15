@@ -16,7 +16,8 @@ export default function ProtectedRoute({
   redirectTo = "/login",
   allowedRoles,
 }: ProtectedRouteProps) {
-  const { auth, getAuth, isLoading: authLoading } = useAuth();
+  const { auth, getAuth, isLoading: authLoading, sessionStatus, email } =
+    useAuth();
   const { activeUser, isLoading: userLoading } = useUser();
 
   useEffect(() => {
@@ -36,10 +37,20 @@ export default function ProtectedRoute({
 
   // Si hay auth pero no hay usuario y no está cargando, mostrar error en vez de redirigir en bucle
   if (auth && !activeUser && !userLoading) {
+    // La sesión se está recuperando: no mostrar el error todavía,
+    // el SessionExpiredGuard gobierna esa etapa.
+    if (sessionStatus === "expired" || sessionStatus === "refreshing") {
+      return <LoadingComponent />;
+    }
+
+    const userErrorMessage = email
+      ? `El usuario ${email} no está registrado o está inactivo en la hoja de usuarios. Contactá al administrador.`
+      : "No se pudo obtener tu email de Google. Puede que falten permisos en el login de Google.";
+
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="bg-red-100 text-red-700 dark:bg-red-500/50 dark:text-red-400 px-4 py-2 rounded">
-          {"No se pudo obtener los datos del usuario. Puede que falten permisos en el login de Google."}
+        <div className="bg-red-100 text-red-700 dark:bg-red-500/50 dark:text-red-400 px-4 py-2 rounded text-center">
+          {userErrorMessage}
         </div>
         <button
           className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
@@ -48,7 +59,7 @@ export default function ProtectedRoute({
             window.location.href = redirectTo;
           }}
         >
-          Volver a intentar login
+          {email ? "Cerrar sesión" : "Volver a intentar login"}
         </button>
       </div>
     );

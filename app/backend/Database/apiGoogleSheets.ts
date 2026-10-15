@@ -1,3 +1,5 @@
+import { setSessionStatus } from "~/utils/authEvents";
+
 type GoogleAccessToken = {
   access_token: string;
   expires_in: number;
@@ -68,6 +70,30 @@ export interface BatchUpdateResult {
   data: GoogleBatchUpdateResponse | null;
   error: ProcessedGoogleApiError | null;
   status: number;
+}
+
+function processGoogleError(
+  err: unknown,
+  fallbackMessage: string,
+): ProcessedGoogleApiError {
+  const googleError = err as GoogleApiError;
+  const errorDetail = googleError.result?.error || {};
+
+  const processedError: ProcessedGoogleApiError = {
+    code: errorDetail.code || googleError.status || 500,
+    message: errorDetail.message || fallbackMessage,
+    status: errorDetail.status || "UNKNOWN",
+    raw: err,
+  };
+
+  if (
+    processedError.code === 401 ||
+    processedError.status === "UNAUTHENTICATED"
+  ) {
+    setSessionStatus("expired");
+  }
+
+  return processedError;
 }
 export interface GoogleAppendResponse {
   status: number;
@@ -162,16 +188,10 @@ export const getAllSheets = async (
       status: respuesta.status,
     };
   } catch (err: unknown) {
-    // Extraemos la información útil del error de Google
-    const googleError = err as GoogleApiError;
-    const errorDetail = googleError.result?.error || {};
-
-    const processedError: ProcessedGoogleApiError = {
-      code: errorDetail.code || googleError.status || 500,
-      message: errorDetail.message || "Error desconocido en la API",
-      status: errorDetail.status || "UNKNOWN",
-      raw: err,
-    };
+    const processedError = processGoogleError(
+      err,
+      "Error desconocido en la API",
+    );
 
     console.error("Error procesado:", processedError);
 
@@ -209,15 +229,10 @@ export const insertDataToSheet = async (
       status: respuesta.status,
     };
   } catch (err: unknown) {
-    const googleError = err as GoogleApiError;
-    const errorDetail = googleError.result?.error || {};
-
-    const processedError: ProcessedGoogleApiError = {
-      code: errorDetail.code || googleError.status || 500,
-      message: errorDetail.message || "Error al insertar datos en la API",
-      status: errorDetail.status || "UNKNOWN",
-      raw: err,
-    };
+    const processedError = processGoogleError(
+      err,
+      "Error al insertar datos en la API",
+    );
 
     console.error("Error en inserción procesado:", processedError);
 
@@ -255,15 +270,10 @@ export const insertManyDataToSheet = async (
       status: respuesta.status,
     };
   } catch (err: unknown) {
-    const googleError = err as GoogleApiError;
-    const errorDetail = googleError.result?.error || {};
-
-    const processedError: ProcessedGoogleApiError = {
-      code: errorDetail.code || googleError.status || 500,
-      message: errorDetail.message || "Error al insertar datos en la API",
-      status: errorDetail.status || "UNKNOWN",
-      raw: err,
-    };
+    const processedError = processGoogleError(
+      err,
+      "Error al insertar datos en la API",
+    );
 
     console.error("Error en inserción procesado:", processedError);
 
@@ -293,16 +303,10 @@ export const updateManySheets = async (
       status: respuesta.status,
     };
   } catch (err: unknown) {
-    // ... (el resto del catch se queda igual)
-    const googleError = err as GoogleApiError;
-    const errorDetail = googleError.result?.error || {};
-
-    const processedError: ProcessedGoogleApiError = {
-      code: errorDetail.code || googleError.status || 500,
-      message: errorDetail.message || "Error en la actualización masiva",
-      status: errorDetail.status || "UNKNOWN",
-      raw: err,
-    };
+    const processedError = processGoogleError(
+      err,
+      "Error en la actualización masiva",
+    );
 
     return {
       data: null,

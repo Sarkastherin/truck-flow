@@ -1,5 +1,6 @@
 import { NavBar } from "~/components/Navbar";
 import ProtectedRoute from "~/components/ProtectedRoute";
+import SessionExpiredGuard from "~/components/SessionExpiredGuard";
 import { Outlet, useNavigate } from "react-router";
 import ModalManager from "~/components/modals/ModalManager";
 import { PedidosProvider } from "~/context/PedidoContext";
@@ -21,6 +22,7 @@ export default function Layout() {
   }, [auth]);
   return (
     <main className="min-h-screen w-full flex flex-col gap-4 text-base-800 dark:text-white bg-white dark:bg-base-900">
+      <SessionExpiredGuard />
       <NavBar />
       <div className="">
         <ProtectedRoute>

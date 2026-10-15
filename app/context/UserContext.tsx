@@ -89,7 +89,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     if (auth) {
       void getUsersData();
     }
-  }, [auth, getUsersData]);
+  }, [auth, email, getUsersData]);
  
 
   const {

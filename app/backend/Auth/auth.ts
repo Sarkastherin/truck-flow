@@ -1,3 +1,5 @@
+import { setSessionStatus } from "~/utils/authEvents";
+
 const SCOPES =
   "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email";
 const DISCOVERY_DOC_GMAIL =
@@ -68,6 +70,8 @@ declare const google: {
 };
 
 const SILENT_REFRESH_TIMEOUT_MS = 6000;
+const USERINFO_TIMEOUT_MS = 5000;
+const REFRESH_RETRY_DELAYS_MS = [0, 2000, 5000];
 
 let tokenClient: TokenClient | null = null;
 let gapiInited = false;
@@ -75,35 +79,43 @@ let gisInited = false;
 let tokenMonitorInterval: ReturnType<typeof setInterval> | null = null;
 let onTokenRefreshCallback: AuthOptions["onTokenRefresh"] | null = null;
 let visibilityHandlerAttached = false;
-let isRefreshing = false;
+let gapiInitPromise: Promise<void> | null = null;
+let gisInitPromise: Promise<void> | null = null;
+let activeRefreshCycle: Promise<boolean> | null = null;
 
 function gapiLoaded(apiKey: string): Promise<void> {
-  return new Promise((resolve) => {
-    gapi.load("client", async () => {
-      await gapi.client.init({
-        apiKey,
-        discoveryDocs: [
-          DISCOVERY_DOC_GMAIL,
-          DISCOVERY_DOC_SHEET,
-          DISCOVERY_DOC_DRIVE,
-        ],
+  if (!gapiInitPromise) {
+    gapiInitPromise = new Promise((resolve) => {
+      gapi.load("client", async () => {
+        await gapi.client.init({
+          apiKey,
+          discoveryDocs: [
+            DISCOVERY_DOC_GMAIL,
+            DISCOVERY_DOC_SHEET,
+            DISCOVERY_DOC_DRIVE,
+          ],
+        });
+        gapiInited = true;
+        resolve();
       });
-      gapiInited = true;
-      resolve();
     });
-  });
+  }
+  return gapiInitPromise;
 }
 
 function gisLoaded(clientId: string): Promise<void> {
-  return new Promise((resolve) => {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: SCOPES,
-      callback: "",
+  if (!gisInitPromise) {
+    gisInitPromise = new Promise((resolve) => {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPES,
+        callback: "",
+      });
+      gisInited = true;
+      resolve();
     });
-    gisInited = true;
-    resolve();
-  });
+  }
+  return gisInitPromise;
 }
 
 function isTokenValid(token: GoogleAccessToken | null): boolean {
@@ -175,6 +187,7 @@ function requestToken(
       token.created_at = Date.now();
       gapi.client.setToken(token);
       localStorage.setItem("google_auth_token", JSON.stringify(token));
+      setSessionStatus("valid");
 
       if (onTokenRefreshCallback) {
         onTokenRefreshCallback(token);
@@ -191,22 +204,60 @@ async function refreshTokenSilently(): Promise<boolean> {
   return requestToken("", SILENT_REFRESH_TIMEOUT_MS);
 }
 
-async function refreshIfNeeded(): Promise<void> {
-  if (isRefreshing) return;
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+function runRefreshCycle(): Promise<boolean> {
+  if (activeRefreshCycle) return activeRefreshCycle;
+
+  activeRefreshCycle = (async () => {
+    setSessionStatus("refreshing");
+    try {
+      for (const delay of REFRESH_RETRY_DELAYS_MS) {
+        if (delay > 0) await sleep(delay);
+        try {
+          await refreshTokenSilently();
+          return true;
+        } catch (error) {
+          console.warn("Renovación silenciosa fallida, reintentando...", error);
+        }
+      }
+      return false;
+    } finally {
+      activeRefreshCycle = null;
+    }
+  })();
+
+  return activeRefreshCycle;
+}
+
+async function resolveCycleOutcome(ok: boolean): Promise<boolean> {
+  if (ok) {
+    console.log("Token renovado automáticamente");
+    return true;
+  }
+
+  const currentToken = readStoredToken();
+  if (currentToken && isTokenValid(currentToken)) {
+    setSessionStatus("valid");
+    return true;
+  }
+
+  console.error(
+    "No se pudo renovar el token y ya expiró; la sesión está caída.",
+  );
+  setSessionStatus("expired");
+  return false;
+}
+
+async function refreshIfNeeded(): Promise<void> {
   const savedToken = readStoredToken();
   if (!savedToken || !needsTokenRefresh(savedToken)) return;
 
-  isRefreshing = true;
-  try {
-    console.log("Token necesita renovación, renovando automáticamente...");
-    await refreshTokenSilently();
-    console.log("Token renovado automáticamente");
-  } catch (error) {
-    console.error("Error en el monitoreo automático del token:", error);
-  } finally {
-    isRefreshing = false;
-  }
+  console.log("Token necesita renovación, renovando automáticamente...");
+  const ok = await runRefreshCycle();
+  await resolveCycleOutcome(ok);
 }
 
 function handleVisibilityChange(): void {
@@ -306,21 +357,29 @@ async function getUserEmail(): Promise<string | null> {
       return null;
     }
 
-    const response = await fetch(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), USERINFO_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          signal: controller.signal,
         },
-      },
-    );
+      );
 
-    if (!response.ok) {
-      return null;
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = (await response.json()) as { email?: string };
+      return data.email ?? null;
+    } finally {
+      clearTimeout(timer);
     }
-
-    const data = (await response.json()) as { email?: string };
-    return data.email ?? null;
   } catch (error) {
     console.error("Error al obtener el email:", error);
     return null;
@@ -342,6 +401,7 @@ const Auth = async (
 
     const existingAuth = await checkExistingAuth();
     if (existingAuth) {
+      setSessionStatus("valid");
       if (options.autoRefresh !== false) {
         startTokenMonitoring();
       }
@@ -376,6 +436,7 @@ const Logout = (): boolean => {
   try {
     stopTokenMonitoring();
     onTokenRefreshCallback = null;
+    setSessionStatus("checking");
 
     if (typeof gapi !== "undefined" && gapi.client) {
       gapi.client.setToken(null);
@@ -418,15 +479,30 @@ const checkTokenStatus = (): TokenStatus => {
   }
 };
 
-const forceTokenRefresh = async (): Promise<boolean> => {
+const renewSession = async (): Promise<boolean> => {
   try {
-    await refreshTokenSilently();
-    return true;
+    const ok = await runRefreshCycle();
+    if (ok) {
+      console.log("Sesión renovada por el usuario");
+      return true;
+    }
+    console.error("No se pudo renovar la sesión de forma silenciosa");
+    setSessionStatus("expired");
+    return false;
   } catch (error) {
-    console.error("Error forzando renovación del token:", error);
+    console.error("Error renovando la sesión:", error);
+    setSessionStatus("expired");
     return false;
   }
 };
 
+const forceTokenRefresh = async (): Promise<boolean> => renewSession();
+
 export default Auth;
-export { Logout, checkTokenStatus, forceTokenRefresh };
+export {
+  Logout,
+  checkTokenStatus,
+  forceTokenRefresh,
+  renewSession,
+  getUserEmail,
+};

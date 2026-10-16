@@ -36,6 +36,7 @@ const formatCurrency = (value: number) =>
 export default function ReportesEmpleadoModal({
   show,
   empleado,
+  grupoEmpleados = [],
   rows,
   premios,
   liquidacionId,
@@ -45,6 +46,7 @@ export default function ReportesEmpleadoModal({
 }: {
   show: boolean;
   empleado: Employee | null;
+  grupoEmpleados?: Employee[];
   rows: ReporteFormValues[];
   premios: Premios[];
   liquidacionId: string;
@@ -52,8 +54,10 @@ export default function ReportesEmpleadoModal({
   onSave: (reportes: ReporteFormValues[], deletedIds: string[]) => void;
   onClose: () => void;
 }) {
+  const isGrupo = grupoEmpleados.length > 0;
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [pedidoErrorIndex, setPedidoErrorIndex] = useState<number | null>(null);
+  const [emptyError, setEmptyError] = useState<string | null>(null);
   const { pedidos, getPedidosData } = usePedido();
   const {
     register,
@@ -72,17 +76,21 @@ export default function ReportesEmpleadoModal({
   useEffect(() => {
     if (show) {
       setDeletedIds([]);
+      setPedidoErrorIndex(null);
+      setEmptyError(null);
       reset({
-        reportes: rows.map((rep) => ({
-          id: rep.id,
-          premio_id: rep.premio_id,
-          cantidad: Number(rep.cantidad) || 1,
-          asocia_pedido: Boolean(rep.pedido_id),
-          pedido_id: rep.pedido_id ?? "",
-        })),
+        reportes: isGrupo
+          ? []
+          : rows.map((rep) => ({
+              id: rep.id,
+              premio_id: rep.premio_id,
+              cantidad: Number(rep.cantidad) || 1,
+              asocia_pedido: Boolean(rep.pedido_id),
+              pedido_id: rep.pedido_id ?? "",
+            })),
       });
     }
-  }, [show, rows, reset]);
+  }, [show, rows, reset, isGrupo]);
 
   useEffect(() => {
     if (show && pedidos == null) getPedidosData();
@@ -130,6 +138,16 @@ export default function ReportesEmpleadoModal({
     remove(index);
   };
 
+  const handleAppend = () => {
+    setEmptyError(null);
+    append({
+      premio_id: "",
+      cantidad: 1,
+      asocia_pedido: false,
+      pedido_id: "",
+    });
+  };
+
   const handleTogglePedido = (index: number, checked: boolean) => {
     if (!checked) {
       setValue(`reportes.${index}.pedido_id`, "");
@@ -138,6 +156,12 @@ export default function ReportesEmpleadoModal({
   };
 
   const onSubmit = handleSubmit((values) => {
+    if (values.reportes.length === 0) {
+      setEmptyError(
+        "Agregá al menos un premio antes de guardar",
+      );
+      return;
+    }
     const invalidPedidoIndex = values.reportes.findIndex(
       (row) => row.asocia_pedido && !row.pedido_id,
     );
@@ -147,6 +171,23 @@ export default function ReportesEmpleadoModal({
       return;
     }
     setPedidoErrorIndex(null);
+    setEmptyError(null);
+    if (isGrupo) {
+      const payload: ReporteFormValues[] = grupoEmpleados.flatMap((emp) =>
+        values.reportes.map((row) => {
+          const item: ReporteFormValues = {
+            empleado_id: emp.id,
+            liquidacion_id: liquidacionId,
+            premio_id: row.premio_id,
+            cantidad: Number(row.cantidad) || 0,
+          };
+          if (row.asocia_pedido && row.pedido_id) item.pedido_id = row.pedido_id;
+          return item;
+        }),
+      );
+      onSave(payload, []);
+      return;
+    }
     const payload: ReporteFormValues[] = values.reportes.map((row) => {
       const item: ReporteFormValues = {
         empleado_id: empleado?.id as string,
@@ -163,15 +204,40 @@ export default function ReportesEmpleadoModal({
 
   return (
     <Modal
-      open={show && Boolean(empleado)}
-      title={empleado ? `Reportes — ${empleado.nombre_completo}` : "Reportes"}
+      open={show && (isGrupo || Boolean(empleado))}
+      title={
+        isGrupo
+          ? `Reportes — grupo (${grupoEmpleados.length} empleado${grupoEmpleados.length === 1 ? "" : "s"})`
+          : empleado
+            ? `Reportes — ${empleado.nombre_completo}`
+            : "Reportes"
+      }
       size="4xl"
       onClose={onClose}
       footer={
         <div className="flex w-full items-center justify-between gap-4">
           <span className="text-sm font-medium text-base-600 dark:text-base-300">
-            Total en premios:{" "}
-            <span className="font-bold">{formatCurrency(totalEmpleado)}</span>
+            {isGrupo ? (
+              <>
+                Total por empleado:{" "}
+                <span className="font-bold">
+                  {formatCurrency(totalEmpleado)}
+                </span>
+                <span className="ms-4">
+                  Total general:{" "}
+                  <span className="font-bold">
+                    {formatCurrency(totalEmpleado * grupoEmpleados.length)}
+                  </span>
+                </span>
+              </>
+            ) : (
+              <>
+                Total en premios:{" "}
+                <span className="font-bold">
+                  {formatCurrency(totalEmpleado)}
+                </span>
+              </>
+            )}
           </span>
           <div className="flex items-center gap-3">
             <Button color="alternative" onClick={onClose} disabled={isSaving}>
@@ -185,24 +251,46 @@ export default function ReportesEmpleadoModal({
       }
     >
       <div className="space-y-6">
+        {isGrupo && (
+          <div className="rounded-lg border border-base-200 bg-base-50 p-3 dark:border-base-700 dark:bg-base-800">
+            <p className="mb-2 text-sm font-semibold text-base-700 dark:text-base-200">
+              {grupoEmpleados.length} empleado
+              {grupoEmpleados.length === 1 ? "" : "s"} seleccionado
+              {grupoEmpleados.length === 1 ? "" : "s"}
+            </p>
+            <ul className="max-h-32 space-y-1 overflow-y-auto">
+              {grupoEmpleados.map((emp) => (
+                <li
+                  key={emp.id}
+                  className="flex items-center justify-between rounded-md bg-white px-3 py-1.5 text-sm dark:bg-base-900"
+                >
+                  <span className="text-base-700 dark:text-base-200">
+                    {emp.nombre_completo}
+                  </span>
+                  <span className="text-xs text-base-500 dark:text-base-400">
+                    DNI {emp.dni}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {emptyError && (
+          <p className="text-sm text-red-600 dark:text-red-400">{emptyError}</p>
+        )}
         {fields.length === 0 ? (
           <div className="rounded-lg border-2 border-dashed border-base-300 py-12 text-center dark:border-base-600">
             <p className="mb-3 text-sm text-base-500 dark:text-base-400">
-              No hay reportes cargados para este empleado
+              {isGrupo
+                ? "No hay premios cargados. Agregá el primero para aplicarlo a todos los empleados seleccionados"
+                : "No hay reportes cargados para este empleado"}
             </p>
             <Button
               type="button"
               size="sm"
               color="light"
               className="mx-auto"
-              onClick={() =>
-                append({
-                  premio_id: "",
-                  cantidad: 1,
-                  asocia_pedido: false,
-                  pedido_id: "",
-                })
-              }
+              onClick={handleAppend}
             >
               Agregar el primer reporte
             </Button>
@@ -345,14 +433,7 @@ export default function ReportesEmpleadoModal({
             </div>
             <button
               type="button"
-              onClick={() =>
-                append({
-                  premio_id: "",
-                  cantidad: 1,
-                  asocia_pedido: false,
-                  pedido_id: "",
-                })
-              }
+              onClick={handleAppend}
               disabled={isSaving}
               className="w-full rounded-lg border-2 border-dashed border-base-300 bg-base-50/50 p-4 transition-all hover:border-yellow-400 hover:bg-yellow-50/50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-base-600 dark:bg-base-800/50 dark:hover:border-yellow-600 dark:hover:bg-yellow-900/20"
             >

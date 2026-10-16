@@ -4,7 +4,12 @@ import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
 import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
 import { LuArrowRight, LuCalendarDays } from "react-icons/lu";
-import type { Fichada, Reporte, LiquidacionResumen, ReporteFormValues } from "~/types/liquidaciones";
+import type {
+  Fichada,
+  Reporte,
+  LiquidacionResumen,
+  ReporteFormValues,
+} from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
 import { formatDateUStoES } from "~/backend/Database/helperTransformData";
 import { getDiasPeriodo } from "~/components/modals/customs/SeleccionarLiquidacionModal";
@@ -92,6 +97,7 @@ export default function Liquidacion() {
   } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
+  const [selected, setSelected] = useState<ResumenRow[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const [fichadasFile, setFichadasFile] = useState<FichadasFileUI[]>([]);
   const [isLoadingImport, setIsLoadingImport] = useState(false);
@@ -101,6 +107,7 @@ export default function Liquidacion() {
   const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
     null,
   );
+  const [grupoEmpleados, setGrupoEmpleados] = useState<Employee[]>([]);
   const [isSavingReportes, setIsSavingReportes] = useState(false);
   const { openModal, closeModal } = useModal();
   const liquidacion = useMemo(() => {
@@ -141,7 +148,6 @@ export default function Liquidacion() {
   const fichadasGuardadas = liquidacion?.fichada ?? [];
   const reportesGuardados = liquidacion?.reporte ?? [];
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
-  const hayReportesGuardados = reportesGuardados.length > 0;
 
   const resumen: ResumenRow[] = useMemo(() => {
     const premioById = new Map(premios.map((premio) => [premio.id, premio]));
@@ -203,18 +209,24 @@ export default function Liquidacion() {
     {
       name: "Reportes",
       selector: (row) => row.reportes.length,
-      width: "110px",
+      width: "130px",
       center: true,
+      sortable: true,
+      filterable: true,
+      filterType: "number"
     },
     {
       name: "Total premios",
       selector: (row) => row.monto_premio,
       cell: (row) => (
-        <span className="font-semibold">{formatCurrency(row.monto_premio)}</span>
+        <span className="font-semibold">
+          {formatCurrency(row.monto_premio)}
+        </span>
       ),
       width: "170px",
       right: true,
       sortable: true,
+      filterType: "number"
     },
   ];
 
@@ -333,6 +345,7 @@ export default function Liquidacion() {
 
   const handleCloseReportesModal = () => {
     setSelectedEmpleado(null);
+    setGrupoEmpleados([]);
   };
 
   const handleSaveReportes = async (
@@ -351,7 +364,9 @@ export default function Liquidacion() {
       const result = await CUDReportes(reportes as Reporte[], deletedIds);
       if (!result.success) {
         throw new Error(
-          result.error || result.message || "No se pudieron guardar los reportes",
+          result.error ||
+            result.message ||
+            "No se pudieron guardar los reportes",
         );
       }
       closeModal();
@@ -375,6 +390,53 @@ export default function Liquidacion() {
     } finally {
       setIsSavingReportes(false);
     }
+  };
+  const handleSaveGrupoReportes = async (reportes: ReporteFormValues[]) => {
+    if (!liquidacionId || grupoEmpleados.length === 0) return;
+
+    setIsSavingReportes(true);
+    openModal("loading", {
+      props: {
+        title: "Cargando producción al grupo",
+      },
+    });
+    try {
+      const result = await CUDReportes(reportes as Reporte[], []);
+      if (!result.success) {
+        throw new Error(
+          result.error ||
+            result.message ||
+            "No se pudieron cargar los reportes",
+        );
+      }
+      const cantidadEmpleados = grupoEmpleados.length;
+      closeModal();
+      setGrupoEmpleados([]);
+      setSelected([]);
+      openModal("success", {
+        props: {
+          title: "Producción cargada",
+          message: `${reportes.length} reporte${reportes.length === 1 ? "" : "s"} cargado${reportes.length === 1 ? "" : "s"} a ${cantidadEmpleados} empleado${cantidadEmpleados === 1 ? "" : "s"}`,
+        },
+      });
+    } catch (error) {
+      openModal("error", {
+        props: {
+          title: "Error al guardar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Hubo un error al cargar la producción. Inténtalo de nuevo.",
+        },
+      });
+    } finally {
+      setIsSavingReportes(false);
+    }
+  };
+
+  const handleSelectGroup = () => {
+    setSelectedEmpleado(null);
+    setGrupoEmpleados(selected.map((row) => row.empleado));
   };
   return (
     <>
@@ -453,14 +515,53 @@ export default function Liquidacion() {
               </div>
             )}
             {activeTab === 1 && (
-              <div className="mt-4">
-                <div className="mb-3 flex items-center justify-end gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
-                  <span className="text-sm font-medium text-base-500 dark:text-base-400">
-                    Total general de premios
-                  </span>
-                  <span className="text-lg font-bold text-base-800 dark:text-base-100">
-                    {formatCurrency(totalPremiosGeneral)}
-                  </span>
+              <>
+                <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
+                  <div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          setSelected(
+                            resumen.filter(
+                              (res) => res.empleado.grupo === "Cacho",
+                            ),
+                          )
+                        }
+                        outline
+                      >
+                        Grupo: Cacho
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelected([]);
+                          setGrupoEmpleados([]);
+                        }}
+                        color={"light"}
+                      >
+                        Limpiar
+                      </Button>
+                    </div>
+                    {selected.length > 0 && (
+                      <div
+                        className="mt-2 text-sm underline text-primary-600 dark:text-primary-400 cursor-pointer"
+                        onClick={handleSelectGroup}
+                      >
+                        Cargar premio/producción a los {selected.length}{" "}
+                        seleccionado
+                        {selected.length === 1 ? "" : "s"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm font-medium text-base-500 dark:text-base-400">
+                      Total general de premios
+                    </span>
+                    <span className="text-lg font-bold text-base-800 dark:text-base-100">
+                      {formatCurrency(totalPremiosGeneral)}
+                    </span>
+                  </div>
                 </div>
                 <TableComponent
                   columns={produccionColumns}
@@ -471,12 +572,20 @@ export default function Liquidacion() {
                   color="yellow"
                   labelButton=""
                   hasActiveColumn={false}
-                  onRowClicked={(row) => setSelectedEmpleado(row.empleado)}
+                  onRowClicked={(row) => {
+                    setGrupoEmpleados([]);
+                    setSelectedEmpleado(row.empleado);
+                  }}
                   searchKeys={["empleado.nombre_completo", "empleado.dni"]}
                   searchPlaceholder="Buscar por nombre o DNI"
                   scrollHeightOffset={430}
+                  selectableRows
+                  selectedRows={selected}
+                  onSelectedRowsChange={({ selectedRows }) =>
+                    setSelected(selectedRows)
+                  }
                 />
-              </div>
+              </>
             )}
             {activeTab === 2 && <div>resumen</div>}
           </TabItem>
@@ -496,13 +605,18 @@ export default function Liquidacion() {
         hasFaltanSalidas={hasFaltanSalidas}
       />
       <ReportesEmpleadoModal
-        show={Boolean(selectedEmpleado)}
+        show={Boolean(selectedEmpleado) || grupoEmpleados.length > 0}
         empleado={selectedEmpleado}
+        grupoEmpleados={grupoEmpleados}
         rows={selectedEmpleadoRow?.reportes ?? []}
         premios={premios}
         liquidacionId={liquidacionId ?? ""}
         isSaving={isSavingReportes}
-        onSave={handleSaveReportes}
+        onSave={
+          grupoEmpleados.length > 0
+            ? handleSaveGrupoReportes
+            : handleSaveReportes
+        }
         onClose={handleCloseReportesModal}
       />
     </>

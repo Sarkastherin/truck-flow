@@ -147,14 +147,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       const liquidacionesData = getDataInJSONFormat<Liquidacion>(data[3]);
       const fichadasData = getDataInJSONFormat<Fichada>(data[4]);
       const reportesData = getDataInJSONFormat<Reporte>(data[5]);
-      const employeesDataCalc = employeesData.map((emp) => {
-        const calc_hora_regular =
-          emp.tipo_pago === "Salario semanal" && emp.valor_salario_semanal
-            ? Math.round((emp.valor_salario_semanal / 5 / 9.5) * 100) / 100
-            : 0;
-        return { ...emp, valor_hora_regular: calc_hora_regular };
-      });
-      //console.log(employeesDataCalc)
+      //console.log(employeesData)
       const ctasCorrientes = mvtoEmpleadosData.reduce(
         (acc, cta) => {
           const key = cta.empleado_id;
@@ -206,7 +199,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           reporte: reportes,
         };
       });
-      setEmployees(employeesDataCalc);
+      setEmployees(employeesData);
       setPremios(premiosData);
       setSaldoEmpleados(ctasCorrientesArray);
       setLiquidaciones(combinedData);

@@ -12,6 +12,7 @@ import { useRRHH } from "~/context/RRHHContext";
 import { LoadingComponent } from "~/components/LoadingComponent";
 import { SeleccionarLiquidacionModal } from "~/components/modals/customs/SeleccionarLiquidacionModal";
 import type { Liquidacion } from "~/types/liquidaciones";
+import { HORAS_SEMANALES_DEFAULT } from "~/utils/liquidacionCalculos";
 //import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 
 export function meta({}: Route.MetaArgs) {
@@ -37,6 +38,9 @@ export default function RRHH() {
       desde: "",
       hasta: "",
       status: "nueva",
+      horas_semanales: HORAS_SEMANALES_DEFAULT,
+      dias_lluvia: "",
+      dias_no_laborables: "",
     });
     form.clearErrors();
     openModal("form", {

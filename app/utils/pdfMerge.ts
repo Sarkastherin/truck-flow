@@ -13,6 +13,10 @@ function isPdfFile(mimeType: string): boolean {
   return mimeType === "application/pdf";
 }
 
+function toPdfBlob(bytes: Uint8Array): Blob {
+  return new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
+}
+
 async function embedImageAsPage(
   mergedPdf: PDFDocument,
   imageBytes: ArrayBuffer,
@@ -70,7 +74,7 @@ export async function mergePDFs(
   console.log(`[pdfMerge] Documentos a procesar: ${documents.length}`);
 
   if (documents.length === 0) {
-    return new Blob([await mergedPdf.save()], { type: "application/pdf" });
+    return toPdfBlob(await mergedPdf.save());
   }
 
   const failedDocs: string[] = [];
@@ -114,5 +118,5 @@ export async function mergePDFs(
   }
 
   const pdfBytes = await mergedPdf.save();
-  return new Blob([pdfBytes], { type: "application/pdf" });
+  return toPdfBlob(pdfBytes);
 }

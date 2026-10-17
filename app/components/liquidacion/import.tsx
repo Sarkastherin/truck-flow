@@ -8,10 +8,12 @@ export default function Import({
   setIsLoadingImport,
   setFichadasFile,
   onProcessed,
+  diasNoLaborables = [],
 }: {
   setIsLoadingImport: React.Dispatch<React.SetStateAction<boolean>>;
   setFichadasFile: React.Dispatch<React.SetStateAction<FichadasFileUI[]>>;
   onProcessed: () => void;
+  diasNoLaborables?: string[];
 }) {
   const { employees, isReady, getSueldosData } = useRRHH();
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function Import({
   }, [isReady, employees, getSueldosData]);
   const handleImport = (data: FichadaFile[]) => {
     setIsLoadingImport(true);
-    const agrupadas = agruparFichadasPorDia(data);
+    const agrupadas = agruparFichadasPorDia(data, diasNoLaborables);
     const rows = agrupadas.map((liq) => {
       const empleado = employees.find((emp) => emp.dni == liq.dniEmpleado);
       return { empleado, ...liq };

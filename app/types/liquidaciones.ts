@@ -12,9 +12,10 @@ export type Fichada = CommonTypes & {
   empleado_id: string;
   entrada: string;
   salida: string | null;
-  total_horas: number;
-  horas_regular: number;
-  horas_extras: number;
+  /* Derivados — recalculados al vuelo; opcionales por legacy en hojas viejas */
+  total_horas?: number;
+  horas_regular?: number;
+  horas_extras?: number;
   active: boolean;
 };
 export type Reporte = CommonTypes & {
@@ -29,17 +30,36 @@ export type Liquidacion = CommonTypes & {
   desde: string;
   hasta: string;
   status: StatusLiquidacion;
+  horas_semanales: number | null;
+  dias_lluvia: string | null;
+  dias_no_laborables: string | null;
   fichada?: Fichada[];
   reporte?: Reporte[];
 };
 export type LiquidacionResumen = {
   empleado: Employee;
-  total_horas_regulares: number;
-  total_horas_extras: number;
-  monto_salario: number;
-  monto_premio: number;
   fichadas: Fichada[];
   reportes: Reporte[];
+  /* Horas */
+  horas_totales: number;
+  total_horas_regulares: number;
+  total_horas_extras: number;
+  monto_salario_regular: number;
+  monto_salario_extra: number;
+  /* Cumplimiento */
+  dias_laborables: number;
+  faltas: number;
+  tardanzas: number;
+  salidas_tempranas: number;
+  dias_incumplidos: number;
+  /* Premios (grupo Cacho: régimen de carrocerías; resto: monto simple) */
+  carrocerias: number;
+  monto_carrocerias: number;
+  premios_perdidos: number;
+  premios_ganados: number;
+  premio_recuperado: number;
+  otros_premios: number;
+  monto_premio: number;
 };
 export type ReporteFormValues = Omit<Reporte, keyof CommonTypes> & {
   id?: string;

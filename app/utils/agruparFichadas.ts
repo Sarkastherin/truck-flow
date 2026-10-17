@@ -1,18 +1,20 @@
 import type { FichadaFile, FichadaFileAgrupada } from "~/types/fichadas";
+import {
+  calcularHorasFichada,
+  esFinDeSemana,
+  fechaAISO,
+} from "~/utils/liquidacionCalculos";
 
 function dayKey(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return fechaAISO(date);
 }
 
-export function diffHoras(desde: Date, hasta: Date): number {
-  const ms = hasta.getTime() - desde.getTime();
-  if (ms <= 0) return 0;
-  return Math.round((ms / 3600000) * 100) / 100;
-}
-
-export function agruparFichadasPorDia(fichadas: FichadaFile[]): FichadaFileAgrupada[] {
+export function agruparFichadasPorDia(
+  fichadas: FichadaFile[],
+  diasNoLaborables: string[] = [],
+): FichadaFileAgrupada[] {
   const grupos = new Map<string, FichadaFile[]>();
+  const feriados = new Set(diasNoLaborables);
 
   for (const fichada of fichadas) {
     const key = `${dayKey(fichada.fecha)}|${fichada.idFichada}`;
@@ -33,16 +35,14 @@ export function agruparFichadasPorDia(fichadas: FichadaFile[]): FichadaFileAgrup
     const primera = ordenadas[0];
     const ultima = ordenadas[ordenadas.length - 1];
     const tieneSalida = ordenadas.length > 1;
-    const totalHorasTrabajadas = tieneSalida
-      ? diffHoras(primera.fecha, ultima.fecha)
-      : 0;
-    const horasRegular =
-      totalHorasTrabajadas === 0
-        ? 0
-        : totalHorasTrabajadas >= 9.5
-          ? 9.5
-          : totalHorasTrabajadas;
-    const horasExtras = Number((totalHorasTrabajadas-horasRegular).toFixed(2))
+    const iso = fechaAISO(primera.fecha);
+    const esDiaLaborable = !esFinDeSemana(iso) && !feriados.has(iso);
+    const { totalHorasTrabajadas, horasRegular, horasExtras } =
+      calcularHorasFichada(
+        primera.hora,
+        tieneSalida ? ultima.hora : null,
+        esDiaLaborable,
+      );
     result.push({
       fecha: new Date(
         primera.fecha.getFullYear(),

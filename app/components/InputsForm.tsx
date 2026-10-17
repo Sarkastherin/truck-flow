@@ -46,6 +46,7 @@ type InputProps = ComponentPropsWithoutRef<typeof TextInput> & {
   label?: string;
   error?: string;
   requiredField?: boolean;
+  allowDecimal?: boolean;
 };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
@@ -57,14 +58,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     onInput,
     inputMode,
     pattern,
+    allowDecimal = false,
     ...props
   },
   ref,
 ) {
   const isNumberLike = type === "number";
+  const isDecimalNumber = isNumberLike && allowDecimal;
 
   const handleInput: React.InputEventHandler<HTMLInputElement> = (event) => {
-    if (isNumberLike) {
+    if (isDecimalNumber) {
+      const input = event.target as HTMLInputElement;
+      let value = input.value.replace(/[^0-9.,]/g, "").replace(/,/g, ".");
+      const parts = value.split(".");
+      if (parts.length > 2) value = `${parts[0]}.${parts.slice(1).join("")}`;
+      input.value = value;
+    } else if (isNumberLike) {
       const input = event.target as HTMLInputElement;
       input.value = input.value.replace(/[^0-9]/g, "");
     }
@@ -88,8 +97,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         {...props}
         type={isNumberLike ? "text" : (type ?? "text")}
-        inputMode={isNumberLike ? "numeric" : inputMode}
-        pattern={isNumberLike ? "[0-9]*" : pattern}
+        inputMode={
+          isDecimalNumber ? "decimal" : isNumberLike ? "numeric" : inputMode
+        }
+        pattern={
+          isDecimalNumber
+            ? "[0-9]*[.]?[0-9]*"
+            : isNumberLike
+              ? "[0-9]*"
+              : pattern
+        }
         color={error ? "failure" : "gray"}
         onInput={handleInput}
         autoComplete="off"

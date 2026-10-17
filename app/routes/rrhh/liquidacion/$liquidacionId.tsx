@@ -2,10 +2,23 @@ import { useMemo, useState, useRef } from "react";
 import type { Route } from "../../+types/home";
 import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
-import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
-import { LuArrowRight, LuCalendarDays } from "react-icons/lu";
+import {
+  Badge,
+  Button,
+  Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TabItem,
+  Tabs,
+  type TabsRef,
+} from "flowbite-react";
+import { LuArrowRight, LuCalendarDays, LuSettings2 } from "react-icons/lu";
 import type {
   Fichada,
+  Liquidacion,
   Reporte,
   LiquidacionResumen,
   ReporteFormValues,
@@ -22,11 +35,26 @@ import FichadasTableModal, {
   aplicarEdicionCelda,
 } from "~/components/liquidacion/FichadasTableModal";
 import ReportesEmpleadoModal from "~/components/liquidacion/ReportesEmpleadoModal";
+import ConfigurarSemanaModal, {
+  type ConfigSemanaValues,
+} from "~/components/liquidacion/ConfigurarSemanaModal";
+import {
+  HORAS_SEMANALES_DEFAULT,
+  HORA_ENTRADA,
+  HORA_SALIDA,
+  TOLERANCIA_MIN,
+  calcularHorasFichada,
+  calcularResumenLiquidacion,
+  esFinDeSemana,
+  getHorasSemanales,
+  parseFechasISO,
+} from "~/utils/liquidacionCalculos";
 import type { FichadasFileUI, FichadaFormValues } from "~/types/fichadas";
 import { useModal } from "~/context/ModalContext";
 import type { TableColumn } from "react-data-table-component";
 import TableComponent from "~/components/TableComponentNew";
 import type { Employee } from "~/types/rrhh";
+import type { DirtyMap } from "~/utils/prepareUpdatePayload";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Liquidación" },
@@ -84,6 +112,9 @@ const parseHora = (raw: string | number | null | undefined): string | null => {
 const formatCurrency = (value: number) =>
   value.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 
+const formatHoras = (value: number) =>
+  value.toLocaleString("es-AR", { maximumFractionDigits: 2 });
+
 type ResumenRow = LiquidacionResumen & { active?: boolean };
 
 export default function Liquidacion() {
@@ -94,6 +125,7 @@ export default function Liquidacion() {
     isLoading,
     CUDFichadas,
     CUDReportes,
+    updateLiquidacion,
   } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
@@ -109,6 +141,8 @@ export default function Liquidacion() {
   );
   const [grupoEmpleados, setGrupoEmpleados] = useState<Employee[]>([]);
   const [isSavingReportes, setIsSavingReportes] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
   const { openModal, closeModal } = useModal();
   const liquidacion = useMemo(() => {
     return liquidaciones.find((liq) => liq.id === liquidacionId);
@@ -116,6 +150,10 @@ export default function Liquidacion() {
   const dias = liquidacion
     ? getDiasPeriodo(liquidacion.desde, liquidacion.hasta)
     : null;
+  const diasNoLaborables = useMemo(
+    () => parseFechasISO(liquidacion?.dias_no_laborables),
+    [liquidacion?.dias_no_laborables],
+  );
 
   const items: {
     key: TabsTypes;
@@ -150,40 +188,15 @@ export default function Liquidacion() {
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
 
   const resumen: ResumenRow[] = useMemo(() => {
-    const premioById = new Map(premios.map((premio) => [premio.id, premio]));
-    return employees
-      .filter((emp) => emp.active !== false)
-      .map((empleado) => {
-        const fichadas = fichadasGuardadas.filter(
-          (fich) => fich.empleado_id === empleado.id,
-        );
-        const reportes = reportesGuardados.filter(
-          (rep) => rep.empleado_id === empleado.id,
-        );
-        const total_horas_regulares = fichadas.reduce(
-          (acc, fich) => acc + (Number(fich.horas_regular) || 0),
-          0,
-        );
-        const total_horas_extras = fichadas.reduce(
-          (acc, fich) => acc + (Number(fich.horas_extras) || 0),
-          0,
-        );
-        const monto_premio = reportes.reduce((acc, rep) => {
-          const premio = premioById.get(rep.premio_id);
-          const precio = Number(premio?.precio) || 0;
-          return acc + precio * (Number(rep.cantidad) || 0);
-        }, 0);
-        return {
-          empleado,
-          fichadas,
-          reportes,
-          total_horas_regulares,
-          total_horas_extras,
-          monto_salario: 0,
-          monto_premio,
-        };
-      });
-  }, [employees, premios, fichadasGuardadas, reportesGuardados]);
+    if (!liquidacion) return [];
+    return calcularResumenLiquidacion({
+      liquidacion,
+      employees,
+      premios,
+      fichadas: fichadasGuardadas,
+      reportes: reportesGuardados,
+    });
+  }, [liquidacion, employees, premios, fichadasGuardadas, reportesGuardados]);
 
   const totalPremiosGeneral = useMemo(
     () => resumen.reduce((acc, row) => acc + row.monto_premio, 0),
@@ -213,7 +226,7 @@ export default function Liquidacion() {
       center: true,
       sortable: true,
       filterable: true,
-      filterType: "number"
+      filterType: "number",
     },
     {
       name: "Total premios",
@@ -226,7 +239,7 @@ export default function Liquidacion() {
       width: "170px",
       right: true,
       sortable: true,
-      filterType: "number"
+      filterType: "number",
     },
   ];
 
@@ -240,8 +253,13 @@ export default function Liquidacion() {
   const handleOpenFromImport = () => setIsModalOpen(true);
 
   const handleOpenSaved = () => {
+    const feriados = new Set(diasNoLaborables);
     const rows: FichadasFileUI[] = fichadasGuardadas.map((fich) => {
       const empleado = employees.find((emp) => emp.id === fich.empleado_id);
+      const esDiaLaborable =
+        !esFinDeSemana(fich.fecha) && !feriados.has(fich.fecha);
+      const { totalHorasTrabajadas, horasRegular, horasExtras } =
+        calcularHorasFichada(fich.entrada, fich.salida, esDiaLaborable);
       return {
         id: fich.id,
         fecha: parseFecha(fich.fecha),
@@ -249,9 +267,9 @@ export default function Liquidacion() {
         empleado,
         entrada: parseHora(fich.entrada) ?? "",
         salida: parseHora(fich.salida),
-        totalHorasTrabajadas: fich.total_horas,
-        horasRegular: fich.horas_regular,
-        horasExtras: fich.horas_extras,
+        totalHorasTrabajadas,
+        horasRegular,
+        horasExtras,
         active: fich.active,
       };
     });
@@ -279,7 +297,9 @@ export default function Liquidacion() {
     const field =
       column.id === "entrada" || column.id === "salida" ? column.id : null;
     if (!field) return;
-    setFichadasFile((prev) => aplicarEdicionCelda(prev, row, value, field));
+    setFichadasFile((prev) =>
+      aplicarEdicionCelda(prev, row, value, field, diasNoLaborables),
+    );
   };
 
   const handleSaveFichada = async () => {
@@ -293,9 +313,6 @@ export default function Liquidacion() {
         empleado_id: fich.empleado?.id as string,
         entrada: fich.entrada,
         salida: fich.salida,
-        total_horas: fich.totalHorasTrabajadas,
-        horas_regular: fich.horasRegular,
-        horas_extras: fich.horasExtras,
         active: fich.active,
       };
       if (fich.id) row.id = fich.id;
@@ -438,6 +455,117 @@ export default function Liquidacion() {
     setSelectedEmpleado(null);
     setGrupoEmpleados(selected.map((row) => row.empleado));
   };
+
+  const handleSaveConfig = async (config: ConfigSemanaValues) => {
+    if (!liquidacion) return;
+    setIsSavingConfig(true);
+    openModal("loading", {
+      props: {
+        title: "Guardando configuración",
+      },
+    });
+    try {
+      const result = await updateLiquidacion(
+        { ...liquidacion, ...config } as Liquidacion,
+        {
+          horas_semanales: true,
+          dias_lluvia: true,
+          dias_no_laborables: true,
+        } as DirtyMap<Liquidacion>,
+      );
+      if (!result.success) {
+        throw new Error(
+          result.error ||
+            result.message ||
+            "No se pudo guardar la configuración",
+        );
+      }
+      closeModal();
+      setIsConfigOpen(false);
+      openModal("success", {
+        props: {
+          title: "Configuración guardada",
+          message: "La configuración de la semana se actualizó correctamente",
+        },
+      });
+    } catch (error) {
+      openModal("error", {
+        props: {
+          title: "Error al guardar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Hubo un error al guardar la configuración. Inténtalo de nuevo.",
+        },
+      });
+    } finally {
+      setIsSavingConfig(false);
+    }
+  };
+
+  const horasSemanales = liquidacion
+    ? getHorasSemanales(liquidacion)
+    : HORAS_SEMANALES_DEFAULT;
+  const diasLluviaCount = liquidacion
+    ? parseFechasISO(liquidacion.dias_lluvia).length
+    : 0;
+  const feriadosCount = liquidacion
+    ? parseFechasISO(liquidacion.dias_no_laborables).length
+    : 0;
+
+  const totalesResumen = useMemo(
+    () => ({
+      monto_salario_regular: resumen.reduce(
+        (acc, row) => acc + row.monto_salario_regular,
+        0,
+      ),
+      monto_salario_extra: resumen.reduce(
+        (acc, row) => acc + row.monto_salario_extra,
+        0,
+      ),
+      carrocerias: resumen.reduce((acc, row) => acc + row.carrocerias, 0),
+      faltas: resumen.reduce((acc, row) => acc + row.faltas, 0),
+      tardanzas: resumen.reduce((acc, row) => acc + row.tardanzas, 0),
+      salidas_tempranas: resumen.reduce(
+        (acc, row) => acc + row.salidas_tempranas,
+        0,
+      ),
+      premios_perdidos: resumen.reduce(
+        (acc, row) => acc + row.premios_perdidos,
+        0,
+      ),
+      premios_ganados: resumen.reduce(
+        (acc, row) => acc + row.premios_ganados,
+        0,
+      ),
+      premio_recuperado: resumen.reduce(
+        (acc, row) => acc + row.premio_recuperado,
+        0,
+      ),
+      otros_premios: resumen.reduce((acc, row) => acc + row.otros_premios, 0),
+      monto_premio: resumen.reduce((acc, row) => acc + row.monto_premio, 0),
+      total: resumen.reduce(
+        (acc, row) =>
+          acc +
+          row.monto_salario_regular +
+          row.monto_salario_extra +
+          row.monto_premio,
+        0,
+      ),
+    }),
+    [resumen],
+  );
+  const ButtonConfSemana = () => (
+    <Button
+      size="sm"
+      color="indigo"
+      outline
+      onClick={() => setIsConfigOpen(true)}
+    >
+      <LuSettings2 className="me-1 size-4" />
+      Configurar semana
+    </Button>
+  );
   return (
     <>
       <Card>
@@ -460,7 +588,8 @@ export default function Liquidacion() {
                 </span>
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-3">
+              <ButtonConfSemana/>
               <span className="text-xs uppercase tracking-tight font-semibold text-base-500">
                 Status
               </span>
@@ -486,6 +615,7 @@ export default function Liquidacion() {
                     setFichadasFile={setFichadasFile}
                     setIsLoadingImport={setIsLoadingImport}
                     onProcessed={handleOpenFromImport}
+                    diasNoLaborables={diasNoLaborables}
                   />
                 ) : (
                   <div
@@ -587,7 +717,224 @@ export default function Liquidacion() {
                 />
               </>
             )}
-            {activeTab === 2 && <div>resumen</div>}
+            {activeTab === 2 && (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
+                  <div className="text-sm text-base-600 dark:text-base-300">
+                    <span className="font-semibold">
+                      {formatHoras(horasSemanales)} hs semanales
+                    </span>{" "}
+                    · llegadas hasta las {HORA_ENTRADA} + {TOLERANCIA_MIN}' de
+                    tolerancia (30' si llueve) · salidas después de las{" "}
+                    {HORA_SALIDA}
+                    {feriadosCount > 0 &&
+                      ` · ${feriadosCount} no laborable${feriadosCount === 1 ? "" : "s"}`}
+                    {diasLluviaCount > 0 &&
+                      ` · ${diasLluviaCount} día${diasLluviaCount === 1 ? "" : "s"} de lluvia`}
+                  </div>
+                  <ButtonConfSemana/>
+                </div>
+                <p className="text-xs text-base-500 dark:text-base-400">
+                  Perdidos = faltas + días con tardanza o salida temprana (máx.
+                  1 por día). El premio recuperado se reparte solo entre
+                  empleados sin faltas ni tardanzas, en proporción a las
+                  carrocerías del grupo.
+                </p>
+                <div className="overflow-x-auto rounded-lg shadow-md">
+                  <Table>
+                    <TableHead className="bg-yellow-50 dark:bg-yellow-400/30">
+                      <TableRow className="dark:text-white">
+                        <th scope="col" className="px-3 py-3 text-start">
+                          Empleado
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Hs tot
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Hs reg
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Hs extra
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Salario reg
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Salario extra
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Carrocerías
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-center">
+                          Faltas
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-center">
+                          Tardanzas
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-center">
+                          Sal. tempranas
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-center">
+                          Perdidos
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-center">
+                          Ganados
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Recuperado
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Otros premios
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          Total premios
+                        </th>
+                        <th scope="col" className="px-3 py-3 text-end">
+                          TOTAL
+                        </th>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {resumen.map((row) => {
+                        const isCacho = row.empleado.grupo === "Cacho";
+                        return (
+                          <TableRow
+                            key={row.empleado.id}
+                            className="border-b border-base-200 bg-white dark:border-base-700 dark:bg-base-800"
+                          >
+                            <TableCell
+                              scope="row"
+                              className="px-3 py-2 whitespace-nowrap"
+                            >
+                              {row.empleado.nombre_completo}
+                              {isCacho && (
+                                <Badge color="warning" className="ms-2">
+                                  Cacho
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end">
+                              {formatHoras(row.horas_totales)}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end">
+                              {formatHoras(row.total_horas_regulares)}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end">
+                              {formatHoras(row.total_horas_extras)}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                              {formatCurrency(row.monto_salario_regular)}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                              {row.monto_salario_extra > 0
+                                ? formatCurrency(row.monto_salario_extra)
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end">
+                              {row.carrocerias}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-center">
+                              {row.faltas || "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-center">
+                              {row.tardanzas || "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-center">
+                              {row.salidas_tempranas || "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-center">
+                              {isCacho ? row.premios_perdidos || "-" : "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-center">
+                              {isCacho ? row.premios_ganados || "-" : "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                              {isCacho && row.premio_recuperado > 0
+                                ? formatCurrency(row.premio_recuperado)
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                              {row.otros_premios > 0
+                                ? formatCurrency(row.otros_premios)
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end font-semibold whitespace-nowrap">
+                              {formatCurrency(row.monto_premio)}
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-end font-bold whitespace-nowrap">
+                              {formatCurrency(
+                                row.monto_salario_regular +
+                                  row.monto_salario_extra +
+                                  row.monto_premio,
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      {resumen.length > 0 && (
+                        <TableRow className="border-t-2 border-base-300 bg-base-50 font-semibold dark:border-base-600 dark:bg-base-800">
+                          <TableCell className="px-3 py-2">Totales</TableCell>
+                          <TableCell className="px-3 py-2 text-end">
+                            -
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end">
+                            -
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end">
+                            -
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                            {formatCurrency(totalesResumen.monto_salario_regular)}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                            {totalesResumen.monto_salario_extra > 0
+                              ? formatCurrency(totalesResumen.monto_salario_extra)
+                              : "-"}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end">
+                            {totalesResumen.carrocerias}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-center">
+                            {totalesResumen.faltas}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-center">
+                            {totalesResumen.tardanzas}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-center">
+                            {totalesResumen.salidas_tempranas}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-center">
+                            {totalesResumen.premios_perdidos}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-center">
+                            {totalesResumen.premios_ganados}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                            {formatCurrency(totalesResumen.premio_recuperado)}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                            {formatCurrency(totalesResumen.otros_premios)}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
+                            {formatCurrency(totalesResumen.monto_premio)}
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-end font-bold whitespace-nowrap">
+                            {formatCurrency(totalesResumen.total)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                {resumen.length === 0 && (
+                  <div className="rounded-lg border-2 border-dashed border-base-300 py-12 text-center dark:border-base-600">
+                    <p className="text-sm text-base-500 dark:text-base-400">
+                      No hay empleados activos para mostrar en el resumen
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </TabItem>
         ))}
       </Tabs>
@@ -603,6 +950,7 @@ export default function Liquidacion() {
         isSaving={isSaving}
         hasNoEncontrados={hasNoEncontrados}
         hasFaltanSalidas={hasFaltanSalidas}
+        diasNoLaborables={diasNoLaborables}
       />
       <ReportesEmpleadoModal
         show={Boolean(selectedEmpleado) || grupoEmpleados.length > 0}
@@ -618,6 +966,13 @@ export default function Liquidacion() {
             : handleSaveReportes
         }
         onClose={handleCloseReportesModal}
+      />
+      <ConfigurarSemanaModal
+        show={isConfigOpen}
+        liquidacion={liquidacion ?? null}
+        isSaving={isSavingConfig}
+        onSave={handleSaveConfig}
+        onClose={() => setIsConfigOpen(false)}
       />
     </>
   );

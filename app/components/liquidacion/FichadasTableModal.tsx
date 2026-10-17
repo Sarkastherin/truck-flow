@@ -9,6 +9,11 @@ import type {
   TableColumn,
 } from "react-data-table-component";
 import type { FichadasFileUI } from "~/types/fichadas";
+import {
+  calcularHorasFichada,
+  esFinDeSemana,
+  fechaAISO,
+} from "~/utils/liquidacionCalculos";
 
 const TIME_REGEX = /^([01]?\d|2[0-3]):[0-5]\d$/;
 
@@ -29,60 +34,26 @@ const formatDni = (dni: string | number) => {
 
 export const isValidHora = (value: string) => TIME_REGEX.test(value);
 
-const calcHoras = (
-  entrada: string,
-  salida: string | null,
-): Pick<
-  FichadasFileUI,
-  "totalHorasTrabajadas" | "horasRegular" | "horasExtras"
-> => {
-  const toMinutes = (hora: string) => {
-    const parts = /^(\d{1,2}):(\d{2})$/.exec(hora.trim());
-    if (!parts) return null;
-    const h = Number(parts[1]);
-    const m = Number(parts[2]);
-    if (h > 23 || m > 59) return null;
-    return h * 60 + m;
-  };
-  if (!salida) {
-    return { totalHorasTrabajadas: 0, horasRegular: 0, horasExtras: 0 };
-  }
-  const entradaM = toMinutes(entrada);
-  const salidaM = toMinutes(salida);
-  if (entradaM === null || salidaM === null) {
-    return { totalHorasTrabajadas: 0, horasRegular: 0, horasExtras: 0 };
-  }
-  let diff = salidaM - entradaM;
-  if (diff < 0) diff += 24 * 60;
-  const totalHorasTrabajadas = Math.round((diff / 60) * 100) / 100;
-  const horasRegular =
-    totalHorasTrabajadas === 0
-      ? 0
-      : totalHorasTrabajadas >= 9.5
-        ? 9.5
-        : totalHorasTrabajadas;
-  const horasExtras = Number(
-    (totalHorasTrabajadas - horasRegular).toFixed(2),
-  );
-  return { totalHorasTrabajadas, horasRegular, horasExtras };
-};
-
 export const aplicarEdicionCelda = (
   rows: FichadasFileUI[],
   row: FichadasFileUI,
   value: string,
   field: "entrada" | "salida",
+  diasNoLaborables: string[] = [],
 ): FichadasFileUI[] => {
   if (!isValidHora(value)) return rows;
   return rows.map((r) => {
     if (r !== row) return r;
     const entrada = field === "entrada" ? value : r.entrada;
     const salida = field === "salida" ? value : r.salida;
+    const iso = fechaAISO(r.fecha);
+    const esDiaLaborable =
+      !esFinDeSemana(iso) && !diasNoLaborables.includes(iso);
     return {
       ...r,
       entrada,
       salida,
-      ...calcHoras(entrada, salida),
+      ...calcularHorasFichada(entrada, salida, esDiaLaborable),
     };
   });
 };
@@ -152,8 +123,23 @@ export const getFichadasColumns = (
   },
 ];
 
-export const getFichadasRowStyles =
-  (): ConditionalStyles<FichadasFileUI>[] => [
+export const getFichadasRowStyles = (
+  diasNoLaborables: string[] = [],
+): ConditionalStyles<FichadasFileUI>[] => {
+  const feriados = new Set(diasNoLaborables);
+  const esFeriado = (row: FichadasFileUI) => feriados.has(fechaAISO(row.fecha));
+  const esFinDeSemana = (row: FichadasFileUI) =>
+    row.fecha.getDay() === 0 || row.fecha.getDay() === 6;
+
+  return [
+    {
+      when: esFeriado,
+      classNames: ["!bg-purple-100/50", "dark:!bg-purple-900/20"],
+    },
+    {
+      when: (row) => esFinDeSemana(row) && !esFeriado(row),
+      classNames: ["!bg-blue-100/40", "dark:!bg-blue-900/20"],
+    },
     {
       when: (row) => !row.salida,
       classNames: [
@@ -164,6 +150,7 @@ export const getFichadasRowStyles =
       ],
     },
   ];
+};
 
 export default function FichadasTableModal({
   show,
@@ -177,6 +164,7 @@ export default function FichadasTableModal({
   isSaving,
   hasNoEncontrados,
   hasFaltanSalidas,
+  diasNoLaborables = [],
 }: {
   show: boolean;
   title: string;
@@ -193,9 +181,11 @@ export default function FichadasTableModal({
   isSaving: boolean;
   hasNoEncontrados: boolean;
   hasFaltanSalidas: boolean;
+  diasNoLaborables?: string[];
 }) {
   const [showDniAlert, setShowDniAlert] = useState(true);
   const columns = getFichadasColumns(onCellEdit);
+  const rowStyles = getFichadasRowStyles(diasNoLaborables);
   const saveDisabled = isSaving || hasNoEncontrados || hasFaltanSalidas;
 
   return (
@@ -264,6 +254,20 @@ export default function FichadasTableModal({
             </span>
           </Alert>
         )}
+        <div className="flex flex-wrap items-center gap-4 text-xs text-base-500 dark:text-base-400">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded bg-blue-100/70 dark:bg-blue-900/40" />
+            Fines de semana
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded bg-purple-100/70 dark:bg-purple-900/40" />
+            Feriados
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block size-3 rounded bg-red-300/60" />
+            Sin salida
+          </span>
+        </div>
         <TableComponent
           columns={columns}
           data={rows}
@@ -279,7 +283,7 @@ export default function FichadasTableModal({
           pointerOnHover={false}
           highlightOnHover={false}
           cellNavigation
-          conditionalRowStyles={getFichadasRowStyles()}
+          conditionalRowStyles={rowStyles}
         />
       </div>
     </Modal>

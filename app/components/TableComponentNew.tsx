@@ -2,6 +2,8 @@ import DataTable, {
   type TableColumn,
   type TableProps,
   type ConditionalStyles,
+  type ThemeProp,
+  createTheme
 } from "react-data-table-component";
 import {
   useThemeMode,
@@ -10,7 +12,7 @@ import {
   ToggleSwitch,
   TextInput,
 } from "flowbite-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { MdAddChart } from "react-icons/md";
 import { SubTitles } from "./SubTitles";
 import { Badge } from "flowbite-react";
@@ -29,7 +31,7 @@ type TableComponentProps<T> = TableProps<T> & {
   onAddRecord?: () => void;
   isLoading: boolean;
   labelButton: string;
-  title: string;
+  title?: string;
   backPath: string;
   color: ColorsTypes;
   scrollHeightOffset?: number;
@@ -42,6 +44,8 @@ type TableComponentProps<T> = TableProps<T> & {
     disabled?: boolean
   };
   conditionalRowStyles?:ConditionalStyles<T>[]
+  customTheme?: any;
+  message?: string | React.ReactNode | React.ReactElement
 };
 function NoDataComponent({
   label = "Nuevo registro",
@@ -90,6 +94,8 @@ export default function TableComponent<T extends { active?: boolean }>({
   hasActiveColumn = true,
   btnAction,
   conditionalRowStyles = [],
+  customTheme={},
+  message,
   ...props
 }: TableComponentProps<T>) {
   const stateActiveColumn: TableColumn<T>[] | [] = hasActiveColumn
@@ -149,13 +155,14 @@ export default function TableComponent<T extends { active?: boolean }>({
     },
   ];
   const processConditionalRowStyles = [...conditionalActiveColumnStyles, ...conditionalRowStyles]
+  const inlineTheme = createTheme(customTheme, 'rounded');
   return (
     <>
       <DataTable
         columns={processColumn}
         data={visibleData}
         pagination
-        theme="rounded"
+        theme={inlineTheme}
         colorMode={tableTheme}
         noDataComponent={
           query && data.length > 0 ? (
@@ -181,8 +188,14 @@ export default function TableComponent<T extends { active?: boolean }>({
         resizable
         title={
           <div className="flex w-full items-center justify-between gap-4">
-            <SubTitles title={title} back_path={backPath} />
+            {title && (
+              <SubTitles title={title} back_path={backPath} />
+            )}
+            {message&& (
+              message
+            )}
             <div className="flex items-center gap-3">
+              {/* ColumnMenu */}
               <TextInput
                 type="search"
                 sizing="sm"
@@ -244,7 +257,7 @@ export default function TableComponent<T extends { active?: boolean }>({
             betweenSeparatorText: "y",
           },
         }}
-        conditionalRowStyles={conditionalRowStyles}
+        conditionalRowStyles={processConditionalRowStyles}
       />
       <div className="fixed bottom-6 right-6">
         {onAddRecord && (

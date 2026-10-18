@@ -57,6 +57,7 @@ export default function ReportesEmpleadoModal({
   const isGrupo = grupoEmpleados.length > 0;
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [pedidoErrorIndex, setPedidoErrorIndex] = useState<number | null>(null);
+  const [premioErrorIndex, setPremioErrorIndex] = useState<number | null>(null);
   const [emptyError, setEmptyError] = useState<string | null>(null);
   const { pedidos, getPedidosData } = usePedido();
   const {
@@ -111,11 +112,19 @@ export default function ReportesEmpleadoModal({
       id: String(pedido.id),
       name: `${pedido.numero_pedido} — ${pedido.cliente?.razon_social ?? "Sin cliente"}`,
     }));
-
+const premiosItems =(premios??[]).filter((premio) => premio.active!==false).map((premio)=>({
+      id: String(premio.id),
+      name: `${premio.nombre} — ${formatCurrency(premio.precio) ?? "-"}`,
+    }))
   const getPedidoLabel = (pedidoId: string) => {
     const pedido = (pedidos ?? []).find((p) => String(p.id) === pedidoId);
     if (!pedido) return pedidoId;
     return `${pedido.numero_pedido} — ${pedido.cliente?.razon_social ?? "Sin cliente"}`;
+  };
+const getPremioLabel = (premioId: string) => {
+    const premio = (premios ?? []).find((p) => String(p.id) === premioId);
+    if (!premio) return premioId;
+    return `${premio.nombre} — ${formatCurrency(premio.precio) ?? "-"}`;
   };
 
   const getPrecio = (premioId: string) => {
@@ -212,7 +221,7 @@ export default function ReportesEmpleadoModal({
             ? `Reportes — ${empleado.nombre_completo}`
             : "Reportes"
       }
-      size="4xl"
+      size="5xl"
       onClose={onClose}
       footer={
         <div className="flex w-full items-center justify-between gap-4">
@@ -300,8 +309,8 @@ export default function ReportesEmpleadoModal({
             <div className="relative overflow-x-auto rounded-lg shadow-md">
               <Table>
                 <colgroup>
-                  <col className="w-[34%]" />
-                  <col className="w-[14%]" />
+                  <col className="" />
+                  <col className="w-[1%]" />
                   <col className="w-[28%]" />
                   <col className="w-[16%]" />
                   <col className="w-[1%]" />
@@ -337,7 +346,34 @@ export default function ReportesEmpleadoModal({
                         className="border-b border-base-200 bg-white dark:border-base-700 dark:bg-base-800"
                       >
                         <TableCell scope="row" className="py-3 ps-4 pe-2">
-                          <Select
+                          <SelectWithSearch
+                                  input={{
+                                    label: "",
+                                    placeholder: "Buscar premio",
+                                    value: row.premio_id
+                                      ? getPremioLabel(row.premio_id)
+                                      : "",
+                                  }}
+                                  search={{
+                                    placeholder: "Buscar premio",
+                                  }}
+                                  data={{
+                                    items: premiosItems,
+                                    onSelect: (premio) => {
+                                      setValue(
+                                        `reportes.${index}.premio_id`,
+                                        premio.id,
+                                      );
+                                      setPremioErrorIndex(null);
+                                    },
+                                  }}
+                                  error={
+                                    premioErrorIndex === index
+                                      ? "Seleccioná un premio o desactivá la opción"
+                                      : ""
+                                  }
+                                />
+                          {/* <Select
                             sizing="sm"
                             {...register(`reportes.${index}.premio_id`, {
                               required: "Este campo es obligatorio",
@@ -348,7 +384,7 @@ export default function ReportesEmpleadoModal({
                             )}
                             options={premiosOptions}
                             emptyOption="Seleccione un premio"
-                          />
+                          /> */}
                         </TableCell>
                         <TableCell className="px-2 py-3">
                           <Input

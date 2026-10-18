@@ -341,8 +341,8 @@ export function calcularResumenLiquidacion({
       premios_perdidos: perdidos,
       premios_ganados: ganados,
       premio_recuperado: round2(recuperado),
-      otros_premios: round2(row.montoOtros),
       monto_premio: round2(montoPremio),
+      active: true
     };
   });
 }

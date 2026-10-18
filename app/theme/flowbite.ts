@@ -7,8 +7,8 @@ export const flowbiteTheme = createTheme({
         "primary": "ring-primary-500 dark:ring-primary-600",
       }
     }
-  }
-  /* textInput: {
+  },
+  textInput: {
     field: {
       input: {
         colors: {
@@ -45,5 +45,5 @@ export const flowbiteTheme = createTheme({
     root: {
       base: "border border-red-500"
     }
-  } */
+  }
 });

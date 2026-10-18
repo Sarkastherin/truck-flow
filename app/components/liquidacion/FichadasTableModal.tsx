@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Button } from "flowbite-react";
 import { FaRegIdCard } from "react-icons/fa";
 import { HiExclamation } from "react-icons/hi";
+import { LuPlus, LuX } from "react-icons/lu";
 import TableComponent from "~/components/TableComponentNew";
 import { Modal } from "~/components/modals/ModalBase";
+import { Input, SelectWithSearch } from "~/components/InputsForm";
 import type {
   ConditionalStyles,
   TableColumn,
 } from "react-data-table-component";
 import type { FichadasFileUI } from "~/types/fichadas";
+import type { Employee } from "~/types/rrhh";
 import {
   calcularHorasFichada,
   esFinDeSemana,
@@ -56,6 +59,27 @@ export const aplicarEdicionCelda = (
       ...calcularHorasFichada(entrada, salida, esDiaLaborable),
     };
   });
+};
+
+export const crearFichadaUI = (
+  empleado: Employee,
+  fechaISO: string,
+  entrada: string,
+  salida: string | null,
+  diasNoLaborables: string[] = [],
+): FichadasFileUI => {
+  const esDiaLaborable =
+    !esFinDeSemana(fechaISO) && !diasNoLaborables.includes(fechaISO);
+  const [anio, mes, dia] = fechaISO.split("-").map(Number);
+  return {
+    fecha: new Date(anio, mes - 1, dia),
+    dniEmpleado: String(empleado.dni),
+    empleado,
+    entrada,
+    salida,
+    ...calcularHorasFichada(entrada, salida, esDiaLaborable),
+    active: true,
+  };
 };
 
 export const getFichadasColumns = (
@@ -165,6 +189,10 @@ export default function FichadasTableModal({
   hasNoEncontrados,
   hasFaltanSalidas,
   diasNoLaborables = [],
+  employees = [],
+  desde = "",
+  hasta = "",
+  onAddRow,
 }: {
   show: boolean;
   title: string;
@@ -182,11 +210,100 @@ export default function FichadasTableModal({
   hasNoEncontrados: boolean;
   hasFaltanSalidas: boolean;
   diasNoLaborables?: string[];
+  employees?: Employee[];
+  desde?: string;
+  hasta?: string;
+  onAddRow?: (row: FichadasFileUI) => void;
 }) {
   const [showDniAlert, setShowDniAlert] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newEmpleado, setNewEmpleado] = useState<Employee | null>(null);
+  const [newFecha, setNewFecha] = useState("");
+  const [newEntrada, setNewEntrada] = useState("");
+  const [newSalida, setNewSalida] = useState("");
+  const [addError, setAddError] = useState("");
   const columns = getFichadasColumns(onCellEdit);
   const rowStyles = getFichadasRowStyles(diasNoLaborables);
   const saveDisabled = isSaving || hasNoEncontrados || hasFaltanSalidas;
+
+  useEffect(() => {
+    if (!show) return;
+    setShowAddForm(false);
+    setNewEmpleado(null);
+    setNewFecha("");
+    setNewEntrada("");
+    setNewSalida("");
+    setAddError("");
+  }, [show]);
+
+  const empleadosItems = employees
+    .filter((emp) => emp.active !== false)
+    .map((emp) => ({
+      id: String(emp.id),
+      name: emp.nombre_completo,
+    }));
+
+  const handleToggleAddForm = () => {
+    setShowAddForm((prev) => {
+      const next = !prev;
+      if (next) {
+        setNewEmpleado(null);
+        setNewFecha("");
+        setNewEntrada("");
+        setNewSalida("");
+        setAddError("");
+      }
+      return next;
+    });
+  };
+
+  const handleConfirmAdd = () => {
+    if (!newEmpleado) {
+      setAddError("Seleccioná un empleado");
+      return;
+    }
+    if (!newFecha) {
+      setAddError("Ingresá una fecha");
+      return;
+    }
+    if (desde && hasta && (newFecha < desde || newFecha > hasta)) {
+      setAddError("La fecha debe estar dentro del período de la liquidación");
+      return;
+    }
+    if (!isValidHora(newEntrada.trim())) {
+      setAddError("Ingresá una hora de entrada válida (HH:MM)");
+      return;
+    }
+    const salida = newSalida.trim();
+    if (salida && !isValidHora(salida)) {
+      setAddError("Ingresá una hora de salida válida (HH:MM)");
+      return;
+    }
+    const esDuplicada = rows.some(
+      (r) =>
+        fechaAISO(r.fecha) === newFecha &&
+        r.dniEmpleado === String(newEmpleado.dni),
+    );
+    if (esDuplicada) {
+      setAddError("El empleado ya tiene fichada para ese día");
+      return;
+    }
+    onAddRow?.(
+      crearFichadaUI(
+        newEmpleado,
+        newFecha,
+        newEntrada.trim(),
+        salida || null,
+        diasNoLaborables,
+      ),
+    );
+    setNewEmpleado(null);
+    setNewFecha("");
+    setNewEntrada("");
+    setNewSalida("");
+    setAddError("");
+    setShowAddForm(false);
+  };
 
   return (
     <Modal
@@ -254,20 +371,123 @@ export default function FichadasTableModal({
             </span>
           </Alert>
         )}
-        <div className="flex flex-wrap items-center gap-4 text-xs text-base-500 dark:text-base-400">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block size-3 rounded bg-blue-100/70 dark:bg-blue-900/40" />
-            Fines de semana
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block size-3 rounded bg-purple-100/70 dark:bg-purple-900/40" />
-            Feriados
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block size-3 rounded bg-red-300/60" />
-            Sin salida
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-base-500 dark:text-base-400">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block size-3 rounded bg-blue-100/70 dark:bg-blue-900/40" />
+              Fines de semana
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block size-3 rounded bg-purple-100/70 dark:bg-purple-900/40" />
+              Feriados
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block size-3 rounded bg-red-300/60" />
+              Sin salida
+            </span>
+          </div>
+          {onAddRow && (
+            <Button
+              color="yellow"
+              size="sm"
+              onClick={handleToggleAddForm}
+            >
+              {showAddForm ? (
+                <>
+                  <LuX className="me-1 size-4" />
+                  Cerrar
+                </>
+              ) : (
+                <>
+                  <LuPlus className="me-1 size-4" />
+                  Agregar fichada
+                </>
+              )}
+            </Button>
+          )}
         </div>
+        {showAddForm && (
+          <div className="rounded-xl border border-base-200 bg-base-50 p-4 dark:border-base-700 dark:bg-base-800">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+              <div className="md:col-span-2">
+                <SelectWithSearch
+                  input={{
+                    label: "Empleado",
+                    placeholder: "Buscar por nombre",
+                    value: newEmpleado?.nombre_completo ?? "",
+                  }}
+                  search={{
+                    placeholder: "Buscar empleado",
+                  }}
+                  data={{
+                    items: empleadosItems,
+                    onSelect: (item) => {
+                      const emp =
+                        employees.find((e) => String(e.id) === item.id) ??
+                        null;
+                      setNewEmpleado(emp);
+                      setAddError("");
+                    },
+                  }}
+                  error=""
+                  requiredField
+                />
+              </div>
+              <Input
+                type="date"
+                label="Fecha"
+                value={newFecha}
+                min={desde || undefined}
+                max={hasta || undefined}
+                onChange={(e) => {
+                  setNewFecha(e.target.value);
+                  setAddError("");
+                }}
+                requiredField
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Entrada"
+                  placeholder="HH:MM"
+                  value={newEntrada}
+                  maxLength={5}
+                  onChange={(e) => {
+                    setNewEntrada(e.target.value);
+                    setAddError("");
+                  }}
+                  requiredField
+                />
+                <Input
+                  label="Salida"
+                  placeholder="HH:MM"
+                  value={newSalida}
+                  maxLength={5}
+                  onChange={(e) => {
+                    setNewSalida(e.target.value);
+                    setAddError("");
+                  }}
+                />
+              </div>
+            </div>
+            {addError && (
+              <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
+                {addError}
+              </p>
+            )}
+            <div className="mt-3 flex justify-end gap-2">
+              <Button
+                color="alternative"
+                size="sm"
+                onClick={handleToggleAddForm}
+              >
+                Cancelar
+              </Button>
+              <Button color="yellow" size="sm" onClick={handleConfirmAdd}>
+                Agregar
+              </Button>
+            </div>
+          </div>
+        )}
         <TableComponent
           columns={columns}
           data={rows}

@@ -2,19 +2,7 @@ import { useMemo, useState, useRef } from "react";
 import type { Route } from "../../+types/home";
 import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
-import {
-  Badge,
-  Button,
-  Card,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TabItem,
-  Tabs,
-  type TabsRef,
-} from "flowbite-react";
+import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
 import { LuArrowRight, LuCalendarDays, LuSettings2 } from "react-icons/lu";
 import type {
   Fichada,
@@ -55,6 +43,7 @@ import type { TableColumn } from "react-data-table-component";
 import TableComponent from "~/components/TableComponentNew";
 import type { Employee } from "~/types/rrhh";
 import type { DirtyMap } from "~/utils/prepareUpdatePayload";
+import { useColumnVisibility } from "react-data-table-component";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Liquidación" },
@@ -115,8 +104,6 @@ const formatCurrency = (value: number) =>
 const formatHoras = (value: number) =>
   value.toLocaleString("es-AR", { maximumFractionDigits: 2 });
 
-type ResumenRow = LiquidacionResumen & { active?: boolean };
-
 export default function Liquidacion() {
   const {
     liquidaciones,
@@ -129,7 +116,7 @@ export default function Liquidacion() {
   } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
-  const [selected, setSelected] = useState<ResumenRow[]>([]);
+  const [selected, setSelected] = useState<LiquidacionResumen[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const [fichadasFile, setFichadasFile] = useState<FichadasFileUI[]>([]);
   const [isLoadingImport, setIsLoadingImport] = useState(false);
@@ -187,7 +174,7 @@ export default function Liquidacion() {
   const reportesGuardados = liquidacion?.reporte ?? [];
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
 
-  const resumen: ResumenRow[] = useMemo(() => {
+  const resumen: LiquidacionResumen[] = useMemo(() => {
     if (!liquidacion) return [];
     return calcularResumenLiquidacion({
       liquidacion,
@@ -203,7 +190,7 @@ export default function Liquidacion() {
     [resumen],
   );
 
-  const produccionColumns: TableColumn<ResumenRow>[] = [
+  const produccionColumns: TableColumn<LiquidacionResumen>[] = [
     {
       name: "Empleado",
       selector: (row) => row.empleado.nombre_completo,
@@ -242,7 +229,102 @@ export default function Liquidacion() {
       filterType: "number",
     },
   ];
-
+  const resumenColumns: TableColumn<LiquidacionResumen>[] = [
+    {
+      name: "Empleado",
+      selector: (row) => row.empleado.nombre_completo,
+      sortable: true,
+      filterable: true,
+      filterType: "text",
+      grow: 1,
+      pinned: "left",
+    },
+    {
+      name: "HS totales",
+      selector: (row) => row.horas_totales,
+      width: "80px",
+    },
+    {
+      name: "HS Reg",
+      selector: (row) => row.total_horas_regulares,
+      width: "80px",
+    },
+    {
+      name: "HS Extras",
+      selector: (row) => row.total_horas_extras,
+      width: "80px",
+    },
+    {
+      name: "Salario",
+      selector: (row) => formatCurrency(row.monto_salario_regular),
+      width: "110px",
+    },
+    {
+      name: "Extra",
+      selector: (row) => formatCurrency(row.monto_salario_extra),
+      width: "110px",
+    },
+    {
+      name: "Carrocerías",
+      selector: (row) => row.carrocerias,
+      width: "90px",
+    },
+    {
+      name: "Faltas",
+      selector: (row) => row.faltas,
+      width: "80px",
+    },
+    {
+      name: "Tardanzas",
+      selector: (row) => row.tardanzas,
+      width: "80px",
+    },
+    {
+      name: "Sal temp",
+      selector: (row) => row.salidas_tempranas,
+      width: "80px",
+    },
+    {
+      name: "Perdidos",
+      selector: (row) => row.premios_perdidos,
+      width: "80px",
+    },
+    {
+      name: "Ganados",
+      selector: (row) => row.premios_ganados,
+      width: "80px",
+    },
+    {
+      name: "Recuperados",
+      selector: (row) => row.premio_recuperado,
+      width: "80px",
+    },
+    {
+      name: "Total premios",
+      selector: (row) => row.monto_premio,
+      width: "110px",
+    },
+    {
+      name: "Total",
+      selector: (row) =>
+        formatCurrency(
+          row.monto_salario_regular +
+            row.monto_salario_extra +
+            row.monto_premio,
+        ),
+      cell: (row) => (
+        <span className="font-bold">
+          {formatCurrency(
+            row.monto_salario_regular +
+              row.monto_salario_extra +
+              row.monto_premio,
+          )}
+        </span>
+      ),
+      width: "110px",
+      pinned: "right",
+    },
+  ];
   const hasNoEncontrados = fichadasFile.some((fich) => !fich.empleado);
   const hasFaltanSalidas = fichadasFile.some((fich) => !fich.salida);
 
@@ -299,6 +381,19 @@ export default function Liquidacion() {
     if (!field) return;
     setFichadasFile((prev) =>
       aplicarEdicionCelda(prev, row, value, field, diasNoLaborables),
+    );
+  };
+
+  const handleAddFichada = (row: FichadasFileUI) => {
+    setFichadasFile((prev) =>
+      [...prev, row].sort((a, b) => {
+        const diff = a.fecha.getTime() - b.fecha.getTime();
+        if (diff !== 0) return diff;
+        return (a.empleado?.nombre_completo ?? "").localeCompare(
+          b.empleado?.nombre_completo ?? "",
+          "es",
+        );
+      }),
     );
   };
 
@@ -542,7 +637,6 @@ export default function Liquidacion() {
         (acc, row) => acc + row.premio_recuperado,
         0,
       ),
-      otros_premios: resumen.reduce((acc, row) => acc + row.otros_premios, 0),
       monto_premio: resumen.reduce((acc, row) => acc + row.monto_premio, 0),
       total: resumen.reduce(
         (acc, row) =>
@@ -566,6 +660,7 @@ export default function Liquidacion() {
       Configurar semana
     </Button>
   );
+
   return (
     <>
       <Card>
@@ -589,7 +684,7 @@ export default function Liquidacion() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <ButtonConfSemana/>
+              <ButtonConfSemana />
               <span className="text-xs uppercase tracking-tight font-semibold text-base-500">
                 Status
               </span>
@@ -719,212 +814,43 @@ export default function Liquidacion() {
             )}
             {activeTab === 2 && (
               <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
-                  <div className="text-sm text-base-600 dark:text-base-300">
-                    <span className="font-semibold">
-                      {formatHoras(horasSemanales)} hs semanales
-                    </span>{" "}
-                    · llegadas hasta las {HORA_ENTRADA} + {TOLERANCIA_MIN}' de
-                    tolerancia (30' si llueve) · salidas después de las{" "}
-                    {HORA_SALIDA}
-                    {feriadosCount > 0 &&
-                      ` · ${feriadosCount} no laborable${feriadosCount === 1 ? "" : "s"}`}
-                    {diasLluviaCount > 0 &&
-                      ` · ${diasLluviaCount} día${diasLluviaCount === 1 ? "" : "s"} de lluvia`}
-                  </div>
-                  <ButtonConfSemana/>
-                </div>
-                <p className="text-xs text-base-500 dark:text-base-400">
-                  Perdidos = faltas + días con tardanza o salida temprana (máx.
-                  1 por día). El premio recuperado se reparte solo entre
-                  empleados sin faltas ni tardanzas, en proporción a las
-                  carrocerías del grupo.
-                </p>
                 <div className="overflow-x-auto rounded-lg shadow-md">
-                  <Table>
-                    <TableHead className="bg-yellow-50 dark:bg-yellow-400/30">
-                      <TableRow className="dark:text-white">
-                        <th scope="col" className="px-3 py-3 text-start">
-                          Empleado
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Hs tot
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Hs reg
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Hs extra
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Salario reg
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Salario extra
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Carrocerías
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-center">
-                          Faltas
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-center">
-                          Tardanzas
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-center">
-                          Sal. tempranas
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-center">
-                          Perdidos
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-center">
-                          Ganados
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Recuperado
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Otros premios
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          Total premios
-                        </th>
-                        <th scope="col" className="px-3 py-3 text-end">
-                          TOTAL
-                        </th>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {resumen.map((row) => {
-                        const isCacho = row.empleado.grupo === "Cacho";
-                        return (
-                          <TableRow
-                            key={row.empleado.id}
-                            className="border-b border-base-200 bg-white dark:border-base-700 dark:bg-base-800"
-                          >
-                            <TableCell
-                              scope="row"
-                              className="px-3 py-2 whitespace-nowrap"
-                            >
-                              {row.empleado.nombre_completo}
-                              {isCacho && (
-                                <Badge color="warning" className="ms-2">
-                                  Cacho
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end">
-                              {formatHoras(row.horas_totales)}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end">
-                              {formatHoras(row.total_horas_regulares)}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end">
-                              {formatHoras(row.total_horas_extras)}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                              {formatCurrency(row.monto_salario_regular)}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                              {row.monto_salario_extra > 0
-                                ? formatCurrency(row.monto_salario_extra)
-                                : "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end">
-                              {row.carrocerias}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-center">
-                              {row.faltas || "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-center">
-                              {row.tardanzas || "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-center">
-                              {row.salidas_tempranas || "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-center">
-                              {isCacho ? row.premios_perdidos || "-" : "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-center">
-                              {isCacho ? row.premios_ganados || "-" : "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                              {isCacho && row.premio_recuperado > 0
-                                ? formatCurrency(row.premio_recuperado)
-                                : "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                              {row.otros_premios > 0
-                                ? formatCurrency(row.otros_premios)
-                                : "-"}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end font-semibold whitespace-nowrap">
-                              {formatCurrency(row.monto_premio)}
-                            </TableCell>
-                            <TableCell className="px-3 py-2 text-end font-bold whitespace-nowrap">
-                              {formatCurrency(
-                                row.monto_salario_regular +
-                                  row.monto_salario_extra +
-                                  row.monto_premio,
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      {resumen.length > 0 && (
-                        <TableRow className="border-t-2 border-base-300 bg-base-50 font-semibold dark:border-base-600 dark:bg-base-800">
-                          <TableCell className="px-3 py-2">Totales</TableCell>
-                          <TableCell className="px-3 py-2 text-end">
-                            -
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end">
-                            -
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end">
-                            -
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                            {formatCurrency(totalesResumen.monto_salario_regular)}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                            {totalesResumen.monto_salario_extra > 0
-                              ? formatCurrency(totalesResumen.monto_salario_extra)
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end">
-                            {totalesResumen.carrocerias}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-center">
-                            {totalesResumen.faltas}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-center">
-                            {totalesResumen.tardanzas}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-center">
-                            {totalesResumen.salidas_tempranas}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-center">
-                            {totalesResumen.premios_perdidos}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-center">
-                            {totalesResumen.premios_ganados}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                            {formatCurrency(totalesResumen.premio_recuperado)}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                            {formatCurrency(totalesResumen.otros_premios)}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end whitespace-nowrap">
-                            {formatCurrency(totalesResumen.monto_premio)}
-                          </TableCell>
-                          <TableCell className="px-3 py-2 text-end font-bold whitespace-nowrap">
-                            {formatCurrency(totalesResumen.total)}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                  <TableComponent
+                    columns={resumenColumns}
+                    data={resumen}
+                    title=""
+                    backPath=""
+                    isLoading={isLoading}
+                    color="yellow"
+                    labelButton=""
+                    hasActiveColumn={false}
+                    searchKeys={["empleado.nombre_completo", "empleado.dni"]}
+                    searchPlaceholder="Buscar por nombre o DNI"
+                    scrollHeightOffset={390}
+                    customTheme={{
+                      typography: { fontSize: "12px", fontSizeHeader: "13px" },
+                      spacing: {
+                        rowHeight: "34px",
+                        cellPaddingX: "8px",
+                      },
+                      text: {
+                        primary: "#333333",
+                        secondary: "#4a4a6a",
+                        disabled: "#9e9e9e",
+                      },
+                      background: {
+                        header: "#FFF9D9",
+                      },
+                    }}
+                    message={
+                      <p className="text-xs text-base-500 dark:text-base-400 ">
+                        Perdidos = faltas + días con tardanza o salida temprana
+                        (máx. 1 por día). El premio recuperado se reparte solo
+                        entre empleados sin faltas ni tardanzas, en proporción a
+                        las carrocerías del grupo.
+                      </p>
+                    }
+                  />
                 </div>
                 {resumen.length === 0 && (
                   <div className="rounded-lg border-2 border-dashed border-base-300 py-12 text-center dark:border-base-600">
@@ -951,6 +877,10 @@ export default function Liquidacion() {
         hasNoEncontrados={hasNoEncontrados}
         hasFaltanSalidas={hasFaltanSalidas}
         diasNoLaborables={diasNoLaborables}
+        employees={employees}
+        desde={liquidacion?.desde ?? ""}
+        hasta={liquidacion?.hasta ?? ""}
+        onAddRow={handleAddFichada}
       />
       <ReportesEmpleadoModal
         show={Boolean(selectedEmpleado) || grupoEmpleados.length > 0}

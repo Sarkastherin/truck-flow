@@ -70,6 +70,7 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     },
     grow: 0,
     sortable: true,
+    
   },
   {
     id: "horas_extras",

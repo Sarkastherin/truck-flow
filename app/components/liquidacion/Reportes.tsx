@@ -67,7 +67,7 @@ export default function Reportes({
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
 }) {
-  const { premios, isLoading, CUDReportes, employees } = useRRHH();
+  const { premios, isLoading, CUDReportes, employees, saldoEmpleados } = useRRHH();
 
   const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
     null,
@@ -84,6 +84,7 @@ export default function Reportes({
       premios,
       fichadas: fichadasGuardadas,
       reportes: reportesGuardados,
+      saldoEmpleados,
     });
   }, [liquidacion, employees, premios, fichadasGuardadas, reportesGuardados]);
   const handleSelectGroup = () => {

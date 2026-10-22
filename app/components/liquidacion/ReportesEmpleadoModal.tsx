@@ -10,13 +10,14 @@ import {
   ToggleSwitch,
 } from "flowbite-react";
 import { LuTrash2 } from "react-icons/lu";
-import { Input, Select, SelectWithSearch } from "~/components/InputsForm";
+import { Input, SelectWithSearch } from "~/components/InputsForm";
 import { Modal } from "~/components/modals/ModalBase";
 import { getFieldError } from "~/utils/formFieldHelpers";
 import { usePedido } from "~/context/PedidoContext";
 import type { Premios } from "~/types/rrhh";
 import type { Employee } from "~/types/rrhh";
 import type { ReporteFormValues } from "~/types/liquidaciones";
+import { formatCurrency } from "~/utils/formats";
 
 type ReporteRowForm = {
   id?: string;
@@ -29,9 +30,6 @@ type ReporteRowForm = {
 type ReportesFormValues = {
   reportes: ReporteRowForm[];
 };
-
-const formatCurrency = (value: number) =>
-  value.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 
 export default function ReportesEmpleadoModal({
   show,
@@ -112,16 +110,18 @@ export default function ReportesEmpleadoModal({
       id: String(pedido.id),
       name: `${pedido.numero_pedido} — ${pedido.cliente?.razon_social ?? "Sin cliente"}`,
     }));
-const premiosItems =(premios??[]).filter((premio) => premio.active!==false).map((premio)=>({
+  const premiosItems = (premios ?? [])
+    .filter((premio) => premio.active !== false)
+    .map((premio) => ({
       id: String(premio.id),
       name: `${premio.nombre} — ${formatCurrency(premio.precio) ?? "-"}`,
-    }))
+    }));
   const getPedidoLabel = (pedidoId: string) => {
     const pedido = (pedidos ?? []).find((p) => String(p.id) === pedidoId);
     if (!pedido) return pedidoId;
     return `${pedido.numero_pedido} — ${pedido.cliente?.razon_social ?? "Sin cliente"}`;
   };
-const getPremioLabel = (premioId: string) => {
+  const getPremioLabel = (premioId: string) => {
     const premio = (premios ?? []).find((p) => String(p.id) === premioId);
     if (!premio) return premioId;
     return `${premio.nombre} — ${formatCurrency(premio.precio) ?? "-"}`;
@@ -166,9 +166,7 @@ const getPremioLabel = (premioId: string) => {
 
   const onSubmit = handleSubmit((values) => {
     if (values.reportes.length === 0) {
-      setEmptyError(
-        "Agregá al menos un premio antes de guardar",
-      );
+      setEmptyError("Agregá al menos un premio antes de guardar");
       return;
     }
     const invalidPedidoIndex = values.reportes.findIndex(
@@ -190,7 +188,8 @@ const getPremioLabel = (premioId: string) => {
             premio_id: row.premio_id,
             cantidad: Number(row.cantidad) || 0,
           };
-          if (row.asocia_pedido && row.pedido_id) item.pedido_id = row.pedido_id;
+          if (row.asocia_pedido && row.pedido_id)
+            item.pedido_id = row.pedido_id;
           return item;
         }),
       );
@@ -306,7 +305,7 @@ const getPremioLabel = (premioId: string) => {
           </div>
         ) : (
           <fieldset className="grid grid-cols-1 gap-4">
-            <div className="relative overflow-x-auto rounded-lg shadow-md">
+            <div className="relative overflow-x-auto rounded-lg shadow-md" style={{ minHeight: "calc(100vh - 400px" }}>
               <Table>
                 <colgroup>
                   <col className="" />
@@ -347,48 +346,36 @@ const getPremioLabel = (premioId: string) => {
                       >
                         <TableCell scope="row" className="py-3 ps-4 pe-2">
                           <SelectWithSearch
-                                  input={{
-                                    label: "",
-                                    placeholder: "Buscar premio",
-                                    value: row.premio_id
-                                      ? getPremioLabel(row.premio_id)
-                                      : "",
-                                  }}
-                                  search={{
-                                    placeholder: "Buscar premio",
-                                  }}
-                                  data={{
-                                    items: premiosItems,
-                                    onSelect: (premio) => {
-                                      setValue(
-                                        `reportes.${index}.premio_id`,
-                                        premio.id,
-                                      );
-                                      setPremioErrorIndex(null);
-                                    },
-                                  }}
-                                  error={
-                                    premioErrorIndex === index
-                                      ? "Seleccioná un premio o desactivá la opción"
-                                      : ""
-                                  }
-                                />
-                          {/* <Select
-                            sizing="sm"
-                            {...register(`reportes.${index}.premio_id`, {
-                              required: "Este campo es obligatorio",
-                            })}
-                            error={getFieldError(
-                              errors,
-                              `reportes.${index}.premio_id`,
-                            )}
-                            options={premiosOptions}
-                            emptyOption="Seleccione un premio"
-                          /> */}
+                            input={{
+                              label: "",
+                              placeholder: "Buscar premio",
+                              value: row.premio_id
+                                ? getPremioLabel(row.premio_id)
+                                : "",
+                            }}
+                            search={{
+                              placeholder: "Buscar premio",
+                            }}
+                            data={{
+                              items: premiosItems,
+                              onSelect: (premio) => {
+                                setValue(
+                                  `reportes.${index}.premio_id`,
+                                  premio.id,
+                                );
+                                setPremioErrorIndex(null);
+                              },
+                            }}
+                            error={
+                              premioErrorIndex === index
+                                ? "Seleccioná un premio o desactivá la opción"
+                                : ""
+                            }
+                          />
+                          
                         </TableCell>
                         <TableCell className="px-2 py-3">
                           <Input
-                            sizing="sm"
                             type="number"
                             min={1}
                             {...register(`reportes.${index}.cantidad`, {
@@ -410,7 +397,6 @@ const getPremioLabel = (premioId: string) => {
                                 handleTogglePedido(index, checked)
                               }
                               label="Asociar a pedido"
-                              sizing="sm"
                             />
                             {row?.asocia_pedido && (
                               <>

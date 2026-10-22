@@ -8,6 +8,7 @@ import { BadgeContrato } from "~/components/specials/Badges";
 import { useModal } from "~/context/ModalContext";
 import EmployeeModal from "~/components/modals/customs/EmployeeModal";
 import { useEmployee } from "~/hooks/useEmployee";
+import { formatCurrency } from "~/utils/formats";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,6 +18,7 @@ export function meta({}: Route.MetaArgs) {
 }
 const columns: TableColumn<Employee>[] = [
   {
+    id: "nombre",
     name: "Nombre completo",
     selector: (row) => row.nombre_completo,
     sortable: true,
@@ -24,12 +26,14 @@ const columns: TableColumn<Employee>[] = [
     filterType: "text",
   },
   {
+    id: "dni",
     name: "DNI",
     selector: (row) => row.dni,
     sortable: true,
     width: "100px",
   },
   {
+    id: "tipo_contrato",
     name: "Tipo de Contrato",
     cell: (row) => <BadgeContrato tipoPago={row.tipo_pago} />,
     selector: (row) => row.tipo_pago,
@@ -39,22 +43,18 @@ const columns: TableColumn<Employee>[] = [
     filterType: "set",
   },
   {
+    id: "valor_salario",
     name: "Valor Salario",
-    selector: (row) =>
-      (row.valor_salario_semanal || "-").toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }) || "-",
+    selector: (row) => row.valor_salario_semanal || "0",
+    format: (row) => formatCurrency(row.valor_salario_semanal || 0),
     sortable: true,
     width: "150px",
   },
   {
+    id: "valor_hora_extra",
     name: "Valor Hora Extra",
-    selector: (row) =>
-      (row.valor_hora_extra || "-").toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }) || "-",
+    selector: (row) => row.valor_hora_extra || 0,
+    format: (row) => formatCurrency(row.valor_hora_extra || 0),
     sortable: true,
     width: "150px",
   },
@@ -118,7 +118,7 @@ export default function Employees() {
         columns={columns}
         data={employees}
         searchKeys={["nombre_completo", "dni"]}
-        onRowClicked={(row) => handleRowClick(row)}
+        onRowClicked={handleRowClick}
         onAddRecord={handleAddEmployee}
         isLoading={isLoading}
         labelButton="Agregar empleado"
@@ -127,6 +127,7 @@ export default function Employees() {
         color={"blue"}
         scrollHeightOffset={270}
         searchPlaceholder="Buscar por nombre o DNI"
+        showColumnVisibility
       />
     </>
   );

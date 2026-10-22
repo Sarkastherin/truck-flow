@@ -23,7 +23,7 @@ import {
   TableRow,
 } from "flowbite-react";
 import MvtoModal from "~/components/modals/customs/MvtoEmpleadoModal";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatCurrency, formatDateUStoES } from "~/utils/formats";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -44,33 +44,22 @@ const getColumns = (
     },
     {
       name: "Debe",
-      selector: (row) =>
-        row.debe.toLocaleString("es-AR", {
-          style: "currency",
-          currency: "ARS",
-        }),
+      selector: (row) => row.debe,
+      format: (row) => formatCurrency(row.debe),
       sortable: true,
       width: "150px",
     },
     {
       name: "Haber",
-      selector: (row) =>
-        row.haber.toLocaleString("es-AR", {
-          style: "currency",
-          currency: "ARS",
-        }),
+      selector: (row) => row.haber,
+      format: (row) => formatCurrency(row.haber),
       sortable: true,
       width: "150px",
     },
     {
       name: "Saldo",
-      selector: (row) => {
-        const saldo = row.debe - row.haber;
-        return saldo.toLocaleString("es-AR", {
-          style: "currency",
-          currency: "ARS",
-        });
-      },
+      selector: (row) => row.debe - row.haber,
+      format: (row) => formatCurrency(row.debe - row.haber),
       sortable: true,
       width: "150px",
     },
@@ -126,7 +115,7 @@ export default function MvtoEmpleadosPage() {
     data: row,
   }: ExpanderComponentProps<CtaCteEmpleados>) => {
     const handleRowClick = (mov: MvtoEmpleados) => {
-      handleOpenModal(row.empleado, mov)
+      handleOpenModal(row.empleado, mov);
     };
     return (
       <Table className="font-mono text-sm">
@@ -170,10 +159,7 @@ export default function MvtoEmpleadosPage() {
                 </td>
                 <td className="py-2 px-2">{mov.concepto}</td>
                 <td className={`py-2 px-2 font-bold  ${style}`}>
-                  {monto.toLocaleString("es-AR", {
-                    style: "currency",
-                    currency: "ARS",
-                  })}
+                  {formatCurrency(monto)}
                 </td>
               </TableRow>
             );

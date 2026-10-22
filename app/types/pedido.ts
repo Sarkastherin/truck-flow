@@ -518,6 +518,7 @@ export type Carroceria = CommonTypes & {
   pedido_id: string;
   /* datos generales */
   tipo_carrozado_id: string;
+  nombre?:string
   largo_int: number | null;
   largo_ext: number | null;
   material: (typeof materialOptions)[number]["value"];
@@ -571,6 +572,7 @@ export type Carroceria = CommonTypes & {
   notas?: string;
   //---
   notas_colocacion?: string;
+  armador?:string
 };
 export type TrabajoChasis = CommonTypes & {
   pedido_id: string;

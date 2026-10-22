@@ -17,6 +17,7 @@ import {
   esFinDeSemana,
   fechaAISO,
 } from "~/utils/liquidacionCalculos";
+import { formatDni } from "~/types/rrhh";
 
 const TIME_REGEX = /^([01]?\d|2[0-3]):[0-5]\d$/;
 
@@ -27,13 +28,6 @@ const formatFecha = (fecha: Date) =>
     day: "2-digit",
   });
 
-const formatDni = (dni: string | number) => {
-  const dniString = String(dni);
-  const first = dniString.slice(0, 2);
-  const second = dniString.slice(2, 5);
-  const third = dniString.slice(5, 8);
-  return `${first}.${second}.${third}`;
-};
 
 export const isValidHora = (value: string) => TIME_REGEX.test(value);
 
@@ -92,10 +86,10 @@ export const getFichadasColumns = (
   {
     name: "Fecha",
     selector: (row) => formatFecha(row.fecha),
-    width: "120px",
     filterable: true,
     filterType: "date",
     sortable: true,
+    grow: 0,
   },
   {
     name: "Empleado",
@@ -105,45 +99,46 @@ export const getFichadasColumns = (
   },
   {
     name: "DNI",
-    selector: (row) => formatDni(row.dniEmpleado),
-    width: "120px",
+    selector: (row) => row.dniEmpleado,
+    format: (row) => formatDni(row.dniEmpleado),
     filterable: true,
     sortable: true,
+    grow: 0,
   },
   {
     name: "Entrada",
     id: "entrada",
     selector: (row) => row.entrada,
-    width: "90px",
     editable: true,
     onCellEdit,
+    grow: 0,
   },
   {
     name: "Salida",
     id: "salida",
     selector: (row) => row.salida ?? "",
-    width: "90px",
     editable: true,
     onCellEdit,
     sortable: true,
+    grow: 0,
   },
   {
     name: "Total HS",
     selector: (row) => row.totalHorasTrabajadas,
-    width: "110px",
     filterable: true,
     filterType: "number",
     sortable: true,
+    grow: 0,
   },
   {
     name: "HS Reg.",
     selector: (row) => row.horasRegular,
-    width: "110px",
+    grow: 0,
   },
   {
     name: "HS Extras",
     selector: (row) => row.horasExtras,
-    width: "110px",
+    grow: 0,
   },
 ];
 
@@ -158,11 +153,11 @@ export const getFichadasRowStyles = (
   return [
     {
       when: esFeriado,
-      classNames: ["!bg-purple-100/50", "dark:!bg-purple-900/20"],
+      classNames: ["!bg-lime-400/10"],
     },
     {
       when: (row) => esFinDeSemana(row) && !esFeriado(row),
-      classNames: ["!bg-blue-100/40", "dark:!bg-blue-900/20"],
+      classNames: ["!bg-blue-200/30", "dark:!bg-blue-900/20"],
     },
     {
       when: (row) => !row.salida,
@@ -224,7 +219,7 @@ export default function FichadasTableModal({
   const [addError, setAddError] = useState("");
   const columns = getFichadasColumns(onCellEdit);
   const rowStyles = getFichadasRowStyles(diasNoLaborables);
-  const saveDisabled = isSaving || hasNoEncontrados || hasFaltanSalidas;
+  const saveDisabled = isSaving || hasNoEncontrados;
 
   useEffect(() => {
     if (!show) return;
@@ -321,7 +316,8 @@ export default function FichadasTableModal({
             )}
             {hasFaltanSalidas && (
               <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400">
-                Faltan completar salidas para poder guardar
+                Faltan completar salidas — el resumen se mostrará cuando todas
+                estén completas
               </span>
             )}
             {hasNoEncontrados && (
@@ -330,17 +326,13 @@ export default function FichadasTableModal({
               </span>
             )}
           </div>
-          <Button
-            color="yellow"
-            onClick={onSave}
-            disabled={saveDisabled}
-          >
+          <Button color="yellow" onClick={onSave} disabled={saveDisabled}>
             {isSaving ? "Guardando..." : "Guardar, y continuar"}
           </Button>
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 -my-4">
         {hasNoEncontrados && showDniAlert && (
           <Alert
             color="red"
@@ -358,54 +350,16 @@ export default function FichadasTableModal({
           </Alert>
         )}
         {hasFaltanSalidas && (
-          <Alert
-            color="yellow"
-            withBorderAccent
-            icon={HiExclamation}
-          >
+          <Alert color="yellow" withBorderAccent icon={HiExclamation}>
             <span>
-              <span className="font-bold">Faltan completar salidas</span> Hay
-              algunos registros que no tienen la{" "}
-              <em className="font-medium">hora de salida</em>, por favor
-              completalos en esta <em className="font-medium">Tabla</em>.
+              <span className="font-bold">Faltan completar salidas</span> Podés
+              guardar igual, pero la pestaña{" "}
+              <em className="font-medium">Reporte y resumen</em> no se generará
+              hasta que todas las fichadas tengan{" "}
+              <em className="font-medium">hora de salida</em>.
             </span>
           </Alert>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-base-500 dark:text-base-400">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block size-3 rounded bg-blue-100/70 dark:bg-blue-900/40" />
-              Fines de semana
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block size-3 rounded bg-purple-100/70 dark:bg-purple-900/40" />
-              Feriados
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block size-3 rounded bg-red-300/60" />
-              Sin salida
-            </span>
-          </div>
-          {onAddRow && (
-            <Button
-              color="yellow"
-              size="sm"
-              onClick={handleToggleAddForm}
-            >
-              {showAddForm ? (
-                <>
-                  <LuX className="me-1 size-4" />
-                  Cerrar
-                </>
-              ) : (
-                <>
-                  <LuPlus className="me-1 size-4" />
-                  Agregar fichada
-                </>
-              )}
-            </Button>
-          )}
-        </div>
         {showAddForm && (
           <div className="rounded-xl border border-base-200 bg-base-50 p-4 dark:border-base-700 dark:bg-base-800">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -423,8 +377,7 @@ export default function FichadasTableModal({
                     items: empleadosItems,
                     onSelect: (item) => {
                       const emp =
-                        employees.find((e) => String(e.id) === item.id) ??
-                        null;
+                        employees.find((e) => String(e.id) === item.id) ?? null;
                       setNewEmpleado(emp);
                       setAddError("");
                     },
@@ -491,7 +444,7 @@ export default function FichadasTableModal({
         <TableComponent
           columns={columns}
           data={rows}
-          title="Fichadas"
+          //title="Fichadas"
           backPath=""
           isLoading={isLoading}
           color="yellow"
@@ -504,6 +457,52 @@ export default function FichadasTableModal({
           highlightOnHover={false}
           cellNavigation
           conditionalRowStyles={rowStyles}
+          customTheme={{
+            typography: { fontSize: "13px", fontSizeHeader: "13px" },
+            spacing: {
+              rowHeight: "34px",
+              cellPaddingX: "8px",
+            },
+            text: {
+              primary: "#333333",
+            },
+          }}
+          message={
+            <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-base-500 dark:text-base-400">
+              {onAddRow && (
+                <Button color="yellow" size="sm" onClick={handleToggleAddForm}>
+                  {showAddForm ? (
+                    <>
+                      <LuX className="me-1 size-4" />
+                      Cerrar
+                    </>
+                  ) : (
+                    <>
+                      <LuPlus className="me-1 size-4" />
+                      Agregar fichada
+                    </>
+                  )}
+                </Button>
+              )}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="font-semibold">Leyendas:</span>
+
+                <span className="flex items-center gap-1.5">
+                  <div className="inline-block size-3 rounded bg-blue-200/30 dark:bg-blue-900/40 border border-blue-400" />
+                  Fines de semana
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <div className="inline-block size-3 rounded bg-lime-100/70 dark:bg-lime-700/40 border border-lime-400" />
+                  Feriados
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block size-3 rounded bg-red-300/60" />
+                  Sin salida
+                </span>
+              </div>
+            </div>
+          }
+          pagination={false}
         />
       </div>
     </Modal>

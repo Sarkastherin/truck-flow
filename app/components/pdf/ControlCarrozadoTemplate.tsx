@@ -1,6 +1,5 @@
 import React from "react";
 import { View } from "@react-pdf/renderer";
-//import type { OrdenesYControlesBD, PedidosUI } from "~/types/pedidos";
 import { type Pedido, atributosConMetadata } from "~/types/pedido";
 import {
   Subtitle,
@@ -11,8 +10,6 @@ import {
   TitleBox,
 } from "./pdfComponents";
 import type { ControlCarrozado } from "~/types/configuraciones";
-//import type { ControlPorCarrozadoDB } from "~/types/settings";
-//import { atributosConMetadata } from "~/config/atributosMetadata";
 
 interface ControlCarrozadoTemplateProps {
   pedidoData: Pedido;

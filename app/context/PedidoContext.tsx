@@ -47,6 +47,7 @@ import {
   type CrudGlobalResponse,
 } from "./GlobalContext";
 import { useCarroceriasUsadas } from "./CarroceriasUsadasContext";
+import { useConfiguracion } from "./ConfiguracionesContext";
 type PedidoDirtyFields = DirtyMap<PedidoFormValues>;
 
 type Response = {
@@ -61,6 +62,8 @@ type ResponseWithData = Response & {
 
 type PedidoContextType = {
   getPedidosData: () => Promise<void>;
+  isReady: boolean;
+  isLoading: boolean;
   pedidos: Pedido[] | null;
   createNewPedido: (newPedido: Pedido) => Promise<CreateGlobalResponse<Pedido>>;
   updatePedido: (
@@ -144,7 +147,10 @@ type PedidoContextType = {
     existingPedido: Pedido,
     dirtyFields: PedidoDirtyFields,
   ) => Promise<Response>;
-  updateStatusPedido: (idPedido: string, newStatus: string) => Promise<Response>
+  updateStatusPedido: (
+    idPedido: string,
+    newStatus: string,
+  ) => Promise<Response>;
 };
 type HeadersType = {
   pedidos: SheetCellValue[] | null;
@@ -174,12 +180,16 @@ export const PedidosProvider = ({
   const { activeUser } = useUser();
   const { carroceriasUsadas, changeStatusCarroceriaUsada } =
     useCarroceriasUsadas();
+  const [isReady, setIsReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null);
+  const { getCarrozadoNombre } = useConfiguracion();
   const [paramsFromSheets, setParamsFromSheets] = useState<{
     headers: HeadersType;
     values: Record<string, SheetCellValue[][]>;
   } | null>(null);
   const getPedidosData = useCallback(async () => {
+    setIsLoading(true);
     try {
       if (!socios || socios.length === 0) return;
       if (!carroceriasUsadas) return;
@@ -239,12 +249,20 @@ export const PedidosProvider = ({
           carroceriaData.find(
             (carroceria) => carroceria.pedido_id === pedido.id,
           ) || {};
+        const nombreCarrozado = getCarrozadoNombre(
+          (carroceriaForThisPedido as Carroceria).tipo_carrozado_id,
+        );
+
         const trabajoChasisForThisPedido =
           trabajoChasisData.filter(
             (trabajo) => trabajo.pedido_id === pedido.id,
           ) || [];
         const ordenesTrabajoForThisPedido =
           ordenesTrabajoData.filter((wo) => wo.pedido_id === pedido.id) || [];
+        const armador =
+          (ordenesTrabajoForThisPedido as OrdenesTrabajo[]).find(
+            (wo) => wo.cargo === "armador",
+          )?.responsable_nombre || "";
         const documentosForThisPedido =
           documentosData.filter((doc) => doc.pedido_id === pedido.id) || [];
         const carroceriaUsadaForThisPedido =
@@ -260,7 +278,7 @@ export const PedidosProvider = ({
           cliente: cliente,
           formas_pago: formasPagoForThisPedido,
           camion: camionForThisPedido,
-          carroceria: carroceriaForThisPedido,
+          carroceria: { ...carroceriaForThisPedido, nombre: nombreCarrozado, armador },
           carroceria_usada: carroceriaUsadaForThisPedido,
           trabajo_chasis: trabajoChasisForThisPedido,
           ordenes_trabajo: ordenesTrabajoForThisPedido,
@@ -276,9 +294,12 @@ export const PedidosProvider = ({
           return numB - numA;
         }),
       );
+      setIsReady(true);
     } catch (error) {
       console.error("Error fetching orders data:", error);
       return;
+    } finally {
+      setIsLoading(false);
     }
   }, [socios, carroceriasUsadas]);
   const generatePedidoNumber = () => {
@@ -1162,7 +1183,9 @@ export const PedidosProvider = ({
         createCarroceriaUsadaBase,
         updateCarroceriaUsadaBase,
         updatePedidoBase,
-        updateStatusPedido
+        updateStatusPedido,
+        isReady,
+        isLoading,
       }}
     >
       {children}

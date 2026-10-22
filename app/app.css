@@ -40,6 +40,11 @@
   justify-content: center;
   margin: 0.5rem;
 }
+/* react-data-table-component: el contenedor del título recorta menús flotantes */
+.rdt_header {
+  overflow: visible !important;
+}
+
 @theme {
   --color-primary-50: var(--color-purple-50);
   --color-primary-100: var(--color-purple-100);

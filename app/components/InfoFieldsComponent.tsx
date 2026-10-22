@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Input } from "./InputsForm";
 import { useUser } from "~/context/UserContext";
-import { formatDateUStoES} from "~/backend/Database/helperTransformData"
+import { formatDateUStoES } from "~/utils/formats";
 export default function InfoFieldsComponent({
   created_at,
   created_by,

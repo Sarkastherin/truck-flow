@@ -1,16 +1,12 @@
 import type { Route } from "../+types/home";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
-import { statusOptionsPedidos } from "~/types/pedido";
+import { formatDateUStoES, formatCurrency } from "~/utils/formats";
 import type { Pedido } from "~/types/pedido";
 import { usePedido } from "~/context/PedidoContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { LoadingComponent } from "~/components/LoadingComponent";
 import { BadgeStatusPedido } from "~/components/specials/Badges";
-import { SubTitles } from "~/components/SubTitles";
-import { LuBookMarked } from "react-icons/lu";
 import { Badge } from "flowbite-react";
 import { capitalize } from "~/utils/functions";
 export function meta({}: Route.MetaArgs) {
@@ -19,29 +15,47 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Bienvenido a la gestión de pedidos" },
   ];
 }
-
 const columns: TableColumn<Pedido>[] = [
   {
     name: "Número",
     selector: (row) => row.numero_pedido,
-    width: "100px",
+    grow: 0,
     sortable: true,
   },
   {
     name: "Cliente",
     selector: (row) => row.cliente?.razon_social || "",
     sortable: true,
+    grow: 2,
+    pinned: "left",
+    filterable: true,
+  },
+  {
+    name: "Carrozado",
+    selector: (row) => row.carroceria?.nombre || "-",
+    sortable: true,
+    grow: 2,
+    filterable: true,
+    filterType: "set",
   },
   {
     name: "Tipo",
-    cell: (row) => <Badge color={`${row.tipo === "nueva" ? "blue" : "yellow"}`}>{capitalize(row.tipo)}</Badge>,
+    selector: (row) => row.tipo,
+    cell: (row) => (
+      <Badge color={`${row.tipo === "nueva" ? "blue" : "yellow"}`}>
+        {capitalize(row.tipo)}
+      </Badge>
+    ),
     sortable: true,
-    width: "120px",
+    width: "110px",
+    filterable: true,
+    filterType: "set",
   },
   {
     name: "F. prevista",
-    selector: (row) => formatDateUStoES(row.fecha_estimada_entrega),
-    width: "120px",
+    selector: (row) => row.fecha_estimada_entrega,
+    format: (row) => formatDateUStoES(row.fecha_estimada_entrega),
+    width: "130px",
     sortable: true,
     sortFunction: (rowA, rowB) => {
       if (!rowA.fecha_estimada_entrega) return 1;
@@ -50,36 +64,39 @@ const columns: TableColumn<Pedido>[] = [
       const dateB = new Date(rowB.fecha_estimada_entrega);
       return dateA.getTime() - dateB.getTime();
     },
+    filterable: true,
+    filterType: "date",
   },
   {
     name: "F. pedido",
-    selector: (row) => formatDateUStoES(row.fecha_pedido),
-    width: "120px",
+    selector: (row) => row.fecha_pedido,
+    format: (row) => formatDateUStoES(row.fecha_pedido),
+    width: "130px",
     sortable: true,
     sortFunction: (rowA, rowB) => {
       const dateA = new Date(rowA.fecha_pedido);
       const dateB = new Date(rowB.fecha_pedido);
       return dateA.getTime() - dateB.getTime();
     },
+    filterable: true,
+    filterType: "date",
   },
 
   {
     name: "Precio Total",
-    selector: (row) =>
-      row.precio.toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => formatCurrency(row.precio),
     width: "150px",
     sortable: true,
+    filterable: true,
+    filterType: "number",
   },
   {
     name: "Armador",
-    selector: (row) =>
-      row.ordenes_trabajo?.find((wo) => wo.cargo === "armador")
-        ?.responsable_nombre || "",
-    width: "150px",
+    selector: (row) => row.carroceria?.armador,
     sortable: true,
+    width: "150px",
+    filterable: true,
+    filterType: "set",
   },
   {
     name: "Estado",
@@ -89,7 +106,7 @@ const columns: TableColumn<Pedido>[] = [
   },
 ];
 export default function PedidosHome() {
-  const { getPedidosData, pedidos } = usePedido();
+  const { getPedidosData, pedidos, isLoading } = usePedido();
   const navigate = useNavigate();
   useEffect(() => {
     if (!pedidos) {
@@ -99,54 +116,26 @@ export default function PedidosHome() {
   const handleRowClick = (row: Pedido) => {
     navigate(`/pedidos/${row.id}`);
   };
-  if (!pedidos) {
-    return <LoadingComponent />;
-  }
   return (
     <>
-      <SubTitles title="Pedidos" back_path="/" icon={{ component: LuBookMarked, color: "text-blue-500" }} />
       <TableComponent
         columns={columns}
         data={pedidos || []}
-        filterFields={[
-          {
-            key: "numero_pedido",
-            label: "Número de Pedido",
-          },
-          { key: "cliente.razon_social", label: "Cliente" },
-          {
-            key: "armador",
-            label: "Armador",
-            customFilter: (item, value) => {
-              const armador = item.ordenes_trabajo?.find(
-                (wo:any) => wo.cargo === "armador"
-              )?.responsable_nombre || "";
-              return armador.toLowerCase().includes(value.toLowerCase());
-            },
-          },
-          {
-            key: "status",
-            label: "Estado",
-            type: "select",
-            options: statusOptionsPedidos,
-          },
-          {
-            key: "tipo",
-            label: "Tipo",
-            type: "select",
-            options: [
-              { label: "Nueva", value: "nueva" },
-              { label: "Usada", value: "usada" },
-            ],
-          },
+        searchKeys={[
+          "cliente.razon_social",
+          "carroceria.nombre",
+          "carroceria.armador",
         ]}
-        onRowClick={(row) => handleRowClick(row)}
-        btnOnClick={{
-          color: "blue",
-          title: "Nuevo Pedido",
-          onClick: () => navigate("/pedidos/nuevo"),
-        }}
-        scrollHeightOffset={370}
+        onRowClicked={(row) => handleRowClick(row)}
+        onAddRecord={() => navigate("/pedidos/nuevo")}
+        isLoading={isLoading}
+        labelButton="Agregar pedido"
+        title={"Pedidos"}
+        backPath="/"
+        color={"blue"}
+        scrollHeightOffset={270}
+        searchPlaceholder="Buscar por cliente, carrozado o armador"
+        hasActiveColumn={false}
       />
     </>
   );

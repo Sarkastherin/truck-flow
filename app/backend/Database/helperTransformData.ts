@@ -42,11 +42,7 @@ const getDataInArray = (
   }
   return result;
 };
-export function formatDateUStoES(value?: string) {
-  if (!value) return "-";
-  const [year, month, day] = value.split("-");
-  return `${day}/${month}/${year}`;
-}
+
 export function prepareDataToCreate<T extends Record<string, unknown>>(
   data: T,
   created_by: string,

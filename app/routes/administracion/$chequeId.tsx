@@ -20,6 +20,7 @@ import { useAdministracion } from "~/context/AdministracionContext";
 import { useParams } from "react-router";
 import { SubTitles } from "~/components/SubTitles";
 import { HiOutlineBanknotes } from "react-icons/hi2";
+import { formatCurrency } from "~/utils/formats";
 type AccionTypes =
   | "depositar"
   | "endosar"
@@ -244,10 +245,7 @@ export default function ChequeForm() {
               <div
                 className={`mt-2 inline-flex items-center px-2 py-1 rounded-xl text-white text-xl font-bold bg-green-600`}
               >
-                {cheque?.importe.toLocaleString("es-AR", {
-                  style: "currency",
-                  currency: "ARS",
-                })}
+                {formatCurrency(cheque?.importe)}
               </div>
             </div>
           </div>

@@ -8,6 +8,7 @@ import { useModal } from "~/context/ModalContext";
 import PremiosModal from "~/components/modals/customs/PremiosModal";
 import { usePremios } from "~/hooks/usePremios";
 import { BadgePremiosSector } from "~/components/specials/Badges";
+import { formatCurrency } from "~/utils/formats";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,11 +26,8 @@ const columns: TableColumn<Premios>[] = [
   },
   {
     name: "Valor",
-    selector: (row) =>
-      row.precio.toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => row.precio,
+    format: (row) => formatCurrency(row.precio),
     sortable: true,
     width: "150px",
   },

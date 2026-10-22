@@ -10,9 +10,7 @@ import {
   getAllSheets,
   type SheetCellValue,
 } from "~/backend/Database/apiGoogleSheets";
-import {
-  getDataInJSONFormat,
-} from "~/backend/Database/helperTransformData";
+import { getDataInJSONFormat } from "~/backend/Database/helperTransformData";
 import type {
   Carrozado,
   Color,
@@ -29,13 +27,15 @@ import {
   SHEET_ID_CONFIGURACIONES,
   SHEET_NAMES_CONFIGURACIONES,
 } from "~/backend/Database/SheetsConfig";
-import {
-  type DirtyMap,
-} from "~/utils/prepareUpdatePayload";
+import { type DirtyMap } from "~/utils/prepareUpdatePayload";
 import { capitalize } from "~/utils/functions";
-import { useGlobal, type CreateGlobalMethod, type CrudGlobalResponse, type BaseGlobalEntity } from "./GlobalContext";
-import {useUser} from "~/context/UserContext";
-
+import {
+  useGlobal,
+  type CreateGlobalMethod,
+  type CrudGlobalResponse,
+  type BaseGlobalEntity,
+} from "./GlobalContext";
+import { useUser } from "~/context/UserContext";
 
 type OptionsType = { label: string; value: string }[];
 
@@ -44,7 +44,6 @@ type UpdateConfigMethod<T extends BaseGlobalEntity> = (
   dirtyFields: DirtyMap<T>,
 ) => Promise<CrudGlobalResponse>;
 type ToggleConfigMethod = (entityId: string) => Promise<CrudGlobalResponse>;
-
 
 type ConfiguracionContextType = {
   getConfiguracionesData: () => Promise<void>;
@@ -98,6 +97,7 @@ type ConfiguracionContextType = {
     controlCarrozadoData: ControlCarrozado[],
     deletedIds: string[],
   ) => Promise<CrudGlobalResponse>;
+  getCarrozadoNombre: (carrozadoId?: string) => string;
 };
 
 type HeadersType = {
@@ -118,7 +118,7 @@ export const ConfiguracionesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const {activeUser} = useUser();
+  const { activeUser } = useUser();
   const { createGlobalEntityCrud, cudGlobalFieldsArrayEntities, assertReady } =
     useGlobal();
   const SHEETS = useMemo(
@@ -195,7 +195,7 @@ export const ConfiguracionesProvider = ({
           const colorA = a as Color;
           const colorB = b as Color;
           return colorA.nombre.localeCompare(colorB.nombre);
-        }) as Color[]
+        }) as Color[],
       );
       setPuertasTraseras(puertasTraserasData as PuertaTrasera[]);
       setTrabajosChasis(trabajosChasisData as TipoTrabajo[]);
@@ -237,7 +237,9 @@ export const ConfiguracionesProvider = ({
     }));
   }, [personal]);
   const pintoresOptions = useMemo(() => {
-    const pintores = personal.filter((persona) => persona.sector === "pintura" && persona.active);
+    const pintores = personal.filter(
+      (persona) => persona.sector === "pintura" && persona.active,
+    );
     return pintores.map((persona) => ({
       label: `${persona.nombre} ${persona.apellido}`,
       value: persona.id,
@@ -254,46 +256,67 @@ export const ConfiguracionesProvider = ({
   }, [personal]);
 
   const carrozadosOptions = useMemo(() => {
-    return carrozados.filter((carrozado) => carrozado.active).map((carrozado) => ({
-      label: carrozado.nombre,
-      value: carrozado.id,
-    }));
+    return carrozados
+      .filter((carrozado) => carrozado.active)
+      .map((carrozado) => ({
+        label: carrozado.nombre,
+        value: carrozado.id,
+      }));
   }, [carrozados]);
   const puertasOptions = useMemo(() => {
-    return puertasTraseras.filter((puerta) => puerta.active).map((puerta) => ({
-      label: puerta.nombre,
-      value: puerta.id,
-    }));
+    return puertasTraseras
+      .filter((puerta) => puerta.active)
+      .map((puerta) => ({
+        label: puerta.nombre,
+        value: puerta.id,
+      }));
   }, [puertasTraseras]);
   const coloresEsmalteOptions = useMemo(() => {
-    const coloresEsmalte = colores.filter((color) => color.tipo === "esmalte" && color.active);
+    const coloresEsmalte = colores.filter(
+      (color) => color.tipo === "esmalte" && color.active,
+    );
     return coloresEsmalte.map((color) => ({
       label: color.nombre,
       value: color.id,
     }));
   }, [colores]);
   const coloresLonaOptions = useMemo(() => {
-    const coloresLona = colores.filter((color) => color.tipo === "lona" && color.active);
+    const coloresLona = colores.filter(
+      (color) => color.tipo === "lona" && color.active,
+    );
     return coloresLona.map((color) => ({
       label: color.nombre,
       value: color.id,
     }));
   }, [colores]);
   const trabajosChasisOptions = useMemo(() => {
-    return trabajosChasis.filter((trabajo) => trabajo.active).map((trabajo) => ({
-      label: trabajo.nombre,
-      value: trabajo.id,
-    }));
+    return trabajosChasis
+      .filter((trabajo) => trabajo.active)
+      .map((trabajo) => ({
+        label: trabajo.nombre,
+        value: trabajo.id,
+      }));
   }, [trabajosChasis]);
   const sectoresOptions = useMemo(() => {
     const sectores = Array.from(
-      new Set(personal.filter((persona) => persona.active).map((persona) => persona.sector)),
+      new Set(
+        personal
+          .filter((persona) => persona.active)
+          .map((persona) => persona.sector),
+      ),
     );
     return sectores.map((sector) => ({
       label: capitalize(sector),
       value: sector,
     }));
   }, [personal]);
+  const getCarrozadoNombre = useCallback(
+    (carrozadoId?: string) => {
+      if (!carrozadoId) return "No encontrado";
+      return carrozados.find((c) => c.id === carrozadoId)?.nombre ?? "—";
+    },
+    [carrozados],
+  );
   useEffect(() => {
     if (auth) {
       void getConfiguracionesData();
@@ -313,7 +336,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.carrozados,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const {
     create: createNewColor,
@@ -328,7 +351,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.colores,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const {
     create: createNewPuertaTrasera,
@@ -343,7 +366,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.puertas_traseras,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const {
     create: createNewTipoTrabajo,
@@ -358,7 +381,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.tipos_trabajos,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const {
     create: createNewPersonal,
@@ -373,7 +396,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.personal,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const {
     create: createNewItemControl,
@@ -388,7 +411,7 @@ export const ConfiguracionesProvider = ({
     SHEET_NAMES_CONFIGURACIONES.items_control,
     getConfiguracionesData,
     activeUser!!,
-    "id"
+    "id",
   );
   const CUDValoresPredefinidos = useCallback(
     async (
@@ -406,7 +429,7 @@ export const ConfiguracionesProvider = ({
         successMessage: "Valores predefinidos actualizados exitosamente",
         onGetData: getConfiguracionesData,
         activeUser: activeUser!!,
-        nameColId: "id"
+        nameColId: "id",
       });
     },
     [cudGlobalFieldsArrayEntities, paramsFromSheets, getConfiguracionesData],
@@ -424,7 +447,7 @@ export const ConfiguracionesProvider = ({
         successMessage: "Controles de carrozado actualizados exitosamente",
         onGetData: getConfiguracionesData,
         activeUser: activeUser!!,
-        nameColId: "id"
+        nameColId: "id",
       });
     },
     [paramsFromSheets, cudGlobalFieldsArrayEntities, getConfiguracionesData],
@@ -477,6 +500,7 @@ export const ConfiguracionesProvider = ({
         sectoresOptions,
         CUDValoresPredefinidos,
         CUDControlCarrozado,
+        getCarrozadoNombre,
       }}
     >
       {children}

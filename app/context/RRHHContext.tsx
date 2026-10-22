@@ -30,6 +30,7 @@ import type {
   CtaCteEmpleados,
 } from "~/types/rrhh";
 import type { Fichada, Liquidacion, Reporte } from "~/types/liquidaciones";
+import { HORAS_SEMANALES_DEFAULT } from "~/utils/liquidacionCalculos";
 type RRHHContextType = {
   getSueldosData: () => Promise<void>;
   isReady: boolean;
@@ -147,7 +148,12 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       const liquidacionesData = getDataInJSONFormat<Liquidacion>(data[3]);
       const fichadasData = getDataInJSONFormat<Fichada>(data[4]);
       const reportesData = getDataInJSONFormat<Reporte>(data[5]);
-      //console.log(employeesData)
+      const employeesWithHoraTrabajo = employeesData.map((emp) => {
+        const valorHoraRegular = emp.valor_salario_semanal
+          ? emp.valor_salario_semanal / HORAS_SEMANALES_DEFAULT
+          : 0;
+        return { ...emp, valor_hora_regular: valorHoraRegular };
+      });
       const ctasCorrientes = mvtoEmpleadosData.reduce(
         (acc, cta) => {
           const key = cta.empleado_id;
@@ -199,7 +205,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           reporte: reportes,
         };
       });
-      setEmployees(employeesData);
+      setEmployees(employeesWithHoraTrabajo);
       setPremios(premiosData);
       setSaldoEmpleados(ctasCorrientesArray);
       setLiquidaciones(combinedData);

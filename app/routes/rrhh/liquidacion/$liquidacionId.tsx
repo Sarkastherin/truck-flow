@@ -4,46 +4,22 @@ import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
 import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
 import { LuArrowRight, LuCalendarDays, LuSettings2 } from "react-icons/lu";
-import type {
-  Fichada,
-  Liquidacion,
-  Reporte,
-  LiquidacionResumen,
-  ReporteFormValues,
-} from "~/types/liquidaciones";
+import type { Liquidacion } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES } from "~/utils/formats";
 import { getDiasPeriodo } from "~/components/modals/customs/SeleccionarLiquidacionModal";
 import { TbFileSettingsFilled } from "react-icons/tb";
 import { BiSolidReport } from "react-icons/bi";
 import { FaBox } from "react-icons/fa6";
 import type { IconType } from "react-icons";
-import Import from "~/components/liquidacion/import";
-import FichadasTableModal, {
-  aplicarEdicionCelda,
-} from "~/components/liquidacion/FichadasTableModal";
-import ReportesEmpleadoModal from "~/components/liquidacion/ReportesEmpleadoModal";
 import ConfigurarSemanaModal, {
   type ConfigSemanaValues,
 } from "~/components/liquidacion/ConfigurarSemanaModal";
-import {
-  HORAS_SEMANALES_DEFAULT,
-  HORA_ENTRADA,
-  HORA_SALIDA,
-  TOLERANCIA_MIN,
-  calcularHorasFichada,
-  calcularResumenLiquidacion,
-  esFinDeSemana,
-  getHorasSemanales,
-  parseFechasISO,
-} from "~/utils/liquidacionCalculos";
-import type { FichadasFileUI, FichadaFormValues } from "~/types/fichadas";
 import { useModal } from "~/context/ModalContext";
-import type { TableColumn } from "react-data-table-component";
-import TableComponent from "~/components/TableComponentNew";
-import type { Employee } from "~/types/rrhh";
 import type { DirtyMap } from "~/utils/prepareUpdatePayload";
-import { useColumnVisibility } from "react-data-table-component";
+import ProcesarFichadas from "~/components/liquidacion/ProcesarFichadas";
+import Reportes from "~/components/liquidacion/Reportes";
+import Resumen from "~/components/liquidacion/Resumen";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Liquidación" },
@@ -53,81 +29,12 @@ export function meta({}: Route.MetaArgs) {
 
 type TabsTypes = "fichadas" | "produccion" | "resumen";
 
-const toISODate = (date: Date) => {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-};
-
-const parseFecha = (raw: string | number): Date => {
-  if (typeof raw === "number") {
-    // Serial de fecha de Google Sheets (días desde 1899-12-30)
-    const utcMs = Math.round((raw - 25569) * 86400000);
-    const d = new Date(utcMs);
-    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-  }
-  const iso = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(raw.trim());
-  if (iso) {
-    return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
-  }
-  const parsed = new Date(raw);
-  if (!Number.isNaN(parsed.getTime())) {
-    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-  }
-  return new Date();
-};
-
-const parseHora = (raw: string | number | null | undefined): string | null => {
-  if (raw === null || raw === undefined || raw === "") return null;
-  if (typeof raw === "number") {
-    // Serial de hora de Google Sheets (fracción del día)
-    const totalMinutes = Math.round(raw * 24 * 60);
-    const h = Math.floor(totalMinutes / 60) % 24;
-    const m = totalMinutes % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  }
-  const text = String(raw).trim();
-  const amPm = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(text);
-  if (amPm) {
-    let h = Number(amPm[1]) % 12;
-    if (/pm/i.test(amPm[3])) h += 12;
-    return `${String(h).padStart(2, "0")}:${amPm[2]}`;
-  }
-  const simple = /^(\d{1,2}):(\d{2})/.exec(text);
-  if (simple) {
-    return `${simple[1].padStart(2, "0")}:${simple[2]}`;
-  }
-  return null;
-};
-const formatCurrency = (value: number) =>
-  value.toLocaleString("es-AR", { style: "currency", currency: "ARS" });
-
-const formatHoras = (value: number) =>
-  value.toLocaleString("es-AR", { maximumFractionDigits: 2 });
-
 export default function Liquidacion() {
-  const {
-    liquidaciones,
-    employees,
-    premios,
-    isLoading,
-    CUDFichadas,
-    CUDReportes,
-    updateLiquidacion,
-  } = useRRHH();
+  const { liquidaciones, updateLiquidacion } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
-  const [selected, setSelected] = useState<LiquidacionResumen[]>([]);
   const [activeTab, setActiveTab] = useState(0);
-  const [fichadasFile, setFichadasFile] = useState<FichadasFileUI[]>([]);
-  const [isLoadingImport, setIsLoadingImport] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [importKey, setImportKey] = useState(0);
-  const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
-    null,
-  );
-  const [grupoEmpleados, setGrupoEmpleados] = useState<Employee[]>([]);
-  const [isSavingReportes, setIsSavingReportes] = useState(false);
+
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const { openModal, closeModal } = useModal();
@@ -137,10 +44,6 @@ export default function Liquidacion() {
   const dias = liquidacion
     ? getDiasPeriodo(liquidacion.desde, liquidacion.hasta)
     : null;
-  const diasNoLaborables = useMemo(
-    () => parseFechasISO(liquidacion?.dias_no_laborables),
-    [liquidacion?.dias_no_laborables],
-  );
 
   const items: {
     key: TabsTypes;
@@ -172,384 +75,6 @@ export default function Liquidacion() {
 
   const fichadasGuardadas = liquidacion?.fichada ?? [];
   const reportesGuardados = liquidacion?.reporte ?? [];
-  const hayFichadasGuardadas = fichadasGuardadas.length > 0;
-
-  const resumen: LiquidacionResumen[] = useMemo(() => {
-    if (!liquidacion) return [];
-    return calcularResumenLiquidacion({
-      liquidacion,
-      employees,
-      premios,
-      fichadas: fichadasGuardadas,
-      reportes: reportesGuardados,
-    });
-  }, [liquidacion, employees, premios, fichadasGuardadas, reportesGuardados]);
-
-  const totalPremiosGeneral = useMemo(
-    () => resumen.reduce((acc, row) => acc + row.monto_premio, 0),
-    [resumen],
-  );
-
-  const produccionColumns: TableColumn<LiquidacionResumen>[] = [
-    {
-      name: "Empleado",
-      selector: (row) => row.empleado.nombre_completo,
-      sortable: true,
-      filterable: true,
-      filterType: "text",
-      grow: 1,
-    },
-    {
-      name: "DNI",
-      selector: (row) => String(row.empleado.dni),
-      width: "140px",
-      sortable: true,
-      filterable: true,
-    },
-    {
-      name: "Reportes",
-      selector: (row) => row.reportes.length,
-      width: "130px",
-      center: true,
-      sortable: true,
-      filterable: true,
-      filterType: "number",
-    },
-    {
-      name: "Total premios",
-      selector: (row) => row.monto_premio,
-      cell: (row) => (
-        <span className="font-semibold">
-          {formatCurrency(row.monto_premio)}
-        </span>
-      ),
-      width: "170px",
-      right: true,
-      sortable: true,
-      filterType: "number",
-    },
-  ];
-  const resumenColumns: TableColumn<LiquidacionResumen>[] = [
-    {
-      name: "Empleado",
-      selector: (row) => row.empleado.nombre_completo,
-      sortable: true,
-      filterable: true,
-      filterType: "text",
-      grow: 1,
-      pinned: "left",
-    },
-    {
-      name: "HS totales",
-      selector: (row) => row.horas_totales,
-      width: "80px",
-    },
-    {
-      name: "HS Reg",
-      selector: (row) => row.total_horas_regulares,
-      width: "80px",
-    },
-    {
-      name: "HS Extras",
-      selector: (row) => row.total_horas_extras,
-      width: "80px",
-    },
-    {
-      name: "Salario",
-      selector: (row) => formatCurrency(row.monto_salario_regular),
-      width: "110px",
-    },
-    {
-      name: "Extra",
-      selector: (row) => formatCurrency(row.monto_salario_extra),
-      width: "110px",
-    },
-    {
-      name: "Carrocerías",
-      selector: (row) => row.carrocerias,
-      width: "90px",
-    },
-    {
-      name: "Faltas",
-      selector: (row) => row.faltas,
-      width: "80px",
-    },
-    {
-      name: "Tardanzas",
-      selector: (row) => row.tardanzas,
-      width: "80px",
-    },
-    {
-      name: "Sal temp",
-      selector: (row) => row.salidas_tempranas,
-      width: "80px",
-    },
-    {
-      name: "Perdidos",
-      selector: (row) => row.premios_perdidos,
-      width: "80px",
-    },
-    {
-      name: "Ganados",
-      selector: (row) => row.premios_ganados,
-      width: "80px",
-    },
-    {
-      name: "Recuperados",
-      selector: (row) => row.premio_recuperado,
-      width: "80px",
-    },
-    {
-      name: "Total premios",
-      selector: (row) => row.monto_premio,
-      width: "110px",
-    },
-    {
-      name: "Total",
-      selector: (row) =>
-        formatCurrency(
-          row.monto_salario_regular +
-            row.monto_salario_extra +
-            row.monto_premio,
-        ),
-      cell: (row) => (
-        <span className="font-bold">
-          {formatCurrency(
-            row.monto_salario_regular +
-              row.monto_salario_extra +
-              row.monto_premio,
-          )}
-        </span>
-      ),
-      width: "110px",
-      pinned: "right",
-    },
-  ];
-  const hasNoEncontrados = fichadasFile.some((fich) => !fich.empleado);
-  const hasFaltanSalidas = fichadasFile.some((fich) => !fich.salida);
-
-  const modalTitle = liquidacion
-    ? `Fichadas — ${formatDateUStoES(liquidacion.desde)} → ${formatDateUStoES(liquidacion.hasta)}`
-    : "Fichadas";
-
-  const handleOpenFromImport = () => setIsModalOpen(true);
-
-  const handleOpenSaved = () => {
-    const feriados = new Set(diasNoLaborables);
-    const rows: FichadasFileUI[] = fichadasGuardadas.map((fich) => {
-      const empleado = employees.find((emp) => emp.id === fich.empleado_id);
-      const esDiaLaborable =
-        !esFinDeSemana(fich.fecha) && !feriados.has(fich.fecha);
-      const { totalHorasTrabajadas, horasRegular, horasExtras } =
-        calcularHorasFichada(fich.entrada, fich.salida, esDiaLaborable);
-      return {
-        id: fich.id,
-        fecha: parseFecha(fich.fecha),
-        dniEmpleado: String(empleado?.dni ?? ""),
-        empleado,
-        entrada: parseHora(fich.entrada) ?? "",
-        salida: parseHora(fich.salida),
-        totalHorasTrabajadas,
-        horasRegular,
-        horasExtras,
-        active: fich.active,
-      };
-    });
-    setFichadasFile(rows);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    if (!hayFichadasGuardadas) setFichadasFile([]);
-  };
-
-  const handleResetFile = () => {
-    setIsModalOpen(false);
-    setFichadasFile([]);
-    setIsLoadingImport(false);
-    setImportKey((k) => k + 1);
-  };
-
-  const handleCellEdit = (
-    row: FichadasFileUI,
-    value: string,
-    column: TableColumn<FichadasFileUI>,
-  ) => {
-    const field =
-      column.id === "entrada" || column.id === "salida" ? column.id : null;
-    if (!field) return;
-    setFichadasFile((prev) =>
-      aplicarEdicionCelda(prev, row, value, field, diasNoLaborables),
-    );
-  };
-
-  const handleAddFichada = (row: FichadasFileUI) => {
-    setFichadasFile((prev) =>
-      [...prev, row].sort((a, b) => {
-        const diff = a.fecha.getTime() - b.fecha.getTime();
-        if (diff !== 0) return diff;
-        return (a.empleado?.nombre_completo ?? "").localeCompare(
-          b.empleado?.nombre_completo ?? "",
-          "es",
-        );
-      }),
-    );
-  };
-
-  const handleSaveFichada = async () => {
-    if (!liquidacionId || fichadasFile.length === 0) return;
-    if (hasNoEncontrados || hasFaltanSalidas) return;
-
-    const payload: FichadaFormValues[] = fichadasFile.map((fich) => {
-      const row: FichadaFormValues = {
-        fecha: toISODate(fich.fecha),
-        liquidacion_id: liquidacionId,
-        empleado_id: fich.empleado?.id as string,
-        entrada: fich.entrada,
-        salida: fich.salida,
-        active: fich.active,
-      };
-      if (fich.id) row.id = fich.id;
-      return row;
-    });
-
-    setIsSaving(true);
-    openModal("loading", {
-      props: {
-        title: "Cargando fichadas",
-      },
-    });
-    try {
-      const result = await CUDFichadas(payload as Fichada[], []);
-      if (!result.success) {
-        throw new Error(
-          result.error || result.message || "No se pudo cargar las fichadas",
-        );
-      }
-      closeModal();
-      setIsModalOpen(false);
-      setFichadasFile([]);
-      openModal("success", {
-        props: {
-          title: "Fichadas guardadas",
-          message: result.message || "Las fichadas se guardaron correctamente",
-        },
-      });
-    } catch (error) {
-      openModal("error", {
-        props: {
-          title: "Error al guardar",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Hubo un error al guardar las fichadas. Inténtalo de nuevo.",
-        },
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const selectedEmpleadoRow = selectedEmpleado
-    ? resumen.find((row) => row.empleado.id === selectedEmpleado.id)
-    : undefined;
-
-  const handleCloseReportesModal = () => {
-    setSelectedEmpleado(null);
-    setGrupoEmpleados([]);
-  };
-
-  const handleSaveReportes = async (
-    reportes: ReporteFormValues[],
-    deletedIds: string[],
-  ) => {
-    if (!liquidacionId || !selectedEmpleado) return;
-
-    setIsSavingReportes(true);
-    openModal("loading", {
-      props: {
-        title: "Guardando reportes",
-      },
-    });
-    try {
-      const result = await CUDReportes(reportes as Reporte[], deletedIds);
-      if (!result.success) {
-        throw new Error(
-          result.error ||
-            result.message ||
-            "No se pudieron guardar los reportes",
-        );
-      }
-      closeModal();
-      setSelectedEmpleado(null);
-      openModal("success", {
-        props: {
-          title: "Reportes guardados",
-          message: result.message || "Los reportes se guardaron correctamente",
-        },
-      });
-    } catch (error) {
-      openModal("error", {
-        props: {
-          title: "Error al guardar",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Hubo un error al guardar los reportes. Inténtalo de nuevo.",
-        },
-      });
-    } finally {
-      setIsSavingReportes(false);
-    }
-  };
-  const handleSaveGrupoReportes = async (reportes: ReporteFormValues[]) => {
-    if (!liquidacionId || grupoEmpleados.length === 0) return;
-
-    setIsSavingReportes(true);
-    openModal("loading", {
-      props: {
-        title: "Cargando producción al grupo",
-      },
-    });
-    try {
-      const result = await CUDReportes(reportes as Reporte[], []);
-      if (!result.success) {
-        throw new Error(
-          result.error ||
-            result.message ||
-            "No se pudieron cargar los reportes",
-        );
-      }
-      const cantidadEmpleados = grupoEmpleados.length;
-      closeModal();
-      setGrupoEmpleados([]);
-      setSelected([]);
-      openModal("success", {
-        props: {
-          title: "Producción cargada",
-          message: `${reportes.length} reporte${reportes.length === 1 ? "" : "s"} cargado${reportes.length === 1 ? "" : "s"} a ${cantidadEmpleados} empleado${cantidadEmpleados === 1 ? "" : "s"}`,
-        },
-      });
-    } catch (error) {
-      openModal("error", {
-        props: {
-          title: "Error al guardar",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Hubo un error al cargar la producción. Inténtalo de nuevo.",
-        },
-      });
-    } finally {
-      setIsSavingReportes(false);
-    }
-  };
-
-  const handleSelectGroup = () => {
-    setSelectedEmpleado(null);
-    setGrupoEmpleados(selected.map((row) => row.empleado));
-  };
 
   const handleSaveConfig = async (config: ConfigSemanaValues) => {
     if (!liquidacion) return;
@@ -598,57 +123,6 @@ export default function Liquidacion() {
     }
   };
 
-  const horasSemanales = liquidacion
-    ? getHorasSemanales(liquidacion)
-    : HORAS_SEMANALES_DEFAULT;
-  const diasLluviaCount = liquidacion
-    ? parseFechasISO(liquidacion.dias_lluvia).length
-    : 0;
-  const feriadosCount = liquidacion
-    ? parseFechasISO(liquidacion.dias_no_laborables).length
-    : 0;
-
-  const totalesResumen = useMemo(
-    () => ({
-      monto_salario_regular: resumen.reduce(
-        (acc, row) => acc + row.monto_salario_regular,
-        0,
-      ),
-      monto_salario_extra: resumen.reduce(
-        (acc, row) => acc + row.monto_salario_extra,
-        0,
-      ),
-      carrocerias: resumen.reduce((acc, row) => acc + row.carrocerias, 0),
-      faltas: resumen.reduce((acc, row) => acc + row.faltas, 0),
-      tardanzas: resumen.reduce((acc, row) => acc + row.tardanzas, 0),
-      salidas_tempranas: resumen.reduce(
-        (acc, row) => acc + row.salidas_tempranas,
-        0,
-      ),
-      premios_perdidos: resumen.reduce(
-        (acc, row) => acc + row.premios_perdidos,
-        0,
-      ),
-      premios_ganados: resumen.reduce(
-        (acc, row) => acc + row.premios_ganados,
-        0,
-      ),
-      premio_recuperado: resumen.reduce(
-        (acc, row) => acc + row.premio_recuperado,
-        0,
-      ),
-      monto_premio: resumen.reduce((acc, row) => acc + row.monto_premio, 0),
-      total: resumen.reduce(
-        (acc, row) =>
-          acc +
-          row.monto_salario_regular +
-          row.monto_salario_extra +
-          row.monto_premio,
-        0,
-      ),
-    }),
-    [resumen],
-  );
   const ButtonConfSemana = () => (
     <Button
       size="sm"
@@ -703,200 +177,31 @@ export default function Liquidacion() {
         {items.map(({ name, icon }) => (
           <TabItem className="cursor-pointer" active title={name} icon={icon}>
             {activeTab === 0 && (
-              <div>
-                {!hayFichadasGuardadas ? (
-                  <Import
-                    key={`import-${importKey}`}
-                    setFichadasFile={setFichadasFile}
-                    setIsLoadingImport={setIsLoadingImport}
-                    onProcessed={handleOpenFromImport}
-                    diasNoLaborables={diasNoLaborables}
-                  />
-                ) : (
-                  <div
-                    className="flex flex-col items-center justify-center gap-4 rounded-xl border border-base-200 bg-base-50 p-10 text-center dark:border-base-700 dark:bg-base-800"
-                    style={{ minHeight: "calc(100vh - 300px)" }}
-                  >
-                    <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-yellow-400 to-amber-500 text-white shadow-sm">
-                      <TbFileSettingsFilled className="size-6" />
-                    </span>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-semibold text-base-800 dark:text-base-100">
-                        Fichadas guardadas
-                      </span>
-                      <span className="text-sm text-base-500 dark:text-base-400">
-                        {fichadasGuardadas.length} fichada
-                        {fichadasGuardadas.length === 1 ? "" : "s"} en el
-                        período{" "}
-                        {liquidacion &&
-                          `${formatDateUStoES(liquidacion.desde)} → ${formatDateUStoES(liquidacion.hasta)}`}
-                      </span>
-                    </div>
-                    <Button color="yellow" onClick={handleOpenSaved}>
-                      Ver y editar fichadas
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <ProcesarFichadas
+                liquidacion={liquidacion}
+                liquidacionId={liquidacionId}
+              />
             )}
             {activeTab === 1 && (
-              <>
-                <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-base-200 bg-base-50 px-4 py-3 dark:border-base-700 dark:bg-base-800">
-                  <div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          setSelected(
-                            resumen.filter(
-                              (res) => res.empleado.grupo === "Cacho",
-                            ),
-                          )
-                        }
-                        outline
-                      >
-                        Grupo: Cacho
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setSelected([]);
-                          setGrupoEmpleados([]);
-                        }}
-                        color={"light"}
-                      >
-                        Limpiar
-                      </Button>
-                    </div>
-                    {selected.length > 0 && (
-                      <div
-                        className="mt-2 text-sm underline text-primary-600 dark:text-primary-400 cursor-pointer"
-                        onClick={handleSelectGroup}
-                      >
-                        Cargar premio/producción a los {selected.length}{" "}
-                        seleccionado
-                        {selected.length === 1 ? "" : "s"}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-sm font-medium text-base-500 dark:text-base-400">
-                      Total general de premios
-                    </span>
-                    <span className="text-lg font-bold text-base-800 dark:text-base-100">
-                      {formatCurrency(totalPremiosGeneral)}
-                    </span>
-                  </div>
-                </div>
-                <TableComponent
-                  columns={produccionColumns}
-                  data={resumen}
-                  title="Resumen de producción"
-                  backPath=""
-                  isLoading={isLoading}
-                  color="yellow"
-                  labelButton=""
-                  hasActiveColumn={false}
-                  onRowClicked={(row) => {
-                    setGrupoEmpleados([]);
-                    setSelectedEmpleado(row.empleado);
-                  }}
-                  searchKeys={["empleado.nombre_completo", "empleado.dni"]}
-                  searchPlaceholder="Buscar por nombre o DNI"
-                  scrollHeightOffset={430}
-                  selectableRows
-                  selectedRows={selected}
-                  onSelectedRowsChange={({ selectedRows }) =>
-                    setSelected(selectedRows)
-                  }
-                />
-              </>
+              <Reportes
+                liquidacion={liquidacion}
+                liquidacionId={liquidacionId}
+                fichadasGuardadas={fichadasGuardadas}
+                reportesGuardados={reportesGuardados}
+              />
             )}
             {activeTab === 2 && (
-              <div className="space-y-3">
-                <div className="overflow-x-auto rounded-lg shadow-md">
-                  <TableComponent
-                    columns={resumenColumns}
-                    data={resumen}
-                    title=""
-                    backPath=""
-                    isLoading={isLoading}
-                    color="yellow"
-                    labelButton=""
-                    hasActiveColumn={false}
-                    searchKeys={["empleado.nombre_completo", "empleado.dni"]}
-                    searchPlaceholder="Buscar por nombre o DNI"
-                    scrollHeightOffset={390}
-                    customTheme={{
-                      typography: { fontSize: "12px", fontSizeHeader: "13px" },
-                      spacing: {
-                        rowHeight: "34px",
-                        cellPaddingX: "8px",
-                      },
-                      text: {
-                        primary: "#333333",
-                        secondary: "#4a4a6a",
-                        disabled: "#9e9e9e",
-                      },
-                      background: {
-                        header: "#FFF9D9",
-                      },
-                    }}
-                    message={
-                      <p className="text-xs text-base-500 dark:text-base-400 ">
-                        Perdidos = faltas + días con tardanza o salida temprana
-                        (máx. 1 por día). El premio recuperado se reparte solo
-                        entre empleados sin faltas ni tardanzas, en proporción a
-                        las carrocerías del grupo.
-                      </p>
-                    }
-                  />
-                </div>
-                {resumen.length === 0 && (
-                  <div className="rounded-lg border-2 border-dashed border-base-300 py-12 text-center dark:border-base-600">
-                    <p className="text-sm text-base-500 dark:text-base-400">
-                      No hay empleados activos para mostrar en el resumen
-                    </p>
-                  </div>
-                )}
-              </div>
+              <Resumen
+                liquidacion={liquidacion}
+                liquidacionId={liquidacionId}
+                fichadasGuardadas={fichadasGuardadas}
+                reportesGuardados={reportesGuardados}
+              />
             )}
           </TabItem>
         ))}
       </Tabs>
-      <FichadasTableModal
-        show={isModalOpen}
-        title={modalTitle}
-        rows={fichadasFile}
-        onCellEdit={handleCellEdit}
-        onSave={handleSaveFichada}
-        onClose={handleCloseModal}
-        onReset={hayFichadasGuardadas ? undefined : handleResetFile}
-        isLoading={isLoadingImport}
-        isSaving={isSaving}
-        hasNoEncontrados={hasNoEncontrados}
-        hasFaltanSalidas={hasFaltanSalidas}
-        diasNoLaborables={diasNoLaborables}
-        employees={employees}
-        desde={liquidacion?.desde ?? ""}
-        hasta={liquidacion?.hasta ?? ""}
-        onAddRow={handleAddFichada}
-      />
-      <ReportesEmpleadoModal
-        show={Boolean(selectedEmpleado) || grupoEmpleados.length > 0}
-        empleado={selectedEmpleado}
-        grupoEmpleados={grupoEmpleados}
-        rows={selectedEmpleadoRow?.reportes ?? []}
-        premios={premios}
-        liquidacionId={liquidacionId ?? ""}
-        isSaving={isSavingReportes}
-        onSave={
-          grupoEmpleados.length > 0
-            ? handleSaveGrupoReportes
-            : handleSaveReportes
-        }
-        onClose={handleCloseReportesModal}
-      />
+
       <ConfigurarSemanaModal
         show={isConfigOpen}
         liquidacion={liquidacion ?? null}

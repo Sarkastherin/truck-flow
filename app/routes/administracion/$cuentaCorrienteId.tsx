@@ -11,6 +11,7 @@ import { useSociosComercial } from "~/context/SociosComercialesContext";
 import { useModal } from "~/context/ModalContext";
 import { SubTitles } from "~/components/SubTitles";
 import { LuBookUser } from "react-icons/lu";
+import { formatCurrency } from "~/utils/formats";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuenta Corriente" },
@@ -82,10 +83,7 @@ export default function CuentaCorriente() {
               <div
                 className={`mt-2 inline-flex items-center px-4 py-3 rounded-2xl text-white text-2xl font-bold ${saldo < 0 ? "bg-red-500" : saldo > 0 ? "bg-green-500" : "bg-base-500"}`}
               >
-                {saldo.toLocaleString("es-AR", {
-                  style: "currency",
-                  currency: "ARS",
-                })}
+                {formatCurrency(saldo)}
               </div>
             </div>
           </div>

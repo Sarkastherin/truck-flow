@@ -1,7 +1,7 @@
 import type { Route } from "../+types/home";
 import { TableComponent } from "~/components/TableComponent";
 import type { TableColumn } from "react-data-table-component";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES } from "~/utils/formats";
 import { statusOptionsPedidos } from "~/types/pedido";
 import type { Pedido } from "~/types/pedido";
 import { usePedido } from "~/context/PedidoContext";

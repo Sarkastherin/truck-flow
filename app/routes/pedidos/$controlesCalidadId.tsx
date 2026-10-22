@@ -41,7 +41,7 @@ export default function PedidosControlesCalidad() {
     setIsLastPage(page === totalPages);
   }, []);
 
-  const { carrozados, puertasTraseras, colores, controlCarrozado } =
+  const { getCarrozadoNombre, puertasTraseras, colores, controlCarrozado } =
     useConfiguracion();
   const controlCarrozadoData = useMemo(() => {
     return controlCarrozado
@@ -51,12 +51,7 @@ export default function PedidosControlesCalidad() {
       )
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [controlCarrozado, pedido.carroceria?.tipo_carrozado_id]);
-  const carrozadoNombre = useMemo(() => {
-    return (
-      carrozados.find((c) => c.id === pedido.carroceria?.tipo_carrozado_id)
-        ?.nombre ?? "—"
-    );
-  }, [carrozados, pedido.carroceria?.tipo_carrozado_id]);
+  const carrozadoNombre = getCarrozadoNombre(pedido.carroceria?.tipo_carrozado_id)
   const puertaTraseraNombre = useMemo(() => {
     return (
       puertasTraseras.find((p) => p.id === pedido.carroceria?.puerta_trasera_id)

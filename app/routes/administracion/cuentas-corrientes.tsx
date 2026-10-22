@@ -12,6 +12,7 @@ import { useModal } from "~/context/ModalContext";
 import { SeleccionarSocioModal } from "~/components/modals/customs/SeleccionarSocioModal";
 import type { SocioComercial } from "~/types/socios";
 import { useLocation } from "react-router";
+import { formatCurrency } from "~/utils/formats";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuentas Corrientes" },
@@ -34,26 +35,23 @@ const columns: TableColumn<CtaCte>[] = [
   },
   {
     name: "Debe",
-    selector: (row) =>
-      row.debe.toLocaleString("es-AR", { style: "currency", currency: "ARS" }),
+    selector: (row) => row.debe,
+    format: (row) => formatCurrency(row.debe),
     width: "150px",
     sortable: true,
   },
   {
     name: "Haber",
-    selector: (row) =>
-      row.haber.toLocaleString("es-AR", { style: "currency", currency: "ARS" }),
+    selector: (row) => row.haber,
+    format: (row) => formatCurrency(row.haber),
     width: "150px",
     sortable: true,
   },
 
   {
     name: "Saldo",
-    selector: (row) =>
-      (row.debe - row.haber).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => row.debe - row.haber,
+    format: (row) => formatCurrency(row.debe - row.haber),
     width: "180px",
     sortable: true,
   },

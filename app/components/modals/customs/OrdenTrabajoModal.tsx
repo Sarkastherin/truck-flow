@@ -14,7 +14,7 @@ import { pdf } from "@react-pdf/renderer";
 import { LoadingComponent } from "~/components/LoadingComponent";
 import { usePedido } from "~/context/PedidoContext";
 import type { TipoOrden } from "~/types/pedido";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES } from "~/utils/formats";
 import {
   LuUser,
   LuTruck,
@@ -70,6 +70,7 @@ export default function OrdenTrabajoModal({
     puertasTraseras,
     colores,
     trabajosChasis,
+    getCarrozadoNombre
   } = useConfiguracion();
 
   const [responsable, setResponsable] = useState({ id: "", nombre: "" });
@@ -79,12 +80,7 @@ export default function OrdenTrabajoModal({
     {},
   );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const carrozadoNombre = useMemo(() => {
-    return (
-      carrozados.find((c) => c.id === pedido.carroceria?.tipo_carrozado_id)
-        ?.nombre ?? "—"
-    );
-  }, [carrozados, pedido.carroceria?.tipo_carrozado_id]);
+  const carrozadoNombre = getCarrozadoNombre(pedido.carroceria?.tipo_carrozado_id)
   const puertaTraseraNombre = useMemo(() => {
     return (
       puertasTraseras.find((p) => p.id === pedido.carroceria?.puerta_trasera_id)

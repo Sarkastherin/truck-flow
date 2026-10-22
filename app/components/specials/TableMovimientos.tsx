@@ -7,7 +7,7 @@ import {
   type MovimientoFormValues,
   type Documento,
 } from "~/types/cuentas-corrientes";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES, formatCurrency } from "~/utils/formats";
 import { capitalize } from "~/utils/functions";
 import { LuBanknote, LuFileArchive } from "react-icons/lu";
 import { useModal } from "~/context/ModalContext";
@@ -40,20 +40,14 @@ const columns: TableColumn<MovimientoDetalle>[] = [
   },
   {
     name: "Debe",
-    selector: (row) =>
-      (row.debe || 0).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => row.debe,
+    format: (row) => formatCurrency(row.debe || 0),
     sortable: true,
   },
   {
     name: "Haber",
-    selector: (row) =>
-      (row.haber || 0).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => row.haber,
+    format: (row) => formatCurrency(row.haber || 0),
     sortable: true,
   },
   {
@@ -105,8 +99,13 @@ export default function TableMovimientos({
   });
 
   const filesRef = useRef(files);
-  const { form, fieldArrayCheques, fieldArrayDocumentos, onUpdate, onAnularPago } =
-    useMovimientos();
+  const {
+    form,
+    fieldArrayCheques,
+    fieldArrayDocumentos,
+    onUpdate,
+    onAnularPago,
+  } = useMovimientos();
   useEffect(() => {
     filesRef.current = files;
   }, [files]);

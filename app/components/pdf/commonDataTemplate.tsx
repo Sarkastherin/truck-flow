@@ -1,7 +1,7 @@
 import { View } from "@react-pdf/renderer";
 import type { Pedido } from "~/types/pedido";
 import { Subtitle, Box, Row, Cell, TitleBox } from "./pdfComponents";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES } from "~/utils/formats";
 
 export const DatosPedido = ({
   pedidoData,

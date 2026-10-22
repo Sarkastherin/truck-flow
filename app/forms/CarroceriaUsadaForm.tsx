@@ -19,7 +19,14 @@ import {
   InputGroupWithIcon,
   MorphingInput,
 } from "~/components/InputsForm";
-import { LuRuler, LuBanknote, LuPencil, LuTrash2, LuX, LuCheck } from "react-icons/lu";
+import {
+  LuRuler,
+  LuBanknote,
+  LuPencil,
+  LuTrash2,
+  LuX,
+  LuCheck,
+} from "react-icons/lu";
 import CuchetinForm from "~/forms/CuchetinForm";
 import AlarguesForm from "~/forms/AlarguesForm";
 import AccesoriosForm from "~/forms/AccesoriosForm";
@@ -29,7 +36,7 @@ import type { SocioComercial } from "~/types/socios";
 import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
 import { useModal } from "~/context/ModalContext";
 import { useNavigate } from "react-router";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatCurrency, formatDateUStoES } from "~/utils/formats";
 import { useFormNavigationBlock } from "~/hooks/useFormNavigationBlock";
 import { usePedido } from "~/context/PedidoContext";
 import ImageGallery from "react-image-gallery";
@@ -283,7 +290,10 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
       try {
         await deleteImage(foto.public_id);
       } catch (error) {
-        console.warn(`Error eliminando de Cloudinary: ${foto.public_id}`, error);
+        console.warn(
+          `Error eliminando de Cloudinary: ${foto.public_id}`,
+          error,
+        );
         errors.push(foto.public_id || "imagen");
       }
     }
@@ -411,17 +421,7 @@ export default function NuevaCarroceriaUsada({ data }: { data?: FormValues }) {
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t pt-4 border-base-300">
             <InfoField label="Color" value={data?.color} />
-            <InfoField
-              label="Precio lista"
-              value={
-                data?.precio_lista
-                  ? data.precio_lista.toLocaleString("es-AR", {
-                      style: "currency",
-                      currency: "ARS",
-                    })
-                  : "-"
-              }
-            />
+            <InfoField label="Precio lista" value={formatCurrency(data?.precio_lista || 0)} />
             <InfoField
               label="Propietario anterior"
               value={data?.duenno?.razon_social}

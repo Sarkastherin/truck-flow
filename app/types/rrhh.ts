@@ -1,5 +1,13 @@
 import type { CommonTypes } from "./commonTypes";
+export const formatDni = (dni: string | number) => {
+  const dniString = String(dni);
+  const first = dniString.slice(0, 2);
+  const second = dniString.slice(2, 5);
+  const third = dniString.slice(5, 8);
+  return `${first}.${second}.${third}`;
+};
 export type TipoPago = "Porcentaje" | "Salario semanal" | "Salario mensual";
+
 export const optionsTipoPago: { value: TipoPago; label: string }[] = [
   { value: "Porcentaje", label: "Porcentaje" },
   { value: "Salario semanal", label: "Salario semanal" },

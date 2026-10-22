@@ -12,6 +12,7 @@ import {
 import { LoadingComponent } from "~/components/LoadingComponent";
 import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import { FaTrailer } from "react-icons/fa6";
+import { formatCurrency } from "~/utils/formats";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Carrocerías Usadas" },
@@ -54,11 +55,8 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
 
   {
     name: "Precio lista",
-    selector: (row) =>
-      (row.precio_lista || 0).toLocaleString("es-AR", {
-        style: "currency",
-        currency: "ARS",
-      }),
+    selector: (row) => row.precio_lista || 0,
+    format: (row) => formatCurrency(row.precio_lista || 0),
     width: "130px",
     sortable: true,
   },

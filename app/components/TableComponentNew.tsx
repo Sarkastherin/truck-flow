@@ -3,7 +3,8 @@ import DataTable, {
   type TableProps,
   type ConditionalStyles,
   type ThemeProp,
-  createTheme
+  createTheme,
+  useColumnVisibility,
 } from "react-data-table-component";
 import {
   useThemeMode,
@@ -11,9 +12,13 @@ import {
   Spinner,
   ToggleSwitch,
   TextInput,
+  Dropdown,
+  DropdownItem,
+  DropdownHeader,
+  DropdownDivider,
 } from "flowbite-react";
 import React, { useState } from "react";
-import { MdAddChart } from "react-icons/md";
+import { MdAddChart, MdViewColumn } from "react-icons/md";
 import { SubTitles } from "./SubTitles";
 import { Badge } from "flowbite-react";
 export type ColorsTypes =
@@ -41,11 +46,12 @@ type TableComponentProps<T> = TableProps<T> & {
   btnAction?: {
     onClick: () => void;
     label: string;
-    disabled?: boolean
+    disabled?: boolean;
   };
-  conditionalRowStyles?:ConditionalStyles<T>[]
+  conditionalRowStyles?: ConditionalStyles<T>[];
   customTheme?: any;
-  message?: string | React.ReactNode | React.ReactElement
+  message?: string | React.ReactNode | React.ReactElement;
+  showColumnVisibility?: boolean;
 };
 function NoDataComponent({
   label = "Nuevo registro",
@@ -94,13 +100,15 @@ export default function TableComponent<T extends { active?: boolean }>({
   hasActiveColumn = true,
   btnAction,
   conditionalRowStyles = [],
-  customTheme={},
+  customTheme = {},
   message,
+  showColumnVisibility = false,
   ...props
 }: TableComponentProps<T>) {
   const stateActiveColumn: TableColumn<T>[] | [] = hasActiveColumn
     ? [
         {
+          id: "activo",
           name: "Activo",
           cell: (row) => (
             <Badge color={row.active !== false ? "green" : "red"}>
@@ -143,6 +151,15 @@ export default function TableComponent<T extends { active?: boolean }>({
   const processColumn = hasActiveColumn
     ? [...columns, ...stateActiveColumn]
     : columns;
+  const {
+    columns: visibleColumns,
+    entries: columnEntries,
+    toggleColumn,
+    showAll: showAllColumns,
+  } = useColumnVisibility(processColumn);
+  const toggleableColumns = columnEntries.filter(
+    (entry) => entry.column.id != null,
+  );
   const conditionalActiveColumnStyles: ConditionalStyles<T>[] = [
     {
       when: (row) => !row.active,
@@ -154,12 +171,15 @@ export default function TableComponent<T extends { active?: boolean }>({
       ],
     },
   ];
-  const processConditionalRowStyles = [...conditionalActiveColumnStyles, ...conditionalRowStyles]
-  const inlineTheme = createTheme(customTheme, 'rounded');
+  const processConditionalRowStyles = [
+    ...conditionalActiveColumnStyles,
+    ...conditionalRowStyles,
+  ];
+  const inlineTheme = createTheme(customTheme, "rounded");
   return (
     <>
       <DataTable
-        columns={processColumn}
+        columns={visibleColumns}
         data={visibleData}
         pagination
         theme={inlineTheme}
@@ -188,18 +208,64 @@ export default function TableComponent<T extends { active?: boolean }>({
         resizable
         title={
           <div className="flex w-full items-center justify-between gap-4">
-            {title && (
-              <SubTitles title={title} back_path={backPath} />
-            )}
-            {message&& (
-              message
-            )}
-            <div className="flex items-center gap-3">
-              {/* ColumnMenu */}
+            {title && <SubTitles title={title} back_path={backPath} />}
+            {message && message}
+            <div className="flex items-center gap-3 w-1/2">
+              {showColumnVisibility && toggleableColumns.length > 0 && (
+                <Dropdown
+                  inline
+                  dismissOnClick={false}
+                  theme={{ floating: { base: "z-50" } }}
+                  label={
+                    <span className="inline-flex cursor-pointer select-none items-center gap-1.5 rounded-lg border border-base-300 px-2.5 py-1.5 text-sm text-base-700 hover:bg-base-100 dark:border-base-600 dark:text-base-200 dark:hover:bg-base-700">
+                      <MdViewColumn className="size-4" />
+                      Columnas
+                    </span>
+                  }
+                >
+                  <DropdownHeader>Columnas visibles</DropdownHeader>
+                  {toggleableColumns.map(({ column, visible }) => (
+                    <DropdownItem
+                      key={String(column.id)}
+                      onClick={() => toggleColumn(column.id as string | number)}
+                      className="flex items-center gap-2"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`flex size-4 shrink-0 items-center justify-center rounded border ${
+                          visible
+                            ? "border-indigo-600 bg-indigo-600"
+                            : "border-base-300 bg-white dark:border-base-600 dark:bg-base-800"
+                        }`}
+                      >
+                        {visible && (
+                          <svg
+                            viewBox="0 0 16 16"
+                            className="size-3 fill-white"
+                            aria-hidden="true"
+                          >
+                            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L1.72 8.78a.75.75 0 1 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
+                          </svg>
+                        )}
+                      </span>
+                      <span>
+                        {typeof column.name === "string" ||
+                        typeof column.name === "number"
+                          ? column.name
+                          : String(column.id)}
+                      </span>
+                    </DropdownItem>
+                  ))}
+                  <DropdownDivider />
+                  <DropdownItem onClick={showAllColumns}>
+                    Mostrar todas
+                  </DropdownItem>
+                </Dropdown>
+              )}
               <TextInput
                 type="search"
                 sizing="sm"
-                className="min-w-50"
+                className="ms-auto w-full"
                 placeholder={searchPlaceholder}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -209,8 +275,8 @@ export default function TableComponent<T extends { active?: boolean }>({
                   checked={showInactive}
                   onChange={setShowInactive}
                   label={`Ver inactivos (${inactiveCount})`}
-                  color="primary"
                   sizing="sm"
+                  className="ms-auto min-w-40"
                 />
               )}
             </div>
@@ -220,6 +286,7 @@ export default function TableComponent<T extends { active?: boolean }>({
         pointerOnHover={props.pointerOnHover ?? true}
         highlightOnHover={props.highlightOnHover ?? true}
         paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
+        paginationPerPage={30}
         fixedHeader
         {...(scrollHeightOffset && {
           fixedHeaderScrollHeight: `calc(100vh - ${scrollHeightOffset}px)`,
@@ -267,7 +334,11 @@ export default function TableComponent<T extends { active?: boolean }>({
           </Button>
         )}
         {btnAction && (
-          <Button color={color} onClick={btnAction.onClick} disabled={btnAction.disabled}>
+          <Button
+            color={color}
+            onClick={btnAction.onClick}
+            disabled={btnAction.disabled}
+          >
             {btnAction.label}
           </Button>
         )}

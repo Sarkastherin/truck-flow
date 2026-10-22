@@ -41,9 +41,9 @@ export type LiquidacionResumen = {
   fichadas: Fichada[];
   reportes: Reporte[];
   /* Horas */
-  horas_totales: number;
-  total_horas_regulares: number;
-  total_horas_extras: number;
+  horas_trabajadas: number;
+  horas_feriado: number;
+  horas_extras: number;
   monto_salario_regular: number;
   monto_salario_extra: number;
   /* Cumplimiento */

@@ -1,24 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo} from "react";
 import { NavLink, useNavigate } from "react-router";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES, formatCurrency } from "~/utils/formats";
 import { useAdministracion } from "~/context/AdministracionContext";
 import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
 import { usePedido } from "~/context/PedidoContext";
-import { BadgeStatusCarroceriaUsada } from "~/components/specials/Badges";
 import type { CarroceriaUsadaData } from "~/types/carroceria-usada";
 import type { Movimientos } from "~/types/cuentas-corrientes";
 import type { Pedido } from "~/types/pedido";
 import {
-  LuArrowRight,
   LuBriefcaseBusiness,
   LuCircleDollarSign,
-  LuCircleAlert,
-  LuClipboardPlus,
   LuFilePlus2,
-  LuPackageSearch,
-  LuCalendarClock,
-  LuPlus,
-  LuTruck,
   LuWalletCards,
 } from "react-icons/lu";
 import pkg from "../../package.json";
@@ -430,10 +422,7 @@ export default function HomeAdmin() {
 
                       <div className="shrink-0 text-right">
                         <p className={`text-lg font-semibold ${importeColor}`}>
-                          {importe.toLocaleString("es-AR", {
-                            style: "currency",
-                            currency: "ARS",
-                          })}
+                          {formatCurrency(importe)}
                         </p>
                         <p className="text-xs text-base-500 dark:text-base-400">
                           {movimiento.medio_pago === "no_aplica"

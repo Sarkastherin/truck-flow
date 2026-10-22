@@ -23,6 +23,7 @@ import {
 import { LuBanknote, LuDollarSign, LuTrash2 } from "react-icons/lu";
 import { Button } from "flowbite-react";
 import { useAdministracion } from "~/context/AdministracionContext";
+import { formatCurrency } from "~/utils/formats";
 export default function AddMovimiento({
   props,
 }: {
@@ -194,10 +195,7 @@ export default function AddMovimiento({
                     </p>
                     <p className="text-2xl font-bold">
                       $
-                      {totalCheques.toLocaleString("es-AR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      {formatCurrency(totalCheques)}
                     </p>
                   </div>
                 </div>

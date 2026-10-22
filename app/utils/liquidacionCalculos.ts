@@ -213,6 +213,8 @@ export function calcularResumenLiquidacion({
   const diasLluvia = new Set(parseFechasISO(liquidacion.dias_lluvia));
   const noLaborables = parseFechasISO(liquidacion.dias_no_laborables);
   const noLaborablesSet = new Set(noLaborables);
+  const horasFeriado = noLaborables.length * HORAS_JORNADA_DIARIA;
+  const horasACumplir = horasSemanales + horasFeriado;
   const diasLaborables = getDiasLaborables(
     liquidacion.desde,
     liquidacion.hasta,
@@ -229,7 +231,7 @@ export function calcularResumenLiquidacion({
       const reportesEmp = reportes.filter(
         (rep) => rep.empleado_id === empleado.id && rep.active !== false,
       );
-      const horasTotales = fichadasEmp.reduce((acc, fich) => {
+      const horasTrabajadas = fichadasEmp.reduce((acc, fich) => {
         const esDiaLaborable =
           !esFinDeSemana(fich.fecha) && !noLaborablesSet.has(fich.fecha);
         return (
@@ -238,19 +240,16 @@ export function calcularResumenLiquidacion({
             .totalHorasTrabajadas
         );
       }, 0);
-      const hsRegulares = Math.min(horasTotales, horasSemanales);
-      const hsExtras = Math.max(horasTotales - horasSemanales, 0);
+      const horasPagadas = horasTrabajadas + horasFeriado;
+      const horasExtras = Math.max(horasPagadas - horasACumplir, 0);
       const vhr = Number(empleado.valor_hora_regular) || 0;
       const vhe = Number(empleado.valor_hora_extra) || 0;
       const salarioSemanal = Number(empleado.valor_salario_semanal) || 0;
-      const completoSemana = horasTotales >= horasSemanales;
       const montoSalarioRegular =
-        salarioSemanal > 0
-          ? completoSemana
-            ? salarioSemanal
-            : hsRegulares * (salarioSemanal / horasSemanales)
-          : hsRegulares * vhr;
-      const montoSalarioExtra = hsExtras * vhe;
+        horasTrabajadas < horasSemanales
+          ? horasPagadas * vhr
+          : salarioSemanal;
+      const montoSalarioExtra = horasExtras * vhe;
       const cumplimiento = calcularCumplimiento(
         fichadasEmp,
         diasLaborables,
@@ -274,9 +273,8 @@ export function calcularResumenLiquidacion({
         empleado,
         fichadas: fichadasEmp,
         reportes: reportesEmp,
-        horasTotales,
-        hsRegulares,
-        hsExtras,
+        horasTrabajadas,
+        horasExtras,
         montoSalarioRegular,
         montoSalarioExtra,
         cumplimiento,
@@ -326,9 +324,9 @@ export function calcularResumenLiquidacion({
       empleado: row.empleado,
       fichadas: row.fichadas,
       reportes: row.reportes,
-      horas_totales: round2(row.horasTotales),
-      total_horas_regulares: round2(row.hsRegulares),
-      total_horas_extras: round2(row.hsExtras),
+      horas_trabajadas: round2(row.horasTrabajadas),
+      horas_feriado: round2(horasFeriado),
+      horas_extras: round2(row.horasExtras),
       monto_salario_regular: round2(row.montoSalarioRegular),
       monto_salario_extra: round2(row.montoSalarioExtra),
       dias_laborables: row.cumplimiento.diasLaborables,

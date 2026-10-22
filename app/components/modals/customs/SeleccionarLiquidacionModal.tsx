@@ -10,7 +10,7 @@ import {
 import { useRRHH } from "~/context/RRHHContext";
 import type { Liquidacion } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES } from "~/utils/formats";
 
 export function getDiasPeriodo(desde: string, hasta: string) {
   const start = new Date(desde);

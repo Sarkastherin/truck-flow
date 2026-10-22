@@ -1,15 +1,11 @@
-import {
-  useWatch,
-  type UseFormReturn,
-  type UseFieldArrayReturn,
-} from "react-hook-form";
+import { type UseFormReturn, type UseFieldArrayReturn } from "react-hook-form";
 import {
   optionMediosPago,
   type Cheque,
   type Documento,
   type MovimientoFormValues,
 } from "~/types/cuentas-corrientes";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatDateUStoES, formatCurrency } from "~/utils/formats";
 import { capitalize } from "~/utils/functions";
 import { Input, Select } from "~/components/InputsForm";
 import { useMemo, useState } from "react";
@@ -80,7 +76,10 @@ export default function EditMovimiento({
   };
   return (
     <>
-      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting}>
+      <fieldset
+        className="border-t border-base-300 dark:border-base-600 pt-5"
+        disabled={form.formState.isSubmitting}
+      >
         <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📃 Información del movimiento
         </legend>
@@ -104,21 +103,18 @@ export default function EditMovimiento({
 
           <InfoField
             label="Debe"
-            value={`$${(form.getValues("debe") || 0).toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
+            value={formatCurrency(form.getValues("debe") || 0)}
           />
           <InfoField
             label="Haber"
-            value={`$${(form.getValues("haber") || 0).toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`}
+            value={formatCurrency(form.getValues("haber") || 0)}
           />
         </div>
       </fieldset>
-      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
+      <fieldset
+        className="border-t border-base-300 dark:border-base-600 pt-5"
+        disabled={form.formState.isSubmitting || isAnulado}
+      >
         <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
           📝 Campos editables
         </legend>
@@ -154,12 +150,16 @@ export default function EditMovimiento({
         </div>
       </fieldset>
       {form.watch("medio_pago") === "cheque" && (
-      <fieldset className="border-t border-base-300 dark:border-base-600 pt-5" disabled={form.formState.isSubmitting || isAnulado}>
+        <fieldset
+          className="border-t border-base-300 dark:border-base-600 pt-5"
+          disabled={form.formState.isSubmitting || isAnulado}
+        >
           <legend className="text-sm font-semibold text-base-700 dark:text-base-300">
             💳 Cheques asociados
           </legend>
           <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200">
-            Hay {cheques.length} cheque{cheques.length !== 1 ? "s" : ""} registrado{cheques.length !== 1 ? "s" : ""} en este movimiento.
+            Hay {cheques.length} cheque{cheques.length !== 1 ? "s" : ""}{" "}
+            registrado{cheques.length !== 1 ? "s" : ""} en este movimiento.
           </div>
           <div className="space-y-4">
             {cheques.map((cheque) => (
@@ -168,7 +168,9 @@ export default function EditMovimiento({
                 className="hover:border-primary-400 hover:shadow-md transition-shadow cursor-pointer"
                 title="Ir al cheque"
                 onClick={() => {
-                  openModal("loading", { props: { title: "Cargando cheque..." } });
+                  openModal("loading", {
+                    props: { title: "Cargando cheque..." },
+                  });
                   navigate(`/administracion/cheques/${cheque.id}`);
                 }}
                 style={{ cursor: "pointer" }}
@@ -186,10 +188,7 @@ export default function EditMovimiento({
 
                   <InfoField
                     label="Importe"
-                    value={`$${cheque.importe.toLocaleString("es-AR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}
+                    value={formatCurrency(cheque.importe)}
                   />
                   <div className="space-y-1">
                     <span className="text-xs font-medium text-base-500 dark:text-primary-300 uppercase tracking-wide">
@@ -233,12 +232,7 @@ export default function EditMovimiento({
             <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <p className="text-sm text-red-700 dark:text-red-300 mb-3">
                 Esta acción creará un movimiento de deuda para reversar el pago
-                de $
-                {(form.getValues("haber") || 0).toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                .
+                de ${formatCurrency(form.getValues("haber") || 0)}.
               </p>
               <Button
                 color="red"
@@ -258,11 +252,8 @@ export default function EditMovimiento({
             </h3>
             <p className="text-sm text-base-600 dark:text-base-400">
               Se creará un movimiento de deuda por $
-              {(form.getValues("haber") || 0).toLocaleString("es-AR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              para reversar este pago.
+              {formatCurrency(form.getValues("haber") || 0)} para reversar este
+              pago.
             </p>
             <Input
               label="Fecha de anulación"

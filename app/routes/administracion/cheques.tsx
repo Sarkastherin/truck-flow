@@ -1,7 +1,7 @@
 import type { Route } from "../+types/home";
 import { TableComponent } from "~/components/TableComponent";
 import type { TableColumn } from "react-data-table-component";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatCurrency, formatDateUStoES } from "~/utils/formats";
 import { statusOptionsPedidos } from "~/types/pedido";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
@@ -54,7 +54,10 @@ export default function PedidosHome() {
       width: "150px",
       sortFunction: (rowA, rowB) => {
         if (rowA.fecha_endoso && rowB.fecha_endoso) {
-          return new Date(rowA.fecha_endoso).getTime() - new Date(rowB.fecha_endoso).getTime();
+          return (
+            new Date(rowA.fecha_endoso).getTime() -
+            new Date(rowB.fecha_endoso).getTime()
+          );
         }
         if (!rowA.fecha_endoso && !rowB.fecha_endoso) return 0;
         return rowA.fecha_endoso ? -1 : 1;
@@ -80,11 +83,8 @@ export default function PedidosHome() {
     },
     {
       name: "Importe",
-      selector: (row) =>
-        row.importe.toLocaleString("es-AR", {
-          style: "currency",
-          currency: "ARS",
-        }),
+      selector: (row) => row.importe,
+      format: (row) => formatCurrency(row.importe),
       sortable: true,
       width: "150px",
     },

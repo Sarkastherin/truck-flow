@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink } from "react-router";
-import { formatDateUStoES } from "~/backend/Database/helperTransformData";
+import { formatCurrency, formatDateUStoES } from "~/utils/formats";
 import { useAdministracion } from "~/context/AdministracionContext";
 import { useCarroceriasUsadas } from "~/context/CarroceriasUsadasContext";
 import { usePedido } from "~/context/PedidoContext";
@@ -255,7 +255,6 @@ export function Welcome() {
               <span className="inline-flex items-center rounded-full border border-base-300 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-base-500 backdrop-blur dark:border-base-700 dark:bg-base-900/70 dark:text-base-300">
                 {isSeller ? "Panel de vendedor" : "Dashboard operativo"}
               </span>
-             
             </div>
             {isSeller ? (
               <div className="flex flex-wrap gap-3">
@@ -298,7 +297,10 @@ export function Welcome() {
               />
               <StatCard
                 label="Próximas a devolver"
-                value={sellerInventory.dueSoon.length + sellerInventory.overdue.length}
+                value={
+                  sellerInventory.dueSoon.length +
+                  sellerInventory.overdue.length
+                }
                 icon={LuCircleAlert}
                 accent="bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"
               />
@@ -418,53 +420,54 @@ export function Welcome() {
                   <div className="mt-6 space-y-3">
                     {sellerInventory.overdue.length > 0 ||
                     sellerInventory.dueSoon.length > 0 ? (
-                      [...sellerInventory.overdue, ...sellerInventory.dueSoon].map(
-                        (carroceria) => {
-                          const dias = getDaysUntil(
-                            carroceria.prestamo?.fecha_devolucion_estimada,
-                          );
+                      [
+                        ...sellerInventory.overdue,
+                        ...sellerInventory.dueSoon,
+                      ].map((carroceria) => {
+                        const dias = getDaysUntil(
+                          carroceria.prestamo?.fecha_devolucion_estimada,
+                        );
 
-                          return (
-                            <NavLink
-                              key={carroceria.id}
-                              to={`/carrocerias-usadas/${carroceria.id}`}
-                              className="flex items-center justify-between gap-4 rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
-                            >
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="text-sm font-semibold text-base-900 dark:text-white">
-                                    {carroceria.numero_carroceria}
-                                  </p>
-                                  <BadgeStatusCarroceriaUsada
-                                    status={carroceria.status}
-                                  />
-                                </div>
-                                <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
-                                  {carroceria.tipo_carrozado ||
-                                    "Sin tipo de carrozado"}
-                                </p>
-                              </div>
-                              <div className="shrink-0 text-right">
+                        return (
+                          <NavLink
+                            key={carroceria.id}
+                            to={`/carrocerias-usadas/${carroceria.id}`}
+                            className="flex items-center justify-between gap-4 rounded-[1.25rem] border border-base-200 bg-white px-4 py-4 transition hover:border-base-300 hover:shadow-md dark:border-base-800 dark:bg-base-950 dark:hover:border-base-700"
+                          >
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-sm font-semibold text-base-900 dark:text-white">
-                                  {dias === null
-                                    ? "Sin fecha"
-                                    : dias < 0
-                                      ? `Vencida hace ${Math.abs(dias)} d`
-                                      : `Devuelve en ${dias} d`}
+                                  {carroceria.numero_carroceria}
                                 </p>
-                                <p className="text-xs text-base-500 dark:text-base-400">
-                                  {carroceria.prestamo?.fecha_devolucion_estimada
-                                    ? formatDateUStoES(
-                                        carroceria.prestamo
-                                          .fecha_devolucion_estimada,
-                                      )
-                                    : "Sin fecha estimada"}
-                                </p>
+                                <BadgeStatusCarroceriaUsada
+                                  status={carroceria.status}
+                                />
                               </div>
-                            </NavLink>
-                          );
-                        },
-                      )
+                              <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
+                                {carroceria.tipo_carrozado ||
+                                  "Sin tipo de carrozado"}
+                              </p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className="text-sm font-semibold text-base-900 dark:text-white">
+                                {dias === null
+                                  ? "Sin fecha"
+                                  : dias < 0
+                                    ? `Vencida hace ${Math.abs(dias)} d`
+                                    : `Devuelve en ${dias} d`}
+                              </p>
+                              <p className="text-xs text-base-500 dark:text-base-400">
+                                {carroceria.prestamo?.fecha_devolucion_estimada
+                                  ? formatDateUStoES(
+                                      carroceria.prestamo
+                                        .fecha_devolucion_estimada,
+                                    )
+                                  : "Sin fecha estimada"}
+                              </p>
+                            </div>
+                          </NavLink>
+                        );
+                      })
                     ) : (
                       <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                         {carroceriasUsadas
@@ -476,8 +479,8 @@ export function Welcome() {
 
                   {sellerInventory.withoutDueDate.length > 0 && (
                     <p className="mt-4 text-xs text-base-500 dark:text-base-400">
-                      {sellerInventory.withoutDueDate.length} prestadas sin fecha
-                      de devolución cargada.
+                      {sellerInventory.withoutDueDate.length} prestadas sin
+                      fecha de devolución cargada.
                     </p>
                   )}
                 </div>
@@ -515,7 +518,8 @@ export function Welcome() {
                               />
                             </div>
                             <p className="mt-1 truncate text-sm text-base-600 dark:text-base-300">
-                              {carroceria.tipo_carrozado || "Sin tipo de carrozado"}
+                              {carroceria.tipo_carrozado ||
+                                "Sin tipo de carrozado"}
                             </p>
                             <p className="mt-1 text-xs text-base-500 dark:text-base-400">
                               {carroceria.duenno?.razon_social ||
@@ -526,7 +530,8 @@ export function Welcome() {
                         </div>
                       </NavLink>
                     ))}
-                    {(carroceriasUsadas?.length ?? 0) === 0 && carroceriasUsadas ? (
+                    {(carroceriasUsadas?.length ?? 0) === 0 &&
+                    carroceriasUsadas ? (
                       <div className="rounded-[1.25rem] border border-dashed border-base-300 bg-white px-4 py-10 text-center text-sm text-base-500 dark:border-base-700 dark:bg-base-950 dark:text-base-400">
                         No hay carrocerías cargadas para mostrar.
                       </div>
@@ -599,10 +604,7 @@ export function Welcome() {
                             <p
                               className={`text-lg font-semibold ${importeColor}`}
                             >
-                              {importe.toLocaleString("es-AR", {
-                                style: "currency",
-                                currency: "ARS",
-                              })}
+                              {formatCurrency(importe)}
                             </p>
                             <p className="text-xs text-base-500 dark:text-base-400">
                               {movimiento.medio_pago === "no_aplica"

@@ -30,12 +30,13 @@ export function SeleccionarLiquidacionModal({
   const [filteredData, setFilteredData] = useState<Liquidacion[]>(
     liquidaciones || [],
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const data = liquidaciones;
   useEffect(() => {
-    if (!liquidaciones || liquidaciones.length === 0) {
+    if (!liquidaciones) {
       void getSueldosData();
-    } else {
+    } 
+    else {
       setIsLoading(false);
       setFilteredData(data.filter((liq) => liq.status !== "cerrada"));
     }

@@ -196,6 +196,21 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     sortable: true,
   },
   {
+    id: "deuda",
+    name: "Deuda",
+    selector: (row) => row.deuda,
+    cell: (row) => <span className={`${row.deuda>0?"text-red-600":""}`}>{formatCurrency(row.deuda)}</span>,
+    format: (row) => {
+      const isDecimal =
+        Number.isFinite(row.deuda) && row.deuda % 1 !== 0;
+      return isDecimal
+        ? String(row.deuda).replace(".", ",")
+        : row.deuda;
+    },
+    grow: 0,
+    sortable: true,
+  },
+  {
     id: "totalLiquidacion",
     name: "Total",
     selector: (row) =>
@@ -231,8 +246,7 @@ export default function Resumen({
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
 }) {
-  const { premios, isLoading, employees } = useRRHH();
-  //const [dataExportable, setDataExportable]=useState<Liquidacion[]>([])
+  const { premios, isLoading, employees, saldoEmpleados } = useRRHH();
   const pendientesSalida = fichadasGuardadas.filter((f) => !f.salida).length;
   const resumen: LiquidacionResumen[] = useMemo(() => {
     if (!liquidacion || pendientesSalida > 0) return [];
@@ -242,6 +256,7 @@ export default function Resumen({
       premios,
       fichadas: fichadasGuardadas,
       reportes: reportesGuardados,
+      saldoEmpleados,
     });
   }, [
     liquidacion,
@@ -292,19 +307,6 @@ export default function Resumen({
     }),
     [resumen],
   );
-  /* const resumenExportable: LiquidacionResumen[] = useMemo(() => {
-    if (!resumen) return [];
-    const copia = structuredClone(resumen)
-    return copia.map((row) => {
-      for (let i in row) {
-        const isDecimal = Number.isFinite(row[i]) && row[i] % 1 !== 0;
-        if (isDecimal) {
-          row[i] = String(row[i]).replace(".", ",");
-        }
-      }
-      return row;
-    });
-  }, [resumen]); */
   const { download, copy } = useTableExport({
     columns: resumenColumns,
     rows: resumen,

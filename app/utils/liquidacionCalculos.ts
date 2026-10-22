@@ -4,7 +4,7 @@ import type {
   LiquidacionResumen,
   Reporte,
 } from "~/types/liquidaciones";
-import type { Employee, Premios } from "~/types/rrhh";
+import type { CtaCteEmpleados, Employee, Premios } from "~/types/rrhh";
 
 export const HORAS_SEMANALES_DEFAULT = 45;
 export const HORAS_JORNADA_DIARIA = 9;
@@ -48,7 +48,7 @@ function parseLocalISO(iso: string): Date | null {
 }
 
 export function getDiaSemana(iso: string): number {
-  return (parseLocalISO(iso)?.getDay() ?? 0);
+  return parseLocalISO(iso)?.getDay() ?? 0;
 }
 
 export function calcularHorasFichada(
@@ -202,12 +202,14 @@ export function calcularResumenLiquidacion({
   premios,
   fichadas,
   reportes,
+  saldoEmpleados,
 }: {
   liquidacion: Liquidacion;
   employees: Employee[];
   premios: Premios[];
   fichadas: Fichada[];
   reportes: Reporte[];
+  saldoEmpleados: CtaCteEmpleados[];
 }): LiquidacionResumen[] {
   const horasSemanales = getHorasSemanales(liquidacion);
   const diasLluvia = new Set(parseFechasISO(liquidacion.dias_lluvia));
@@ -246,9 +248,7 @@ export function calcularResumenLiquidacion({
       const vhe = Number(empleado.valor_hora_extra) || 0;
       const salarioSemanal = Number(empleado.valor_salario_semanal) || 0;
       const montoSalarioRegular =
-        horasTrabajadas < horasSemanales
-          ? horasPagadas * vhr
-          : salarioSemanal;
+        horasTrabajadas < horasSemanales ? horasPagadas * vhr : salarioSemanal;
       const montoSalarioExtra = horasExtras * vhe;
       const cumplimiento = calcularCumplimiento(
         fichadasEmp,
@@ -304,8 +304,8 @@ export function calcularResumenLiquidacion({
     totalPerdidosGrupo > 0 &&
     totalCarroceriasGrupo > 0 &&
     cumplidores.length > 0
-      ? (totalPerdidosGrupo / totalCarroceriasGrupo) *
-        totalMontoCarroceriasGrupo /
+      ? ((totalPerdidosGrupo / totalCarroceriasGrupo) *
+          totalMontoCarroceriasGrupo) /
         cumplidores.length
       : 0;
 
@@ -314,12 +314,20 @@ export function calcularResumenLiquidacion({
     const perdidos = isCacho ? row.cumplimiento.diasIncumplidos : 0;
     const ganados = isCacho ? Math.max(row.carrocerias - perdidos, 0) : 0;
     const montoCacho =
-      row.carrocerias > 0 ? row.montoCarrocerias * (ganados / row.carrocerias) : 0;
+      row.carrocerias > 0
+        ? row.montoCarrocerias * (ganados / row.carrocerias)
+        : 0;
     const recuperado =
-      isCacho && row.cumplimiento.diasIncumplidos === 0 ? recuperadoCumplidor : 0;
+      isCacho && row.cumplimiento.diasIncumplidos === 0
+        ? recuperadoCumplidor
+        : 0;
     const montoPremio = isCacho
       ? montoCacho + recuperado + row.montoOtros
       : row.montoCarrocerias + row.montoOtros;
+    const saldo = saldoEmpleados.find(
+      (saldo) => saldo.empleado.id === row.empleado.id,
+    );
+    const deuda = saldo ? saldo.debe - saldo.haber : 0;
     return {
       empleado: row.empleado,
       fichadas: row.fichadas,
@@ -340,7 +348,9 @@ export function calcularResumenLiquidacion({
       premios_ganados: ganados,
       premio_recuperado: round2(recuperado),
       monto_premio: round2(montoPremio),
-      active: true
+      deuda,
+      descuento: 0,
+      active: true,
     };
   });
 }

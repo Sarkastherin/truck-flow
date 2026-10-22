@@ -43,6 +43,16 @@ const columns: TableColumn<Employee>[] = [
     filterType: "set",
   },
   {
+    id: "area",
+    name: "Area",
+    //cell: (row) => <BadgeContrato ={row.area} />,
+    selector: (row) => row.area,
+    sortable: true,
+    width: "180px",
+    filterable: true,
+    filterType: "set",
+  },
+  {
     id: "valor_salario",
     name: "Valor Salario",
     selector: (row) => row.valor_salario_semanal || "0",
@@ -127,7 +137,6 @@ export default function Employees() {
         color={"blue"}
         scrollHeightOffset={270}
         searchPlaceholder="Buscar por nombre o DNI"
-        showColumnVisibility
       />
     </>
   );

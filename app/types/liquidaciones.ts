@@ -59,7 +59,9 @@ export type LiquidacionResumen = {
   premios_ganados: number;
   premio_recuperado: number;
   monto_premio: number;
-  active:boolean
+  deuda: number;
+  descuento:number
+  active: boolean;
 };
 export type ReporteFormValues = Omit<Reporte, keyof CommonTypes> & {
   id?: string;

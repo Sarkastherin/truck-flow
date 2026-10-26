@@ -278,7 +278,9 @@ export const PedidosProvider = ({
           cliente: cliente,
           formas_pago: formasPagoForThisPedido,
           camion: camionForThisPedido,
-          carroceria: { ...carroceriaForThisPedido, nombre: nombreCarrozado, armador },
+          carroceria: Object.keys(carroceriaForThisPedido).length
+            ? { ...carroceriaForThisPedido, nombre: nombreCarrozado, armador }
+            : {},
           carroceria_usada: carroceriaUsadaForThisPedido,
           trabajo_chasis: trabajoChasisForThisPedido,
           ordenes_trabajo: ordenesTrabajoForThisPedido,

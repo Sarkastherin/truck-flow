@@ -100,9 +100,12 @@ const columns: TableColumn<Pedido>[] = [
   },
   {
     name: "Estado",
+    selector:row=> row.status,
     cell: (row) => <BadgeStatusPedido status={row.status} />,
     width: "150px",
     sortable: true,
+    filterable: true,
+    filterType: "set",
   },
 ];
 export default function PedidosHome() {

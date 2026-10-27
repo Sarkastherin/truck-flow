@@ -128,6 +128,7 @@ export default function PedidosHome() {
           "cliente.razon_social",
           "carroceria.nombre",
           "carroceria.armador",
+          "numero_pedido"
         ]}
         onRowClicked={(row) => handleRowClick(row)}
         onAddRecord={() => navigate("/pedidos/nuevo")}
@@ -137,7 +138,7 @@ export default function PedidosHome() {
         backPath="/"
         color={"blue"}
         scrollHeightOffset={270}
-        searchPlaceholder="Buscar por cliente, carrozado o armador"
+        searchPlaceholder="Buscar por cliente, carrozado, armador o numero de pedido"
         hasActiveColumn={false}
       />
     </>

@@ -450,6 +450,7 @@ export default function FichadasTableModal({
           color="yellow"
           labelButton=""
           hasActiveColumn={false}
+          persistFilters={false}
           scrollHeightOffset={400}
           searchKeys={["empleado.nombre_completo", "empleado.dni"]}
           searchPlaceholder="Buscar por nombre o DNI"

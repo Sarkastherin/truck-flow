@@ -3,7 +3,9 @@ import DataTable, {
   type TableProps,
   type ConditionalStyles,
   type ThemeProp,
+  type FilterState,
   createTheme,
+  isFilterActive,
   useColumnVisibility,
 } from "react-data-table-component";
 import {
@@ -17,10 +19,12 @@ import {
   DropdownHeader,
   DropdownDivider,
 } from "flowbite-react";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router";
 import { MdAddChart, MdViewColumn } from "react-icons/md";
 import { SubTitles } from "./SubTitles";
 import { Badge } from "flowbite-react";
+import { useModal } from "~/context/ModalContext";
 export type ColorsTypes =
   | "pink"
   | "green"
@@ -52,6 +56,9 @@ type TableComponentProps<T> = TableProps<T> & {
   customTheme?: any;
   message?: string | React.ReactNode | React.ReactElement;
   showColumnVisibility?: boolean;
+  persistFilters?: boolean;
+  promptOnMount?: boolean;
+  storageKey?: string;
 };
 function NoDataComponent({
   label = "Nuevo registro",
@@ -85,6 +92,76 @@ const getSearchValue = (row: unknown, key: string): unknown =>
       row,
     );
 
+const DEFAULT_ROWS_PER_PAGE = 30;
+
+type TableSortState = {
+  columnId: string | number | null;
+  direction: string;
+};
+
+type PersistedTableState = {
+  filters: Record<string, FilterState>;
+  search: string;
+  page: number;
+  rowsPerPage: number;
+  sort: TableSortState | null;
+  hiddenColumns: (string | number)[];
+};
+
+function readPersistedState(key: string | null): PersistedTableState | null {
+  if (!key || typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PersistedTableState> | null;
+    if (!parsed || typeof parsed !== "object") return null;
+    return {
+      filters:
+        parsed.filters && typeof parsed.filters === "object"
+          ? parsed.filters
+          : {},
+      search: typeof parsed.search === "string" ? parsed.search : "",
+      page: typeof parsed.page === "number" && parsed.page > 0 ? parsed.page : 1,
+      rowsPerPage:
+        typeof parsed.rowsPerPage === "number" && parsed.rowsPerPage > 0
+          ? parsed.rowsPerPage
+          : DEFAULT_ROWS_PER_PAGE,
+      sort: parsed.sort ?? null,
+      hiddenColumns: Array.isArray(parsed.hiddenColumns)
+        ? parsed.hiddenColumns
+        : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writePersistedState(key: string | null, state: PersistedTableState) {
+  if (!key || typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, JSON.stringify(state));
+  } catch {
+    // storage lleno o no disponible
+  }
+}
+
+function removePersistedState(key: string | null) {
+  if (!key || typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // storage no disponible
+  }
+}
+
+function isFilterMeaningful(filter: FilterState): boolean {
+  if (filter.values !== undefined) {
+    if (!filter.knownValues) return filter.values.length > 0;
+    return filter.values.some((value) => !filter.knownValues!.includes(value));
+  }
+  return isFilterActive(filter);
+}
+
 export default function TableComponent<T extends { active?: boolean }>({
   columns,
   data,
@@ -103,6 +180,12 @@ export default function TableComponent<T extends { active?: boolean }>({
   customTheme = {},
   message,
   showColumnVisibility = false,
+  persistFilters = true,
+  promptOnMount,
+  storageKey: storageKeyProp,
+  onChangePage,
+  onChangeRowsPerPage,
+  onSort,
   ...props
 }: TableComponentProps<T>) {
   const stateActiveColumn: TableColumn<T>[] | [] = hasActiveColumn
@@ -125,8 +208,31 @@ export default function TableComponent<T extends { active?: boolean }>({
   const { computedMode } = useThemeMode();
   const isDarkMode = computedMode === "dark";
   const tableTheme = isDarkMode ? "dark" : "light";
+  const location = useLocation();
+  const { openModal, closeModal } = useModal();
+  const storageKey = persistFilters
+    ? (storageKeyProp ?? `tableState_${location.pathname}`)
+    : null;
+  const shouldPrompt = promptOnMount ?? persistFilters;
+  const persisted = useMemo(() => readPersistedState(storageKey), [storageKey]);
   const [showInactive, setShowInactive] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => persisted?.search ?? "");
+  const [filterValues, setFilterValues] = useState<Record<string, FilterState>>(
+    () => persisted?.filters ?? {},
+  );
+  const [currentPage, setCurrentPage] = useState<number>(
+    () => persisted?.page ?? 1,
+  );
+  const [rowsPerPage, setRowsPerPage] = useState<number>(
+    () => persisted?.rowsPerPage ?? DEFAULT_ROWS_PER_PAGE,
+  );
+  const [currentSort, setCurrentSort] = useState<TableSortState | null>(
+    () => persisted?.sort ?? null,
+  );
+  const hiddenColumnIds = useMemo(
+    () => new Set((persisted?.hiddenColumns ?? []).map(String)),
+    [persisted],
+  );
   const inactiveCount = data.filter((row) => !row.active).length;
   const query = search.trim().toLowerCase();
   const visibleData = data
@@ -148,15 +254,138 @@ export default function TableComponent<T extends { active?: boolean }>({
             .includes(query),
       );
     });
-  const processColumn = hasActiveColumn
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (
+    columnId: string | number,
+    filter: FilterState,
+  ) => {
+    setFilterValues((prev) => ({ ...prev, [columnId]: filter }));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange: NonNullable<TableProps<T>["onChangePage"]> = (
+    page,
+    totalRows,
+  ) => {
+    setCurrentPage(page);
+    onChangePage?.(page, totalRows);
+  };
+
+  const handleRowsPerPageChange: NonNullable<
+    TableProps<T>["onChangeRowsPerPage"]
+  > = (currentRowsPerPage, page) => {
+    setRowsPerPage(currentRowsPerPage);
+    setCurrentPage(page);
+    onChangeRowsPerPage?.(currentRowsPerPage, page);
+  };
+
+  const handleSort: NonNullable<TableProps<T>["onSort"]> = (
+    selectedColumn,
+    sortDirection,
+    sortedRows,
+    sortColumns,
+  ) => {
+    setCurrentSort({
+      columnId: selectedColumn?.id ?? null,
+      direction: sortDirection,
+    });
+    onSort?.(selectedColumn, sortDirection, sortedRows, sortColumns);
+  };
+
+  const clearFilters = () => {
+    setFilterValues({});
+    setSearch("");
+    setCurrentPage(1);
+    setShowInactive(false);
+  };
+
+  const baseColumns = hasActiveColumn
     ? [...columns, ...stateActiveColumn]
     : columns;
+  const processColumn =
+    hiddenColumnIds.size === 0
+      ? baseColumns
+      : baseColumns.map((column) =>
+          column.id != null && hiddenColumnIds.has(String(column.id))
+            ? { ...column, omit: true }
+            : column,
+        );
   const {
     columns: visibleColumns,
     entries: columnEntries,
     toggleColumn,
     showAll: showAllColumns,
   } = useColumnVisibility(processColumn);
+  const hiddenColumnsPersisted = useMemo(
+    () =>
+      visibleColumns
+        .filter((column) => column.id != null && column.omit)
+        .map((column) => column.id as string | number),
+    [visibleColumns],
+  );
+  const hiddenColumnsKey = hiddenColumnsPersisted.join(",");
+  const hasActiveFilters = Object.values(filterValues).some(isFilterMeaningful);
+  const isFirstPersistRun = useRef(true);
+  useEffect(() => {
+    if (!storageKey) return;
+    if (isFirstPersistRun.current) {
+      isFirstPersistRun.current = false;
+      return;
+    }
+    const nextState: PersistedTableState = {
+      filters: filterValues,
+      search,
+      page: currentPage,
+      rowsPerPage,
+      sort: currentSort,
+      hiddenColumns: hiddenColumnsPersisted,
+    };
+    const isEmpty =
+      !hasActiveFilters &&
+      !search &&
+      currentPage === 1 &&
+      rowsPerPage === DEFAULT_ROWS_PER_PAGE &&
+      currentSort == null &&
+      hiddenColumnsKey === "";
+    if (isEmpty) removePersistedState(storageKey);
+    else writePersistedState(storageKey, nextState);
+  }, [
+    storageKey,
+    hasActiveFilters,
+    filterValues,
+    search,
+    currentPage,
+    rowsPerPage,
+    currentSort,
+    hiddenColumnsKey,
+  ]);
+  const promptCheckedRef = useRef(false);
+  useEffect(() => {
+    if (!shouldPrompt || !storageKey || promptCheckedRef.current) return;
+    if (isLoading) return;
+    promptCheckedRef.current = true;
+    const saved = readPersistedState(storageKey);
+    if (!saved) return;
+    const savedHasFilters = Object.values(saved.filters).some(isFilterMeaningful);
+    if (!savedHasFilters && !saved.search) return;
+    openModal("confirmation", {
+      props: {
+        title: "Limpiar filtros",
+        message:
+          "Hay filtros aplicados desde tu última visita. ¿Deseas limpiar los filtros?",
+        confirmText: "Sí, limpiar",
+        cancelText: "No, mantener",
+        onConfirm: () => {
+          clearFilters();
+          closeModal();
+        },
+      },
+    });
+  }, [shouldPrompt, storageKey, isLoading]);
   const toggleableColumns = columnEntries.filter(
     (entry) => entry.column.id != null,
   );
@@ -268,7 +497,7 @@ export default function TableComponent<T extends { active?: boolean }>({
                 className="ms-auto w-full"
                 placeholder={searchPlaceholder}
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
               />
               {hasActiveColumn && inactiveCount > 0 && (
                 <ToggleSwitch
@@ -286,7 +515,15 @@ export default function TableComponent<T extends { active?: boolean }>({
         pointerOnHover={props.pointerOnHover ?? true}
         highlightOnHover={props.highlightOnHover ?? true}
         paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 30]}
-        paginationPerPage={30}
+        paginationPerPage={rowsPerPage}
+        paginationDefaultPage={currentPage}
+        onChangePage={handlePageChange}
+        onChangeRowsPerPage={handleRowsPerPageChange}
+        defaultSortFieldId={currentSort?.columnId}
+        defaultSortAsc={currentSort?.direction !== "desc"}
+        onSort={handleSort}
+        filterValues={filterValues}
+        onFilterChange={handleFilterChange}
         fixedHeader
         {...(scrollHeightOffset && {
           fixedHeaderScrollHeight: `calc(100vh - ${scrollHeightOffset}px)`,

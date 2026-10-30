@@ -238,6 +238,7 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
 ];
 export default function Resumen({
   liquidacion,
+  liquidacionId,
   fichadasGuardadas,
   reportesGuardados,
 }: {
@@ -337,6 +338,7 @@ export default function Resumen({
           color="yellow"
           labelButton=""
           hasActiveColumn={false}
+          storageKey={`liquidacion_${liquidacionId}_resumen`}
           searchKeys={["empleado.nombre_completo", "empleado.dni"]}
           searchPlaceholder="Buscar por nombre o DNI"
           scrollHeightOffset={360}

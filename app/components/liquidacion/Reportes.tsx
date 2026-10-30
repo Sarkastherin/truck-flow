@@ -200,6 +200,7 @@ export default function Reportes({
         color="yellow"
         labelButton=""
         hasActiveColumn={false}
+        storageKey={`liquidacion_${liquidacionId}_reportes`}
         onRowClicked={(row) => {
           setGrupoEmpleados([]);
           setSelectedEmpleado(row.empleado);

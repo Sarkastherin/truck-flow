@@ -114,6 +114,7 @@ export type PremiosFormValues = Omit<Premios, keyof CommonTypes> & {
 };
 export type MvtoEmpleados = CommonTypes & {
   empleado_id: string;
+  liquidacion_id?:string;
   fecha_movimiento: string;
   tipo_movimiento: "deuda" | "pago";
   concepto: string;

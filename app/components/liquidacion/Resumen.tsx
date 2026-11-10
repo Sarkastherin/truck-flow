@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRRHH } from "~/context/RRHHContext";
 import type { Liquidacion, LiquidacionResumen } from "~/types/liquidaciones";
 import { calcularResumenLiquidacion } from "~/utils/liquidacionCalculos";
@@ -8,7 +8,14 @@ import { formatCurrency } from "~/utils/formats";
 import type { Fichada, Reporte } from "~/types/liquidaciones";
 import { Button } from "flowbite-react";
 import { FaCopy, FaDownload } from "react-icons/fa6";
-const resumenColumns: TableColumn<LiquidacionResumen>[] = [
+import { FaCirclePlus } from "react-icons/fa6";
+import MvtoModal from "../modals/customs/MvtoEmpleadoModal";
+import { useMvtoEmpleado } from "~/hooks/useMvtoEmpleado";
+import type { CtaCteEmpleados, Employee, MvtoEmpleados } from "~/types/rrhh";
+import { useModal } from "~/context/ModalContext";
+const getResumenColumns = (
+  handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados) => void,
+): TableColumn<LiquidacionResumen>[] => [
   {
     id: "empleado",
     name: "Empleado",
@@ -70,7 +77,6 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     },
     grow: 0,
     sortable: true,
-    
   },
   {
     id: "horas_extras",
@@ -93,7 +99,8 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     cell: (row) => <span>{formatCurrency(row.monto_salario_regular)}</span>,
     format: (row) => {
       const isDecimal =
-        Number.isFinite(row.monto_salario_regular) && row.monto_salario_regular % 1 !== 0;
+        Number.isFinite(row.monto_salario_regular) &&
+        row.monto_salario_regular % 1 !== 0;
       return isDecimal
         ? String(row.monto_salario_regular).replace(".", ",")
         : row.monto_salario_regular;
@@ -108,7 +115,8 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     cell: (row) => <span>{formatCurrency(row.monto_salario_extra)}</span>,
     format: (row) => {
       const isDecimal =
-        Number.isFinite(row.monto_salario_extra) && row.monto_salario_extra % 1 !== 0;
+        Number.isFinite(row.monto_salario_extra) &&
+        row.monto_salario_extra % 1 !== 0;
       return isDecimal
         ? String(row.monto_salario_extra).replace(".", ",")
         : row.monto_salario_extra;
@@ -171,7 +179,8 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     cell: (row) => <span>{formatCurrency(row.premio_recuperado)}</span>,
     format: (row) => {
       const isDecimal =
-        Number.isFinite(row.premio_recuperado) && row.premio_recuperado % 1 !== 0;
+        Number.isFinite(row.premio_recuperado) &&
+        row.premio_recuperado % 1 !== 0;
       return isDecimal
         ? String(row.premio_recuperado).replace(".", ",")
         : row.premio_recuperado;
@@ -199,13 +208,55 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     id: "deuda",
     name: "Deuda",
     selector: (row) => row.deuda,
-    cell: (row) => <span className={`${row.deuda>0?"text-red-600":""}`}>{formatCurrency(row.deuda)}</span>,
+    cell: (row) => (
+      <span className={`${row.deuda > 0 ? "text-red-600" : ""}`}>
+        {formatCurrency(row.deuda)}
+      </span>
+    ),
+    format: (row) => {
+      const isDecimal = Number.isFinite(row.deuda) && row.deuda % 1 !== 0;
+      return isDecimal ? String(row.deuda).replace(".", ",") : row.deuda;
+    },
+    grow: 0,
+    sortable: true,
+  },
+  {
+    id: "descuento",
+    name: "Descuento",
+    selector: (row) => row.descuento,
+    cell: (row) => (
+      <button
+        className="flex justify-between items-center w-full cursor-pointer hover:bg-gray-100"
+        onClick={() => handleOpenPago(row.empleado, row.mvtoDescuento)}
+      >
+        <span className={`${row.descuento > 0 ? "text-green-600" : ""}`}>
+          {formatCurrency(row.descuento)}
+        </span>
+        <FaCirclePlus className="text-green-500"/>
+      </button>
+    ),
     format: (row) => {
       const isDecimal =
-        Number.isFinite(row.deuda) && row.deuda % 1 !== 0;
+        Number.isFinite(row.descuento) && row.descuento % 1 !== 0;
       return isDecimal
-        ? String(row.deuda).replace(".", ",")
-        : row.deuda;
+        ? String(row.descuento).replace(".", ",")
+        : row.descuento;
+    },
+    grow: 0,
+    sortable: true,
+  },
+  {
+    id: "saldo",
+    name: "Saldo",
+    selector: (row) => row.saldo,
+    cell: (row) => (
+      <span className={`${row.saldo > 0 ? "text-red-600" : ""}`}>
+        {formatCurrency(row.saldo)}
+      </span>
+    ),
+    format: (row) => {
+      const isDecimal = Number.isFinite(row.saldo) && row.saldo % 1 !== 0;
+      return isDecimal ? String(row.saldo).replace(".", ",") : row.saldo;
     },
     grow: 0,
     sortable: true,
@@ -214,19 +265,26 @@ const resumenColumns: TableColumn<LiquidacionResumen>[] = [
     id: "totalLiquidacion",
     name: "Total",
     selector: (row) =>
-      row.monto_salario_regular + row.monto_salario_extra + row.monto_premio,
+      row.monto_salario_regular +
+      row.monto_salario_extra +
+      row.monto_premio -
+      row.descuento,
     cell: (row) => (
       <span className="font-bold">
         {formatCurrency(
           row.monto_salario_regular +
             row.monto_salario_extra +
-            row.monto_premio,
+            row.monto_premio -
+            row.descuento,
         )}
       </span>
     ),
     format: (row) => {
       const total =
-        row.monto_salario_regular + row.monto_salario_extra + row.monto_premio;
+        row.monto_salario_regular +
+        row.monto_salario_extra +
+        row.monto_premio -
+        row.descuento;
       const isDecimal = Number.isFinite(total) && total % 1 !== 0;
       return isDecimal ? String(total).replace(".", ",") : total;
     },
@@ -247,7 +305,38 @@ export default function Resumen({
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
 }) {
+  const { form, onCreate, onUpdate, onDelete, onReactivate } =
+    useMvtoEmpleado();
+  const { openModal } = useModal();
   const { premios, isLoading, employees, saldoEmpleados } = useRRHH();
+  const handleOpenPago = (empleado: Employee, mvtoData?: MvtoEmpleados) => {
+    const defaultvalues = mvtoData
+      ? mvtoData
+      : {
+          empleado_id: empleado.id,
+          liquidacion_id: liquidacionId,
+          concepto: "Descuento semanal",
+          fecha_movimiento: new Date().toISOString().split("T")[0],
+          tipo_movimiento: "pago",
+          debe: 0,
+          haber: 0,
+        };
+    form.reset(defaultvalues as MvtoEmpleados);
+    form.clearErrors();
+    openModal("form", {
+      component: MvtoModal,
+      props: {
+        title: `Descuento a: ${empleado.nombre_completo}`,
+        form,
+        size: "2xl",
+        tipoMovimiento: mvtoData ? mvtoData.tipo_movimiento : "pago",
+      },
+      onSubmit: mvtoData
+        ? form.handleSubmit(onUpdate)
+        : form.handleSubmit(onCreate),
+    });
+  };
+  const columns = getResumenColumns(handleOpenPago);
   const pendientesSalida = fichadasGuardadas.filter((f) => !f.salida).length;
   const resumen: LiquidacionResumen[] = useMemo(() => {
     if (!liquidacion || pendientesSalida > 0) return [];
@@ -309,10 +398,11 @@ export default function Resumen({
     [resumen],
   );
   const { download, copy } = useTableExport({
-    columns: resumenColumns,
+    columns: columns,
     rows: resumen,
     valueSource: "format",
   });
+
   if (pendientesSalida > 0) {
     return (
       <div className="rounded-lg border-2 border-dashed border-yellow-300 bg-yellow-50/50 py-12 text-center dark:border-yellow-700 dark:bg-yellow-900/10">
@@ -331,7 +421,7 @@ export default function Resumen({
     <div className="space-y-3">
       <div className="overflow-x-auto rounded-lg shadow-md">
         <TableComponent
-          columns={resumenColumns}
+          columns={columns}
           data={resumen}
           backPath=""
           isLoading={isLoading}
@@ -385,6 +475,7 @@ export default function Resumen({
             </div>
           }
           pointerOnHover={false}
+          highlightOnHover={false}
         />
       </div>
       {resumen.length === 0 && (

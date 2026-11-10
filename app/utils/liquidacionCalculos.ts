@@ -324,10 +324,18 @@ export function calcularResumenLiquidacion({
     const montoPremio = isCacho
       ? montoCacho + recuperado + row.montoOtros
       : row.montoCarrocerias + row.montoOtros;
-    const saldo = saldoEmpleados.find(
-      (saldo) => saldo.empleado.id === row.empleado.id,
+    const ctaCte = saldoEmpleados.find(
+      (ctaCte) => ctaCte.empleado.id === row.empleado.id,
     );
-    const deuda = saldo ? saldo.debe - saldo.haber : 0;
+    const mvto = ctaCte?.movimientos.find(
+      (mvto) =>
+        mvto.liquidacion_id === liquidacion.id &&
+        mvto.tipo_movimiento === "pago",
+    );
+    const descuento = mvto ? mvto.haber : 0
+    const deuda = ctaCte ? ctaCte.debe - ctaCte.haber + descuento : 0;
+
+    const saldo = ctaCte ? ctaCte.debe - ctaCte.haber : 0;
     return {
       empleado: row.empleado,
       fichadas: row.fichadas,
@@ -349,7 +357,9 @@ export function calcularResumenLiquidacion({
       premio_recuperado: round2(recuperado),
       monto_premio: round2(montoPremio),
       deuda,
-      descuento: 0,
+      descuento,
+      mvtoDescuento: mvto,
+      saldo,
       active: true,
     };
   });

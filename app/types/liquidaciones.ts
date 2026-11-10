@@ -1,5 +1,5 @@
 import type { CommonTypes } from "./commonTypes";
-import type { Employee } from "./rrhh";
+import type { Employee, MvtoEmpleados } from "./rrhh";
 export type StatusLiquidacion = "nueva" | "en_proceso" | "cerrada";
 export const optionsStatusLiq: { value: StatusLiquidacion; label: string }[] = [
   { value: "nueva", label: "Nueva" },
@@ -60,7 +60,9 @@ export type LiquidacionResumen = {
   premio_recuperado: number;
   monto_premio: number;
   deuda: number;
-  descuento:number
+  descuento:number;
+  mvtoDescuento?:MvtoEmpleados;
+  saldo: number;
   active: boolean;
 };
 export type ReporteFormValues = Omit<Reporte, keyof CommonTypes> & {

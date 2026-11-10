@@ -8,16 +8,13 @@ import type {
 } from "react-data-table-component";
 import type { CtaCteEmpleados, Employee, MvtoEmpleados } from "~/types/rrhh";
 import { useModal } from "~/context/ModalContext";
-import PremiosModal from "~/components/modals/customs/PremiosModal";
 import { useMvtoEmpleado } from "~/hooks/useMvtoEmpleado";
-import { BadgePremiosSector } from "~/components/specials/Badges";
 import { capitalize } from "~/utils/functions";
 import { SeleccionarEmpleadoModal } from "~/components/modals/customs/SeleccionarEmpleadoModal";
 import {
   Badge,
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeadCell,
   TableRow,
@@ -79,9 +76,9 @@ const getColumns = (
   ];
 };
 export default function MvtoEmpleadosPage() {
-  const { form, onCreate, onUpdate, onDelete, onReactivate } =
+  const { form, onCreate, onUpdate } =
     useMvtoEmpleado();
-  const { openModal, closeModal } = useModal();
+  const { openModal } = useModal();
   const { getSueldosData, saldoEmpleados, isLoading, isReady } = useRRHH();
   useEffect(() => {
     if (saldoEmpleados.length === 0 && !isReady) getSueldosData();

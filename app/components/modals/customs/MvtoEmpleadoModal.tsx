@@ -1,12 +1,7 @@
 import { type UseFormReturn } from "react-hook-form";
-import {
-  Input,
-  Select,
-  CurrencyInput,
-  MorphingInput,
-} from "~/components/InputsForm";
+import { Input, CurrencyInput, MorphingInput } from "~/components/InputsForm";
 import InfoFieldsComponent from "~/components/InfoFieldsComponent";
-import { optionSector, type MvtoEmpleados } from "~/types/rrhh";
+import { type MvtoEmpleados } from "~/types/rrhh";
 import { LuBanknote } from "react-icons/lu";
 import { Button } from "flowbite-react";
 
@@ -38,20 +33,10 @@ export default function MvtoModal({ props }: { props: Props }) {
         error={errors.fecha_movimiento?.message}
         requiredField
       />
-      {/* <Select
-        label="Categoría"
-        {...register("tipo_movimiento", { required: "La categoría es obligatorio" })}
-        error={errors.tipo_movimiento?.message}
-        requiredField
-        options={[
-          {value: "deuda", label: "Deuda"},
-          {value: "pago", label: "Pago"}
-        ]}
-      /> */}
 
       {props.tipoMovimiento === "deuda" && (
         <CurrencyInput
-          label="Importe"
+          label="Importe [DEBE]"
           name="debe"
           control={control}
           rules={{
@@ -68,7 +53,7 @@ export default function MvtoModal({ props }: { props: Props }) {
       )}
       {props.tipoMovimiento === "pago" && (
         <CurrencyInput
-          label="Importe"
+          label="Importe [HABER]"
           name="haber"
           control={control}
           rules={{
@@ -89,9 +74,26 @@ export default function MvtoModal({ props }: { props: Props }) {
           name="concepto"
           control={control}
           options={[
-            { value: "Préstamo", label: "Préstamo" },
-            { value: "Alquiler", label: "Alquiler" },
-            { value: "Adelanto", label: "Adelanto" },
+            {
+              value: "Préstamo",
+              label: "Préstamo",
+              disabled: props.tipoMovimiento === "pago",
+            },
+            {
+              value: "Alquiler",
+              label: "Alquiler",
+              disabled: props.tipoMovimiento === "pago",
+            },
+            {
+              value: "Adelanto",
+              label: "Adelanto",
+              disabled: props.tipoMovimiento === "pago",
+            },
+            {
+              value: "Descuento semanal",
+              label: "Descuento semanal",
+              disabled: props.tipoMovimiento === "deuda",
+            },
           ]}
         />
       </div>

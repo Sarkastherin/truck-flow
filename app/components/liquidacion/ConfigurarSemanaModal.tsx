@@ -104,6 +104,7 @@ export default function ConfigurarSemanaModal({
             allowDecimal
             value={horas}
             onChange={(event) => setHoras(event.target.value)}
+            disabled
           />
           <p className="mt-1 text-xs text-base-500 dark:text-base-400">
             Ajustá el total si hay feriados u otros días no laborables

@@ -17,7 +17,7 @@ export const optionsTipoPago: { value: TipoPago; label: string }[] = [
 export const optionsGrupos: { value: string; label: string; color: string }[] = [
   { value: "Cacho", label: "Cacho", color: "indigo" },
   { value: "Pintura", label: "Pintura", color: "yellow" },
-  { value: "Boio", label: "Boio", color: "lime" },
+  { value: "Bolo", label: "Bolo", color: "lime" },
 ];
 export type AreasType =
   | "soldador"

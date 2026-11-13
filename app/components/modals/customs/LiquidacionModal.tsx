@@ -47,6 +47,7 @@ export default function LiquidacionModal({ props }: { props: Props }) {
           min: { value: 1, message: "Mínimo 1" },
         })}
         error={errors.horas_semanales?.message}
+        disabled
       />
     </fieldset>
   );

@@ -216,7 +216,7 @@ export function calcularResumenLiquidacion({
   const noLaborables = parseFechasISO(liquidacion.dias_no_laborables);
   const noLaborablesSet = new Set(noLaborables);
   const horasFeriado = noLaborables.length * HORAS_JORNADA_DIARIA;
-  const horasACumplir = horasSemanales + horasFeriado;
+  const horasACumplir = horasSemanales;
   const diasLaborables = getDiasLaborables(
     liquidacion.desde,
     liquidacion.hasta,

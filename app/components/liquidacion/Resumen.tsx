@@ -11,7 +11,7 @@ import { FaCopy, FaDownload } from "react-icons/fa6";
 import { FaCirclePlus } from "react-icons/fa6";
 import MvtoModal from "../modals/customs/MvtoEmpleadoModal";
 import { useMvtoEmpleado } from "~/hooks/useMvtoEmpleado";
-import type { CtaCteEmpleados, Employee, MvtoEmpleados } from "~/types/rrhh";
+import type { Employee, MvtoEmpleados } from "~/types/rrhh";
 import { useModal } from "~/context/ModalContext";
 const getResumenColumns = (
   handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados) => void,

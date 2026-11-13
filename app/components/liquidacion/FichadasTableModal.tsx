@@ -87,7 +87,12 @@ export const getFichadasColumns = (
 ): TableColumn<FichadasFileUI>[] => [
   {
     name: "Fecha",
-    selector: (row) => formatFecha(row.fecha),
+    selector: (row) => row.fecha,
+    format:(row)=> row.fecha.toLocaleDateString("es-AR", {
+      day: "2-digit",
+      weekday: "short",
+      month:"short"
+    }),
     filterable: true,
     filterType: "date",
     sortable: true,

@@ -248,7 +248,7 @@ export function calcularResumenLiquidacion({
       const vhe = Number(empleado.valor_hora_extra) || 0;
       const salarioSemanal = Number(empleado.valor_salario_semanal) || 0;
       const montoSalarioRegular =
-        horasTrabajadas < horasSemanales ? horasPagadas * vhr : salarioSemanal;
+        horasPagadas < horasSemanales ? horasPagadas * vhr : salarioSemanal;
       const montoSalarioExtra = horasExtras * vhe;
       const cumplimiento = calcularCumplimiento(
         fichadasEmp,

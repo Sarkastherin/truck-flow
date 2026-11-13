@@ -114,6 +114,7 @@ export default function ProcesarFichadas({
   const fichadasGuardadas = liquidacion?.fichada ?? [];
   const hayFichadasGuardadas = fichadasGuardadas.length > 0;
   const [fichadasFile, setFichadasFile] = useState<FichadasFileUI[]>([]);
+  const [fichadasEliminadas, setFichadasEliminadas] = useState<string[]>([]);
   const [isLoadingImport, setIsLoadingImport] = useState(false);
   const handleOpenFromImport = () => setIsModalOpen(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,6 +142,7 @@ export default function ProcesarFichadas({
   };
   const handleOpenSaved = () => {
     setIsModalOpen(true);
+    setFichadasEliminadas([]);
     const feriados = new Set(diasNoLaborables);
     const rows: FichadasFileUI[] = fichadasGuardadas.map((fich) => {
       const empleado = employees.find((emp) => emp.id === fich.empleado_id);
@@ -166,7 +168,8 @@ export default function ProcesarFichadas({
     setIsLoadingImport(false);
   };
   const handleSaveFichada = async () => {
-    if (!liquidacionId || fichadasFile.length === 0) return;
+    if (!liquidacionId) return;
+    if (fichadasFile.length === 0 && fichadasEliminadas.length === 0) return;
     if (hasNoEncontrados) return;
     const payload: FichadaFormValues[] = fichadasFile.map((fich) => {
       const row: FichadaFormValues = {
@@ -188,7 +191,7 @@ export default function ProcesarFichadas({
       },
     });
     try {
-      const result = await CUDFichadas(payload as Fichada[], []);
+      const result = await CUDFichadas(payload as Fichada[], fichadasEliminadas);
       if (!result.success) {
         throw new Error(
           result.error || result.message || "No se pudo cargar las fichadas",
@@ -197,6 +200,7 @@ export default function ProcesarFichadas({
       closeModal();
       setIsModalOpen(false);
       setFichadasFile([]);
+      setFichadasEliminadas([]);
       openModal("success", {
         props: {
           title: "Fichadas guardadas",
@@ -219,11 +223,13 @@ export default function ProcesarFichadas({
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setFichadasEliminadas([]);
     if (!hayFichadasGuardadas) setFichadasFile([]);
   };
   const handleResetFile = () => {
     setIsModalOpen(false);
     setFichadasFile([]);
+    setFichadasEliminadas([]);
     setIsLoadingImport(false);
     setImportKey((k) => k + 1);
   };
@@ -238,6 +244,16 @@ export default function ProcesarFichadas({
         );
       }),
     );
+  };
+  const handleDeleteFichada = (row: FichadasFileUI) => {
+    setFichadasFile((prev) => prev.filter((r) => r !== row));
+    if (row.id) {
+      setFichadasEliminadas((prev) =>
+        prev.includes(row.id as string)
+          ? prev
+          : [...prev, row.id as string],
+      );
+    }
   };
   return (
     <div>
@@ -290,6 +306,8 @@ export default function ProcesarFichadas({
         desde={liquidacion?.desde ?? ""}
         hasta={liquidacion?.hasta ?? ""}
         onAddRow={handleAddFichada}
+        onDeleteRow={handleDeleteFichada}
+        pendingDeletes={fichadasEliminadas.length}
       />
     </div>
   );

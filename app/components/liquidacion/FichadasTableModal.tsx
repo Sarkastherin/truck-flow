@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Button } from "flowbite-react";
 import { FaRegIdCard } from "react-icons/fa";
 import { HiExclamation } from "react-icons/hi";
-import { LuPlus, LuX } from "react-icons/lu";
+import { LuPlus, LuTrash2, LuX } from "react-icons/lu";
 import TableComponent from "~/components/TableComponentNew";
 import { Modal } from "~/components/modals/ModalBase";
 import { Input, SelectWithSearch } from "~/components/InputsForm";
@@ -82,6 +82,8 @@ export const getFichadasColumns = (
     value: string,
     column: TableColumn<FichadasFileUI>,
   ) => void,
+  onDeleteRow?: (row: FichadasFileUI) => void,
+  isSaving = false,
 ): TableColumn<FichadasFileUI>[] => [
   {
     name: "Fecha",
@@ -140,6 +142,27 @@ export const getFichadasColumns = (
     selector: (row) => row.horasExtras,
     grow: 0,
   },
+  ...(onDeleteRow
+    ? [
+        {
+          name: "",
+          right: true,
+          width: "56px",
+          grow: 0,
+          cell: (row: FichadasFileUI) => (
+            <button
+              type="button"
+              title="Eliminar fichada"
+              onClick={() => onDeleteRow(row)}
+              disabled={isSaving}
+              className="rounded-md p-1.5 text-red-500 transition-colors hover:bg-red-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400"
+            >
+              <LuTrash2 size={15} />
+            </button>
+          ),
+        },
+      ]
+    : []),
 ];
 
 export const getFichadasRowStyles = (
@@ -188,6 +211,8 @@ export default function FichadasTableModal({
   desde = "",
   hasta = "",
   onAddRow,
+  onDeleteRow,
+  pendingDeletes = 0,
 }: {
   show: boolean;
   title: string;
@@ -209,6 +234,8 @@ export default function FichadasTableModal({
   desde?: string;
   hasta?: string;
   onAddRow?: (row: FichadasFileUI) => void;
+  onDeleteRow?: (row: FichadasFileUI) => void;
+  pendingDeletes?: number;
 }) {
   const [showDniAlert, setShowDniAlert] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -217,7 +244,7 @@ export default function FichadasTableModal({
   const [newEntrada, setNewEntrada] = useState("");
   const [newSalida, setNewSalida] = useState("");
   const [addError, setAddError] = useState("");
-  const columns = getFichadasColumns(onCellEdit);
+  const columns = getFichadasColumns(onCellEdit, onDeleteRow, isSaving);
   const rowStyles = getFichadasRowStyles(diasNoLaborables);
   const saveDisabled = isSaving || hasNoEncontrados;
 
@@ -470,21 +497,30 @@ export default function FichadasTableModal({
           }}
           message={
             <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-base-500 dark:text-base-400">
-              {onAddRow && (
-                <Button color="yellow" size="sm" onClick={handleToggleAddForm}>
-                  {showAddForm ? (
-                    <>
-                      <LuX className="me-1 size-4" />
-                      Cerrar
-                    </>
-                  ) : (
-                    <>
-                      <LuPlus className="me-1 size-4" />
-                      Agregar fichada
-                    </>
-                  )}
-                </Button>
-              )}
+              <div className="flex flex-wrap items-center gap-3">
+                {onAddRow && (
+                  <Button color="yellow" size="sm" onClick={handleToggleAddForm}>
+                    {showAddForm ? (
+                      <>
+                        <LuX className="me-1 size-4" />
+                        Cerrar
+                      </>
+                    ) : (
+                      <>
+                        <LuPlus className="me-1 size-4" />
+                        Agregar fichada
+                      </>
+                    )}
+                  </Button>
+                )}
+                {pendingDeletes > 0 && (
+                  <span className="font-medium text-red-600 dark:text-red-400">
+                    {pendingDeletes} fichada
+                    {pendingDeletes === 1 ? "" : "s"} se eliminará
+                    {pendingDeletes === 1 ? "" : "n"} al guardar
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-4">
                 <span className="font-semibold">Leyendas:</span>
 

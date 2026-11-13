@@ -61,7 +61,7 @@ export type LiquidacionResumen = {
   monto_premio: number;
   deuda: number;
   descuento:number;
-  mvtoDescuento?:MvtoEmpleados;
+  mvtoDescuento?: MvtoEmpleados[];
   saldo: number;
   active: boolean;
 };

@@ -327,12 +327,15 @@ export function calcularResumenLiquidacion({
     const ctaCte = saldoEmpleados.find(
       (ctaCte) => ctaCte.empleado.id === row.empleado.id,
     );
-    const mvto = ctaCte?.movimientos.find(
-      (mvto) =>
-        mvto.liquidacion_id === liquidacion.id &&
-        mvto.tipo_movimiento === "pago",
+    const pagosLiquidacion = (ctaCte?.movimientos ?? [])
+      .filter(
+        (m) =>
+          m.liquidacion_id === liquidacion.id && m.tipo_movimiento === "pago",
+      )
+      .sort((a, b) => a.fecha_movimiento.localeCompare(b.fecha_movimiento));
+    const descuento = round2(
+      pagosLiquidacion.reduce((acc, m) => acc + (Number(m.haber) || 0), 0),
     );
-    const descuento = mvto ? mvto.haber : 0
     const deuda = ctaCte ? ctaCte.debe - ctaCte.haber + descuento : 0;
 
     const saldo = ctaCte ? ctaCte.debe - ctaCte.haber : 0;
@@ -358,7 +361,7 @@ export function calcularResumenLiquidacion({
       monto_premio: round2(montoPremio),
       deuda,
       descuento,
-      mvtoDescuento: mvto,
+      mvtoDescuento: pagosLiquidacion,
       saldo,
       active: true,
     };

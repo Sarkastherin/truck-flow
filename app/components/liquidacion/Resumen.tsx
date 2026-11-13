@@ -14,7 +14,7 @@ import { useMvtoEmpleado } from "~/hooks/useMvtoEmpleado";
 import type { Employee, MvtoEmpleados } from "~/types/rrhh";
 import { useModal } from "~/context/ModalContext";
 const getResumenColumns = (
-  handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados) => void,
+  handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados[]) => void,
 ): TableColumn<LiquidacionResumen>[] => [
   {
     id: "empleado",
@@ -315,28 +315,29 @@ export default function Resumen({
     useMvtoEmpleado();
   const { openModal } = useModal();
   const { premios, isLoading, employees, saldoEmpleados } = useRRHH();
-  const handleOpenPago = (empleado: Employee, mvtoData?: MvtoEmpleados) => {
+  const handleOpenPago = (empleado: Employee, mvtoData?: MvtoEmpleados[]) => {
+    const movimientosMvto = mvtoData ?? [];
+    const primerMvto = movimientosMvto[0];
+    const hayMvto = movimientosMvto.length > 0;
     form.reset(
-      mvtoData
+      primerMvto
         ? {
-            empleado_id: mvtoData.empleado_id || empleado.id,
-            liquidacion_id: mvtoData.liquidacion_id,
-            tipo_movimiento: mvtoData.tipo_movimiento,
-            created_at: mvtoData.created_at,
-            created_by: mvtoData.created_by,
-            updated_at: mvtoData.updated_at,
-            updated_by: mvtoData.updated_by,
-            movimientos: [
-              {
-                id: mvtoData.id,
-                fecha_movimiento: mvtoData.fecha_movimiento,
-                concepto: mvtoData.concepto,
-                importe:
-                  mvtoData.tipo_movimiento === "deuda"
-                    ? Number(mvtoData.debe) || 0
-                    : Number(mvtoData.haber) || 0,
-              },
-            ],
+            empleado_id: primerMvto.empleado_id || empleado.id,
+            liquidacion_id: primerMvto.liquidacion_id,
+            tipo_movimiento: primerMvto.tipo_movimiento,
+            created_at: primerMvto.created_at,
+            created_by: primerMvto.created_by,
+            updated_at: primerMvto.updated_at,
+            updated_by: primerMvto.updated_by,
+            movimientos: movimientosMvto.map((mvto) => ({
+              id: mvto.id,
+              fecha_movimiento: mvto.fecha_movimiento,
+              concepto: mvto.concepto,
+              importe:
+                mvto.tipo_movimiento === "deuda"
+                  ? Number(mvto.debe) || 0
+                  : Number(mvto.haber) || 0,
+            })),
             eliminados: [],
           }
         : {
@@ -360,9 +361,9 @@ export default function Resumen({
         title: `Descuento a: ${empleado.nombre_completo}`,
         form,
         size: "3xl",
-        tipoMovimiento: mvtoData ? mvtoData.tipo_movimiento : "pago",
+        tipoMovimiento: primerMvto?.tipo_movimiento ?? "pago",
       },
-      onSubmit: mvtoData
+      onSubmit: hayMvto
         ? form.handleSubmit(onUpdate)
         : form.handleSubmit(onCreate),
     });

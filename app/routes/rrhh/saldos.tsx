@@ -84,16 +84,42 @@ export default function MvtoEmpleadosPage() {
     if (saldoEmpleados.length === 0 && !isReady) getSueldosData();
   }, [isReady, saldoEmpleados, getSueldosData]);
   const handleOpenModal = (empleado: Employee, mvtoData?: MvtoEmpleados) => {
-    const defaultvalues = mvtoData
-      ? mvtoData
-      : {
-          empleado_id: empleado.id,
-          fecha_movimiento: new Date().toISOString().split("T")[0],
-          tipo_movimiento: "deuda",
-          debe: 0,
-          haber: 0,
-        };
-    form.reset(defaultvalues as MvtoEmpleados);
+    form.reset(
+      mvtoData
+        ? {
+            empleado_id: mvtoData.empleado_id || empleado.id,
+            liquidacion_id: mvtoData.liquidacion_id,
+            tipo_movimiento: mvtoData.tipo_movimiento,
+            created_at: mvtoData.created_at,
+            created_by: mvtoData.created_by,
+            updated_at: mvtoData.updated_at,
+            updated_by: mvtoData.updated_by,
+            movimientos: [
+              {
+                id: mvtoData.id,
+                fecha_movimiento: mvtoData.fecha_movimiento,
+                concepto: mvtoData.concepto,
+                importe:
+                  mvtoData.tipo_movimiento === "deuda"
+                    ? Number(mvtoData.debe) || 0
+                    : Number(mvtoData.haber) || 0,
+              },
+            ],
+            eliminados: [],
+          }
+        : {
+            empleado_id: empleado.id,
+            tipo_movimiento: "deuda" as const,
+            movimientos: [
+              {
+                fecha_movimiento: new Date().toISOString().split("T")[0],
+                concepto: "",
+                importe: 0,
+              },
+            ],
+            eliminados: [],
+          },
+    );
     form.clearErrors();
     openModal("form", {
       component: MvtoModal,
@@ -168,11 +194,17 @@ export default function MvtoEmpleadosPage() {
   const handleAddMvto = (empleado: Employee) => {
     form.reset({
       empleado_id: empleado.id,
-      fecha_movimiento: new Date().toISOString().split("T")[0],
       tipo_movimiento: "deuda",
-      debe: 0,
-      haber: 0,
+      movimientos: [
+        {
+          fecha_movimiento: new Date().toISOString().split("T")[0],
+          concepto: "",
+          importe: 0,
+        },
+      ],
+      eliminados: [],
     });
+    form.clearErrors();
     openModal("form", {
       component: MvtoModal,
       props: {

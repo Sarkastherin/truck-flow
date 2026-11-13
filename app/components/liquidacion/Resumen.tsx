@@ -6,7 +6,7 @@ import { useTableExport, type TableColumn } from "react-data-table-component";
 import TableComponent from "~/components/TableComponentNew";
 import { formatCurrency } from "~/utils/formats";
 import type { Fichada, Reporte } from "~/types/liquidaciones";
-import { Button } from "flowbite-react";
+import { Badge, Button } from "flowbite-react";
 import { FaCopy, FaDownload } from "react-icons/fa6";
 import { FaCirclePlus } from "react-icons/fa6";
 import MvtoModal from "../modals/customs/MvtoEmpleadoModal";
@@ -20,6 +20,12 @@ const getResumenColumns = (
     id: "empleado",
     name: "Empleado",
     selector: (row) => row.empleado.nombre_completo,
+    cell: (row) => (
+      <div className="flex items-center gap-2">
+        <span>{row.empleado.nombre_completo}</span>
+        {row.empleado.grupo && <Badge>{row.empleado.grupo}</Badge>}
+      </div>
+    ),
     sortable: true,
     pinned: "left",
     minWidth: "250px",
@@ -232,7 +238,7 @@ const getResumenColumns = (
         <span className={`${row.descuento > 0 ? "text-green-600" : ""}`}>
           {formatCurrency(row.descuento)}
         </span>
-        <FaCirclePlus className="text-green-500"/>
+        <FaCirclePlus className="text-green-500" />
       </button>
     ),
     format: (row) => {
@@ -310,25 +316,50 @@ export default function Resumen({
   const { openModal } = useModal();
   const { premios, isLoading, employees, saldoEmpleados } = useRRHH();
   const handleOpenPago = (empleado: Employee, mvtoData?: MvtoEmpleados) => {
-    const defaultvalues = mvtoData
-      ? mvtoData
-      : {
-          empleado_id: empleado.id,
-          liquidacion_id: liquidacionId,
-          concepto: "Descuento semanal",
-          fecha_movimiento: new Date().toISOString().split("T")[0],
-          tipo_movimiento: "pago",
-          debe: 0,
-          haber: 0,
-        };
-    form.reset(defaultvalues as MvtoEmpleados);
+    form.reset(
+      mvtoData
+        ? {
+            empleado_id: mvtoData.empleado_id || empleado.id,
+            liquidacion_id: mvtoData.liquidacion_id,
+            tipo_movimiento: mvtoData.tipo_movimiento,
+            created_at: mvtoData.created_at,
+            created_by: mvtoData.created_by,
+            updated_at: mvtoData.updated_at,
+            updated_by: mvtoData.updated_by,
+            movimientos: [
+              {
+                id: mvtoData.id,
+                fecha_movimiento: mvtoData.fecha_movimiento,
+                concepto: mvtoData.concepto,
+                importe:
+                  mvtoData.tipo_movimiento === "deuda"
+                    ? Number(mvtoData.debe) || 0
+                    : Number(mvtoData.haber) || 0,
+              },
+            ],
+            eliminados: [],
+          }
+        : {
+            empleado_id: empleado.id,
+            liquidacion_id: liquidacionId,
+            tipo_movimiento: "pago" as const,
+            movimientos: [
+              {
+                fecha_movimiento: new Date().toISOString().split("T")[0],
+                concepto: "Descuento semanal",
+                importe: 0,
+              },
+            ],
+            eliminados: [],
+          },
+    );
     form.clearErrors();
     openModal("form", {
       component: MvtoModal,
       props: {
         title: `Descuento a: ${empleado.nombre_completo}`,
         form,
-        size: "2xl",
+        size: "3xl",
         tipoMovimiento: mvtoData ? mvtoData.tipo_movimiento : "pago",
       },
       onSubmit: mvtoData
@@ -429,8 +460,12 @@ export default function Resumen({
           labelButton=""
           hasActiveColumn={false}
           storageKey={`liquidacion_${liquidacionId}_resumen`}
-          searchKeys={["empleado.nombre_completo", "empleado.dni"]}
-          searchPlaceholder="Buscar por nombre o DNI"
+          searchKeys={[
+            "empleado.nombre_completo",
+            "empleado.dni",
+            "empleado.grupo",
+          ]}
+          searchPlaceholder="Buscar por nombre, DNI o grupo"
           scrollHeightOffset={360}
           customTheme={{
             typography: { fontSize: "12px", fontSizeHeader: "13px" },

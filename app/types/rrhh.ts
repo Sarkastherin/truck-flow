@@ -13,6 +13,12 @@ export const optionsTipoPago: { value: TipoPago; label: string }[] = [
   { value: "Salario semanal", label: "Salario semanal" },
   { value: "Salario mensual", label: "Salario mensual" },
 ];
+
+export const optionsGrupos: { value: string; label: string; color: string }[] = [
+  { value: "Cacho", label: "Cacho", color: "indigo" },
+  { value: "Pintura", label: "Pintura", color: "yellow" },
+  { value: "Boio", label: "Boio", color: "lime" },
+];
 export type AreasType =
   | "soldador"
   | "colocacion"
@@ -114,19 +120,32 @@ export type PremiosFormValues = Omit<Premios, keyof CommonTypes> & {
 };
 export type MvtoEmpleados = CommonTypes & {
   empleado_id: string;
-  liquidacion_id?:string;
+  liquidacion_id?: string;
   fecha_movimiento: string;
   tipo_movimiento: "deuda" | "pago";
   concepto: string;
   debe: number;
   haber: number;
 };
-export type MvtoEmpleadosFormValues = Omit<MvtoEmpleados, keyof CommonTypes> & {
+export type MvtoEmpleadoRowFormValues = {
   id?: string;
-  active?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  fecha_movimiento: string;
+  concepto: string;
+  importe: number;
 };
+export type MvtoEmpleadosFormValues = {
+  empleado_id: string;
+  liquidacion_id?: string;
+  tipo_movimiento: "deuda" | "pago";
+  created_at?: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+  movimientos: MvtoEmpleadoRowFormValues[];
+  eliminados?: string[];
+};
+export type MvtoEmpleadosPayload = Omit<MvtoEmpleados, keyof CommonTypes> &
+  Partial<CommonTypes>;
 export type CtaCteEmpleados = {
   empleado: Employee;
   debe: number;

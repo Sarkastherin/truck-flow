@@ -12,8 +12,9 @@ import { calcularResumenLiquidacion } from "~/utils/liquidacionCalculos";
 import { useModal } from "~/context/ModalContext";
 import type { TableColumn } from "react-data-table-component";
 import TableComponent from "~/components/TableComponentNew";
-import { formatDni, type Employee } from "~/types/rrhh";
+import { formatDni, optionsGrupos, type Employee } from "~/types/rrhh";
 import { formatCurrency } from "~/utils/formats";
+import { Button } from "flowbite-react";
 const produccionColumns: TableColumn<LiquidacionResumen>[] = [
   {
     id: "empleado",
@@ -67,7 +68,8 @@ export default function Reportes({
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
 }) {
-  const { premios, isLoading, CUDReportes, employees, saldoEmpleados } = useRRHH();
+  const { premios, isLoading, CUDReportes, employees, saldoEmpleados } =
+    useRRHH();
 
   const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
     null,
@@ -224,16 +226,25 @@ export default function Reportes({
         message={
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <button
-                className="text-sm border px-1.5 rounded border-primary-500 text-primary-500 font-semibold hover:bg-primary-500 hover:text-white cursor-pointer transition-all font-mono"
-                onClick={() =>
-                  setSelected(
-                    resumen.filter((res) => res.empleado.grupo === "Cacho"),
-                  )
-                }
-              >
-                Grupo: Cacho
-              </button>
+              {optionsGrupos.map((grupo) => {
+                const color = `border-${grupo.color}-500 text-${grupo.color}-500 hover:bg-${grupo.color}-500`
+                return (
+                  <Button
+                    size="xs"
+                    onClick={() =>
+                      setSelected(
+                        resumen.filter(
+                          (res) => res.empleado.grupo === grupo.value,
+                        ),
+                      )
+                    }
+                    color={grupo.color}
+                  >
+                    Grupo: {grupo.label}
+                  </Button>
+                );
+              })}
+
               <button
                 className="text-sm border px-1.5 rounded border-base-500 text-base-500 font-semibold hover:bg-base-500 hover:text-white cursor-pointer transition-all font-mono"
                 onClick={() => {

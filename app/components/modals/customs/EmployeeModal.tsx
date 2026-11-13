@@ -11,6 +11,7 @@ import InfoFieldsComponent from "~/components/InfoFieldsComponent";
 import {
   optionsTipoPago,
   optionsAreas,
+  optionsGrupos,
   type Employee,
   optionsSeguro,
   optionsvehiculo,
@@ -68,10 +69,8 @@ export default function EmployeeModal({ props }: { props: Props }) {
       <Select
         label="Grupo"
         {...register("grupo")}
-        options={[
-          {value: "Cacho", label: "Cacho"},
-          {value: "No aplica", label: "No aplica"}
-        ]}
+        options={optionsGrupos}
+        emptyOption="No Aplica"
       />
       <Select
         label="Tipo de contrato"

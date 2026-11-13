@@ -27,6 +27,7 @@ import type {
   Employee,
   Premios,
   MvtoEmpleados,
+  MvtoEmpleadosPayload,
   CtaCteEmpleados,
 } from "~/types/rrhh";
 import type { Fichada, Liquidacion, Reporte } from "~/types/liquidaciones";
@@ -54,6 +55,10 @@ type RRHHContextType = {
   updateMvtoEmpleado: UpdateGlobalMethod<MvtoEmpleados>;
   removeMvtoEmpleado: ToggleConfigMethod;
   reactivateMvtoEmpleado: ToggleConfigMethod;
+  CUDMvtoEmpleados: (
+    movimientos: MvtoEmpleadosPayload[],
+    deletedIds: string[],
+  ) => Promise<CrudGlobalResponse>;
   /* Liquidaciones */
   liquidaciones: Liquidacion[];
   createNewLiquidacion: CreateGlobalMethod<Liquidacion>;
@@ -282,7 +287,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
     async <T extends { id?: string }>(
       entities: T[],
       deletedIds: string[],
-      sheetKey: "fichadas" | "reportes",
+      sheetKey: "fichadas" | "reportes" | "mvto_empleados",
       entityLabel: string,
       successMessage: string,
     ) => {
@@ -339,6 +344,17 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       ),
     [CUDSueldosEntities],
   );
+  const CUDMvtoEmpleados = useCallback(
+    (movimientos: MvtoEmpleadosPayload[], deletedIds: string[]) =>
+      CUDSueldosEntities(
+        movimientos,
+        deletedIds,
+        "mvto_empleados",
+        "movimiento de empleado",
+        "Movimientos guardados exitosamente",
+      ),
+    [CUDSueldosEntities],
+  );
   const isDNIRegistered = useCallback(
     (dni: string | number) => {
       return employees.some((employee) => employee.dni === dni);
@@ -367,6 +383,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         updateMvtoEmpleado,
         removeMvtoEmpleado,
         reactivateMvtoEmpleado,
+        CUDMvtoEmpleados,
         liquidaciones,
         createNewLiquidacion,
         updateLiquidacion,

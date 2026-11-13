@@ -207,8 +207,8 @@ export default function Reportes({
           setGrupoEmpleados([]);
           setSelectedEmpleado(row.empleado);
         }}
-        searchKeys={["empleado.nombre_completo", "empleado.dni"]}
-        searchPlaceholder="Buscar por nombre o DNI"
+        searchKeys={["empleado.nombre_completo", "empleado.dni", "empleado.grupo"]}
+        searchPlaceholder="Buscar por nombre, DNI o grupo"
         scrollHeightOffset={360}
         selectableRows
         selectedRows={selected}

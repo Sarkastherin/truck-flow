@@ -70,8 +70,15 @@ export default function Reportes({
   reportesGuardados: Reporte[];
   readOnly?: boolean;
 }) {
-  const { premios, isLoading, CUDReportes, employees, saldoEmpleados } =
-    useRRHH();
+  const {
+    premios,
+    isLoading,
+    CUDReportes,
+    employees,
+    saldoEmpleados,
+    liquidaciones,
+    historial,
+  } = useRRHH();
 
   const [selectedEmpleado, setSelectedEmpleado] = useState<Employee | null>(
     null,
@@ -89,8 +96,18 @@ export default function Reportes({
       fichadas: fichadasGuardadas,
       reportes: reportesGuardados,
       saldoEmpleados,
+      liquidaciones,
+      historial,
     });
-  }, [liquidacion, employees, premios, fichadasGuardadas, reportesGuardados]);
+  }, [
+    liquidacion,
+    employees,
+    premios,
+    fichadasGuardadas,
+    reportesGuardados,
+    liquidaciones,
+    historial,
+  ]);
   const handleSelectGroup = () => {
     setSelectedEmpleado(null);
     setGrupoEmpleados(selected.map((row) => row.empleado));

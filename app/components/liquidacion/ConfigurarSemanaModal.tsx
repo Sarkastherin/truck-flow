@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import {
-  Button,
-  ToggleSwitch,
-} from "flowbite-react";
+import { Button, ToggleSwitch as FBToggleSwitch } from "flowbite-react";
 import { Modal } from "~/components/modals/ModalBase";
 import { Input } from "~/components/InputsForm";
 import type { Liquidacion } from "~/types/liquidaciones";
@@ -15,11 +12,13 @@ import {
   parseFechasISO,
   serializeFechasISO,
 } from "~/utils/liquidacionCalculos";
+import { ToggleSwitch } from "~/components/InputsForm";
 
 const DIAS_CORTOS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export type ConfigSemanaValues = {
-  horas_semanales: number;
+  //horas_semanales: number;
+  bono_quincenal: boolean;
   dias_lluvia: string;
   dias_no_laborables: string;
 };
@@ -37,14 +36,14 @@ export default function ConfigurarSemanaModal({
   onSave: (config: ConfigSemanaValues) => void;
   onClose: () => void;
 }) {
-  const [horas, setHoras] = useState(String(HORAS_SEMANALES_DEFAULT));
+  const [bonoQuincenal, setBonoQuincenal] = useState<boolean>(false);
   const [lluvia, setLluvia] = useState<Set<string>>(new Set());
   const [noLaborables, setNoLaborables] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!show || !liquidacion) return;
     const value = Number(liquidacion.horas_semanales);
-    setHoras(String(value > 0 ? value : HORAS_SEMANALES_DEFAULT));
+    setBonoQuincenal(liquidacion.bono_quincenal);
     setLluvia(new Set(parseFechasISO(liquidacion.dias_lluvia)));
     setNoLaborables(new Set(parseFechasISO(liquidacion.dias_no_laborables)));
   }, [show, liquidacion]);
@@ -69,9 +68,10 @@ export default function ConfigurarSemanaModal({
   };
 
   const handleSave = () => {
-    const value = Number(horas);
+    const value = bonoQuincenal;
     onSave({
-      horas_semanales: value > 0 ? value : HORAS_SEMANALES_DEFAULT,
+      bono_quincenal: value ?? false,
+      //horas_semanales: value > 0 ? value : HORAS_SEMANALES_DEFAULT,
       dias_lluvia: serializeFechasISO([...lluvia]),
       dias_no_laborables: serializeFechasISO([...noLaborables]),
     });
@@ -96,7 +96,15 @@ export default function ConfigurarSemanaModal({
     >
       <div className="space-y-4">
         <div>
-          <Input
+          <ToggleSwitch
+          id="bono_quincenal"
+          label={`${liquidacion?.bono_quincenal ? "✅ Con bono quincenal" : "❌ No aplica bono quincenal"}`}
+          value={bonoQuincenal}
+          onCustumChange={(checked) => {
+            setBonoQuincenal(checked)
+          }}
+          ></ToggleSwitch>
+          {/* <Input
             label="Horas semanales"
             type="number"
             step="0.5"
@@ -108,7 +116,7 @@ export default function ConfigurarSemanaModal({
           />
           <p className="mt-1 text-xs text-base-500 dark:text-base-400">
             Ajustá el total si hay feriados u otros días no laborables
-          </p>
+          </p> */}
         </div>
         <div className="rounded-lg border border-base-200 bg-base-50 p-3 dark:border-base-700 dark:bg-base-800">
           <p className="mb-1 text-sm font-semibold text-base-700 dark:text-base-200">
@@ -139,14 +147,14 @@ export default function ConfigurarSemanaModal({
                     )}
                   </span>
                   <span className="flex shrink-0 items-center gap-4">
-                    <ToggleSwitch
+                    <FBToggleSwitch
                       checked={lluvia.has(iso)}
                       onChange={() => toggleSet(setLluvia, iso)}
                       label="Lluvia"
                       sizing="sm"
                       disabled={finDeSemana || isSaving}
                     />
-                    <ToggleSwitch
+                    <FBToggleSwitch
                       checked={noLaborables.has(iso)}
                       onChange={() => toggleSet(setNoLaborables, iso)}
                       label="No laborable"

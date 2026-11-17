@@ -1,6 +1,7 @@
 import type {
   Fichada,
   Liquidacion,
+  LiquidacionHistorial,
   LiquidacionHistorialInput,
   LiquidacionResumen,
   Reporte,
@@ -204,6 +205,8 @@ export function calcularResumenLiquidacion({
   fichadas,
   reportes,
   saldoEmpleados,
+  liquidaciones = [],
+  historial = [],
 }: {
   liquidacion: Liquidacion;
   employees: Employee[];
@@ -211,6 +214,8 @@ export function calcularResumenLiquidacion({
   fichadas: Fichada[];
   reportes: Reporte[];
   saldoEmpleados: CtaCteEmpleados[];
+  liquidaciones?: Liquidacion[];
+  historial?: LiquidacionHistorial[];
 }): LiquidacionResumen[] {
   const horasSemanales = getHorasSemanales(liquidacion);
   const diasLluvia = new Set(parseFechasISO(liquidacion.dias_lluvia));
@@ -224,6 +229,27 @@ export function calcularResumenLiquidacion({
     noLaborables,
   );
   const premioById = new Map(premios.map((premio) => [premio.id, premio]));
+
+  // Bono quincenal: incorpora las faltas de la liquidación anterior (semana
+  // previa) para el grupo Cacho, donde las faltas afectan el pago del bono.
+  // La anterior es la de mayor "hasta" anterior al "desde" actual; si no fue
+  // completada (no tiene filas en el historial) no hay nada que acumular.
+  const historialPreviaByEmpleado = new Map<string, LiquidacionHistorial>();
+  if (liquidacion.bono_quincenal) {
+    const liquidacionPrevia = liquidaciones
+      .filter((liq) => liq.id !== liquidacion.id && liq.hasta < liquidacion.desde)
+      .sort((a, b) => b.hasta.localeCompare(a.hasta))[0];
+    if (liquidacionPrevia) {
+      for (const row of historial) {
+        if (
+          row.liquidacion_id === liquidacionPrevia.id &&
+          row.active !== false
+        ) {
+          historialPreviaByEmpleado.set(row.empleado_id, row);
+        }
+      }
+    }
+  }
 
   const base = employees
     .filter((empleado) => empleado.active !== false)
@@ -251,11 +277,31 @@ export function calcularResumenLiquidacion({
       const montoSalarioRegular =
         horasPagadas < horasSemanales ? horasPagadas * vhr : salarioSemanal;
       const montoSalarioExtra = horasExtras * vhe;
-      const cumplimiento = calcularCumplimiento(
+      const cumplimientoBase = calcularCumplimiento(
         fichadasEmp,
         diasLaborables,
         diasLluvia,
       );
+      // Bono quincenal (solo Cacho): suma las faltas/tardanzas/salidas
+      // tempranas de la liquidación anterior al cumplimiento de esta semana
+      const prevRow =
+        empleado.grupo === "Cacho"
+          ? historialPreviaByEmpleado.get(empleado.id)
+          : undefined;
+      const cumplimiento = prevRow
+        ? {
+            ...cumplimientoBase,
+            faltas: cumplimientoBase.faltas + (Number(prevRow.faltas) || 0),
+            tardanzas:
+              cumplimientoBase.tardanzas + (Number(prevRow.tardanzas) || 0),
+            salidasTempranas:
+              cumplimientoBase.salidasTempranas +
+              (Number(prevRow.sal_temprano) || 0),
+            diasIncumplidos:
+              cumplimientoBase.diasIncumplidos +
+              (Number(prevRow.perdidos) || 0),
+          }
+        : cumplimientoBase;
       let carrocerias = 0;
       let montoCarrocerias = 0;
       let montoOtros = 0;
@@ -263,7 +309,7 @@ export function calcularResumenLiquidacion({
         const premio = premioById.get(rep.premio_id);
         const precio = Number(premio?.precio) || 0;
         const cantidad = Number(rep.cantidad) || 0;
-        if (premio?.tipo === "carroceria") {
+        if (premio?.tipo === "bono_quicenal") {
           carrocerias += cantidad;
           montoCarrocerias += precio * cantidad;
         } else {

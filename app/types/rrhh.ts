@@ -105,7 +105,7 @@ export type SectorTypes =
   | "plegado"
   | "control"
   | "no_definido";
-export type TipoType = "carroceria" | "accesorios";
+export type TipoType = "carroceria" | "accesorios" | "bono_quicenal";
 export type Premios = CommonTypes & {
   nombre: string;
   precio: number;

@@ -30,6 +30,7 @@ export type Liquidacion = CommonTypes & {
   hasta: string;
   status: StatusLiquidacion;
   horas_semanales: number | null;
+  bono_quincenal:boolean;
   dias_lluvia: string | null;
   dias_no_laborables: string | null;
   fichada?: Fichada[];

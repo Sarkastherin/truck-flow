@@ -2,7 +2,14 @@ import { useMemo, useState, useRef } from "react";
 import type { Route } from "../../+types/home";
 import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
-import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
+import {
+  Badge,
+  Button,
+  Card,
+  TabItem,
+  Tabs,
+  type TabsRef,
+} from "flowbite-react";
 import { LuArrowRight, LuCalendarDays, LuCheckCheck, LuSettings2 } from "react-icons/lu";
 import type { Liquidacion, LiquidacionResumen } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
@@ -40,6 +47,7 @@ export default function Liquidacion() {
     employees,
     premios,
     saldoEmpleados,
+    historial,
     CUDHistorial,
   } = useRRHH();
   const { liquidacionId } = useParams();
@@ -100,7 +108,7 @@ export default function Liquidacion() {
       const result = await updateLiquidacion(
         { ...liquidacion, ...config } as Liquidacion,
         {
-          horas_semanales: true,
+          bono_quincenal: true,
           dias_lluvia: true,
           dias_no_laborables: true,
         } as DirtyMap<Liquidacion>,
@@ -218,6 +226,8 @@ export default function Liquidacion() {
       fichadas: fichadasGuardadas,
       reportes: reportesGuardados,
       saldoEmpleados,
+      liquidaciones,
+      historial,
     });
     if (resumen.length === 0) {
       openModal("error", {
@@ -233,7 +243,7 @@ export default function Liquidacion() {
       props: {
         title: "Completar liquidación",
         message:
-          "Se guardará el resumen en el historial y la liquidación quedará como Completada. Esta acción no se puede deshacer.",
+          "Se guardará el resumen en el historial y la liquidación quedará como Completada. Esta acción se puede deshacer desde el historial.",
         confirmText: "Completar liquidación",
         cancelText: "Cancelar",
         onConfirm: () => void ejecutarCompletar(resumen),
@@ -255,6 +265,14 @@ export default function Liquidacion() {
                   {formatDateUStoES(liquidacion.desde)}
                   <LuArrowRight className="size-3.5 shrink-0 text-base-400" />
                   {formatDateUStoES(liquidacion.hasta)}
+                  <Badge
+                    color={liquidacion.bono_quincenal ? "purple" : "gray"}
+                    className="ms-1"
+                  >
+                    {liquidacion.bono_quincenal
+                      ? "Bono quincenal"
+                      : "Semanal"}
+                  </Badge>
                 </span>
                 <span className="text-xs text-base-500 dark:text-base-400">
                   {dias

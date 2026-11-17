@@ -71,7 +71,8 @@ export default function PremiosModal({ props }: { props: Props }) {
         requiredField
         options={[
           {value: "carroceria", label: "Carrocería"},
-          {value: "accesorios", label: "Accesorios"}
+          {value: "accesorios", label: "Accesorios"},
+          {value: "bono_quicenal", label: "Bono Quincenal"}
         ]}
       />
       <div className="col-span-2 mt-2">

@@ -1,5 +1,5 @@
 import { type UseFormReturn } from "react-hook-form";
-import { Input } from "~/components/InputsForm";
+import { Input, ToggleSwitch } from "~/components/InputsForm";
 import { type LiquidacionFormValues } from "~/types/liquidaciones";
 
 interface Props {
@@ -12,11 +12,13 @@ export default function LiquidacionModal({ props }: { props: Props }) {
   const { form } = props;
   const {
     register,
+    watch,
+    setValue,
     formState: { errors },
   } = form;
   return (
     <fieldset
-      className="grid grid-cols-3 flex-col gap-2"
+      className="grid grid-cols-2 flex-col gap-2"
       disabled={form.formState.isSubmitting}
     >
       <Input
@@ -35,20 +37,19 @@ export default function LiquidacionModal({ props }: { props: Props }) {
         })}
         error={errors.hasta?.message}
       />
-      <Input
-        label="Horas semanales"
-        type="number"
-        step="0.5"
-        min={1}
-        allowDecimal
-        {...register("horas_semanales", {
-          required: "Debe ingresar las horas semanales",
-          valueAsNumber: true,
-          min: { value: 1, message: "Mínimo 1" },
-        })}
-        error={errors.horas_semanales?.message}
-        disabled
-      />
+      <div className="col-span-full mt-2">
+        <ToggleSwitch
+          id="bono_quincenal"
+          label={`${watch("bono_quincenal") ? "✅ Con bono quincenal" : "❌ No aplica bono quincenal"}`}
+          value={watch("bono_quincenal")}
+            onCustumChange={(checked) => {
+              setValue("bono_quincenal", checked, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
+        />
+      </div>
     </fieldset>
   );
 }

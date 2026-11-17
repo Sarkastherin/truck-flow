@@ -322,7 +322,8 @@ export default function Resumen({
   const { form, onCreate, onUpdate, onDelete, onReactivate } =
     useMvtoEmpleado();
   const { openModal } = useModal();
-  const { premios, isLoading, employees, saldoEmpleados } = useRRHH();
+  const { premios, isLoading, employees, saldoEmpleados, liquidaciones, historial } =
+    useRRHH();
   const handleOpenPago = (empleado: Employee, mvtoData?: MvtoEmpleados[]) => {
     const movimientosMvto = mvtoData ?? [];
     const primerMvto = movimientosMvto[0];
@@ -387,6 +388,8 @@ export default function Resumen({
       fichadas: fichadasGuardadas,
       reportes: reportesGuardados,
       saldoEmpleados,
+      liquidaciones,
+      historial,
     });
   }, [
     liquidacion,
@@ -395,6 +398,8 @@ export default function Resumen({
     fichadasGuardadas,
     reportesGuardados,
     pendientesSalida,
+    liquidaciones,
+    historial,
   ]);
   const totalesResumen = useMemo(
     () => ({

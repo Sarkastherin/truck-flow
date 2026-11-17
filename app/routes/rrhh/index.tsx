@@ -38,6 +38,7 @@ export default function RRHH() {
       hasta: "",
       status: "nueva",
       horas_semanales: HORAS_SEMANALES_DEFAULT,
+      bono_quincenal: false,
       dias_lluvia: "",
       dias_no_laborables: "",
     });

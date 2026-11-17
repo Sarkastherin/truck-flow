@@ -1,5 +1,6 @@
 import type { CommonTypes } from "./commonTypes";
 import type { SocioComercial } from "./socios";
+import type { ChequeAction } from "~/utils/chequeStateMachine";
 export const optionMediosPago = [
   { value: "efectivo", label: "Efectivo", tipoMovimiento: ["pago"] },
   { value: "transferencia", label: "Transferencia", tipoMovimiento: ["pago"] },
@@ -117,6 +118,12 @@ export type ChequeConSociosYMovimiento = CommonTypes &
     cliente: SocioComercial;
     movimiento: Movimientos;
   };
+export type BulkChequeActionValues = {
+  accion: ChequeAction | "";
+  fecha: string;
+  motivo: string;
+  proveedor_id: string;
+};
 export type Documento = CommonTypes & {
   movimiento_id: string;
   nombre: string;

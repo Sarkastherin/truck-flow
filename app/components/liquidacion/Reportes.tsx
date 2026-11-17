@@ -191,9 +191,7 @@ export default function Reportes({
     setSelectedEmpleado(null);
     setGrupoEmpleados([]);
   };
-  const handleRowClick = (row: LiquidacionResumen) => {
-    openModal("form", {});
-  };
+
   return (
     <>
       <TableComponent

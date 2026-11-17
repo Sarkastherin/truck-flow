@@ -6,7 +6,7 @@ import {
   TableHeadCell,
   TableCell,
 } from "flowbite-react";
-import type { Employee, MvtoEmpleados } from "~/types/rrhh";
+import type { MvtoEmpleados } from "~/types/rrhh";
 import { formatCurrency } from "~/utils/formats";
 
 export default function ShowSaldosModal({

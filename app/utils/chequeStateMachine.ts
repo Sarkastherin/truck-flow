@@ -9,7 +9,7 @@ type ChequeStatus =
   | 'acreditado';
 
 // Acciones posibles sobre el cheque
-type ChequeAction =
+export type ChequeAction =
   | 'endosar'
   | 'anularEndoso'
   | 'depositar'

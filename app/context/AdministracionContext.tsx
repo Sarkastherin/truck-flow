@@ -69,6 +69,14 @@ type AdministracionContextType = {
     cheque: Cheque,
     dirtyFields: DirtyMap<Cheque>,
   ) => Promise<CrudResponse>;
+  CUDCheques: (
+    cheques: Cheque[],
+    deletedIds: string[],
+  ) => Promise<CrudResponse>;
+  CUDMovimientos: (
+    movimientos: Movimientos[],
+    deletedIds: string[],
+  ) => Promise<CrudResponse>;
   createNewMovimiento: CreateGlobalMethod<MovimientoDetalle>;
   isCHEQUERegistered: (numeroCheque: number, cliente_id: string) => boolean;
   anularPago: (
@@ -307,6 +315,24 @@ export const AdministracionProvider = ({
         sheetId: SHEET_ID_CTAS_CORRIENTES,
         sheetName: SHEET_NAMES_CTAS_CORRIENTES.documentos,
         successMessage: "Documentos actualizados exitosamente",
+        onGetData: getAdministracionData,
+        activeUser: activeUser!!,
+        nameColId: "id"
+      });
+    },
+    [cudGlobalFieldsArrayEntities, getAdministracionData, paramsFromSheets],
+  );
+  const CUDMovimientos = useCallback(
+    async (movimientos: Movimientos[], deletedIds: string[]) => {
+      return cudGlobalFieldsArrayEntities({
+        entities: movimientos,
+        deletedIds,
+        sheetKey: "movimientos",
+        entityLabel: "movimiento",
+        paramsFromSheets,
+        sheetId: SHEET_ID_CTAS_CORRIENTES,
+        sheetName: SHEET_NAMES_CTAS_CORRIENTES.movimientos,
+        successMessage: "Movimientos creados exitosamente",
         onGetData: getAdministracionData,
         activeUser: activeUser!!,
         nameColId: "id"
@@ -568,6 +594,8 @@ export const AdministracionProvider = ({
         createMovimiento,
         updateMovimientoAndDocumentos,
         updateCheque,
+        CUDCheques,
+        CUDMovimientos,
         createNewMovimiento,
         isCHEQUERegistered,
         anularPago,

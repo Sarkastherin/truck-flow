@@ -361,13 +361,13 @@ export default function PedidosHome() {
       <TableComponent
         columns={columns}
         data={cheques || []}
-        searchKeys={["cliente.razon_social"]}
+        searchKeys={["cliente.razon_social", "tipo", "banco", "numero", "importe", "cliente.razon_social", "proveedor.razon_social", "status"]}
         onRowClicked={handleRowClick}
         isLoading={false}
         title={"Cheques"}
         backPath="/administracion"
         color={"green"}
-        searchPlaceholder="Buscar por cliente"
+        searchPlaceholder="Buscar por cliente, tipo, banco, número, importe, origen, destino y estado"
         scrollHeightOffset={210}
         labelButton=""
         message={

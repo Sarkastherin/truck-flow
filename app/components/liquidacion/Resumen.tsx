@@ -15,6 +15,7 @@ import type { Employee, MvtoEmpleados } from "~/types/rrhh";
 import { useModal } from "~/context/ModalContext";
 const getResumenColumns = (
   handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados[]) => void,
+  readOnly = false,
 ): TableColumn<LiquidacionResumen>[] => [
   {
     id: "empleado",
@@ -230,17 +231,22 @@ const getResumenColumns = (
     id: "descuento",
     name: "Descuento",
     selector: (row) => row.descuento,
-    cell: (row) => (
-      <button
-        className="flex justify-between items-center w-full cursor-pointer hover:bg-gray-100"
-        onClick={() => handleOpenPago(row.empleado, row.mvtoDescuento)}
-      >
+    cell: (row) =>
+      readOnly ? (
         <span className={`${row.descuento > 0 ? "text-green-600" : ""}`}>
           {formatCurrency(row.descuento)}
         </span>
-        <FaCirclePlus className="text-green-500" />
-      </button>
-    ),
+      ) : (
+        <button
+          className="flex justify-between items-center w-full cursor-pointer hover:bg-gray-100"
+          onClick={() => handleOpenPago(row.empleado, row.mvtoDescuento)}
+        >
+          <span className={`${row.descuento > 0 ? "text-green-600" : ""}`}>
+            {formatCurrency(row.descuento)}
+          </span>
+          <FaCirclePlus className="text-green-500" />
+        </button>
+      ),
     format: (row) => {
       const isDecimal =
         Number.isFinite(row.descuento) && row.descuento % 1 !== 0;
@@ -305,11 +311,13 @@ export default function Resumen({
   liquidacionId,
   fichadasGuardadas,
   reportesGuardados,
+  readOnly = false,
 }: {
   liquidacion?: Liquidacion;
   liquidacionId?: string;
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
+  readOnly?: boolean;
 }) {
   const { form, onCreate, onUpdate, onDelete, onReactivate } =
     useMvtoEmpleado();
@@ -368,7 +376,7 @@ export default function Resumen({
         : form.handleSubmit(onCreate),
     });
   };
-  const columns = getResumenColumns(handleOpenPago);
+  const columns = getResumenColumns(handleOpenPago, readOnly);
   const pendientesSalida = fichadasGuardadas.filter((f) => !f.salida).length;
   const resumen: LiquidacionResumen[] = useMemo(() => {
     if (!liquidacion || pendientesSalida > 0) return [];

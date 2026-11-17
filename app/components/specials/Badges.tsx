@@ -55,8 +55,7 @@ const statusLiquidacionColor: {
   [key in StatusLiquidacion]: BadgeProps["color"];
 } = {
   nueva: "blue",
-  en_proceso: "yellow",
-  cerrada: "green",
+  completada: "green",
 };
 export const BadgeStatusCheque = ({ status }: { status: string }) => {
   const label =

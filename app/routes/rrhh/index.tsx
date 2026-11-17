@@ -1,6 +1,7 @@
 import type { Route } from "../+types/home";
-import { Card, Button } from "flowbite-react";
+import { Card } from "flowbite-react";
 import { NavLink, useNavigate } from "react-router";
+import { LuClock, LuFilePlus, LuHistory } from "react-icons/lu";
 import { useNavItems } from "~/hooks/useNavItems";
 import { SubTitles } from "~/components/SubTitles";
 import { GrupoDeRrhhIcon } from "~/components/icons/GrupoDeRrhhIcon";
@@ -13,7 +14,6 @@ import { LoadingComponent } from "~/components/LoadingComponent";
 import { SeleccionarLiquidacionModal } from "~/components/modals/customs/SeleccionarLiquidacionModal";
 import type { Liquidacion } from "~/types/liquidaciones";
 import { HORAS_SEMANALES_DEFAULT } from "~/utils/liquidacionCalculos";
-//import { MODE_DEV } from "~/backend/Database/SheetsConfig";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -21,7 +21,6 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Recursos Humanos" },
   ];
 }
-const MODE_DEV = true
 export default function RRHH() {
   const navigate = useNavigate();
   const { rrhhItems } = useNavItems();
@@ -84,24 +83,76 @@ export default function RRHH() {
           color: "text-purple-600 dark:text-purple-400",
         }}
       />
-      {MODE_DEV && (
-        <Card className="mt-6">
-          <div className="grid grid-cols-3 gap-6">
-            <Button onClick={handleCreateLiquidacion}>
-              Nueva liquidación
-            </Button>
-            <Button onClick={handleOpenSearchLiquidacionModal} color="light">
-              Liquidación en proceso
-            </Button>
-            <Button onClick={() => {}} color="light">
-              Historial de liquidaciones
-            </Button>
-          </div>
-        </Card>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <button type="button" onClick={handleCreateLiquidacion} className="text-left w-full">
+          <Card className="hover:shadow-2xl hover:scale-105 hover:bg-base-50 dark:hover:bg-base-800 transition-all duration-200 h-full cursor-pointer">
+            <div className="flex items-center gap-4">
+              <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-500/30">
+                <LuFilePlus className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-semibold text-base-800 dark:text-base-100">
+                  Nueva liquidación
+                </h2>
+                <p className="text-sm text-base-500 dark:text-base-400">
+                  Crea y configura un nuevo periodo
+                </p>
+              </div>
+            </div>
+          </Card>
+        </button>
+        <button
+          type="button"
+          onClick={handleOpenSearchLiquidacionModal}
+          className="text-left w-full"
+        >
+          <Card className="hover:shadow-2xl hover:scale-105 hover:bg-base-50 dark:hover:bg-base-800 transition-all duration-200 h-full cursor-pointer">
+            <div className="flex items-center gap-4">
+              <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-yellow-400 to-amber-500 text-white shadow-sm shadow-yellow-500/30">
+                <LuClock className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-semibold text-base-800 dark:text-base-100">
+                  Liquidación en proceso
+                </h2>
+                <p className="text-sm text-base-500 dark:text-base-400">
+                  Continuá una liquidación abierta
+                </p>
+              </div>
+            </div>
+          </Card>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/rrhh/liquidacion/historial")}
+          className="text-left w-full"
+        >
+          <Card className="hover:shadow-2xl hover:scale-105 hover:bg-base-50 dark:hover:bg-base-800 transition-all duration-200 h-full cursor-pointer">
+            <div className="flex items-center gap-4">
+              <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-green-500 to-emerald-600 text-white shadow-sm shadow-green-500/30">
+                <LuHistory className="size-5" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-semibold text-base-800 dark:text-base-100">
+                  Historial de liquidaciones
+                </h2>
+                <p className="text-sm text-base-500 dark:text-base-400">
+                  Consultá las liquidaciones completadas
+                </p>
+              </div>
+            </div>
+          </Card>
+        </button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-15 auto-rows-fr">
         {rrhhItems.map(
-          ({ path, name, description, icon: { component: Icon, color }, hidden }) => (
+          ({
+            path,
+            name,
+            description,
+            icon: { component: Icon, color },
+            hidden,
+          }) => (
             <NavLink key={path} to={path} hidden={hidden}>
               <Card className="hover:shadow-2xl hover:scale-105 hover:bg-base-50 dark:hover:bg-base-800 transition-all duration-200 h-full flex flex-col cursor-pointer">
                 <div className="flex items-center space-x-4">

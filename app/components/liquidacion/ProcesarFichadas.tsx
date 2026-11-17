@@ -104,9 +104,11 @@ function Import({
 export default function ProcesarFichadas({
   liquidacion,
   liquidacionId,
+  readOnly = false,
 }: {
   liquidacion?: Liquidacion;
   liquidacionId?: string;
+  readOnly?: boolean;
 }) {
   const { CUDFichadas, employees } = useRRHH();
   const { openModal, closeModal } = useModal();
@@ -258,13 +260,27 @@ export default function ProcesarFichadas({
   return (
     <div>
       {!hayFichadasGuardadas ? (
-        <Import
-          key={`import-${importKey}`}
-          setFichadasFile={setFichadasFile}
-          setIsLoadingImport={setIsLoadingImport}
-          onProcessed={handleOpenFromImport}
-          diasNoLaborables={diasNoLaborables}
-        />
+        readOnly ? (
+          <div
+            className="flex flex-col items-center justify-center gap-4 rounded-xl border border-base-200 bg-base-50 p-10 text-center dark:border-base-700 dark:bg-base-800"
+            style={{ minHeight: "calc(100vh - 300px)" }}
+          >
+            <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-yellow-400 to-amber-500 text-white shadow-sm">
+              <TbFileSettingsFilled className="size-6" />
+            </span>
+            <span className="font-semibold text-base-800 dark:text-base-100">
+              Sin fichadas registradas
+            </span>
+          </div>
+        ) : (
+          <Import
+            key={`import-${importKey}`}
+            setFichadasFile={setFichadasFile}
+            setIsLoadingImport={setIsLoadingImport}
+            onProcessed={handleOpenFromImport}
+            diasNoLaborables={diasNoLaborables}
+          />
+        )
       ) : (
         <div
           className="flex flex-col items-center justify-center gap-4 rounded-xl border border-base-200 bg-base-50 p-10 text-center dark:border-base-700 dark:bg-base-800"
@@ -285,7 +301,7 @@ export default function ProcesarFichadas({
             </span>
           </div>
           <Button color="yellow" onClick={handleOpenSaved}>
-            Ver y editar fichadas
+            {readOnly ? "Ver fichadas" : "Ver y editar fichadas"}
           </Button>
         </div>
       )}
@@ -305,9 +321,10 @@ export default function ProcesarFichadas({
         employees={employees}
         desde={liquidacion?.desde ?? ""}
         hasta={liquidacion?.hasta ?? ""}
-        onAddRow={handleAddFichada}
-        onDeleteRow={handleDeleteFichada}
+        onAddRow={readOnly ? undefined : handleAddFichada}
+        onDeleteRow={readOnly ? undefined : handleDeleteFichada}
         pendingDeletes={fichadasEliminadas.length}
+        readOnly={readOnly}
       />
     </div>
   );

@@ -30,7 +30,7 @@ import type {
   MvtoEmpleadosPayload,
   CtaCteEmpleados,
 } from "~/types/rrhh";
-import type { Fichada, Liquidacion, Reporte } from "~/types/liquidaciones";
+import type { Fichada, Liquidacion, Reporte, LiquidacionHistorial, LiquidacionHistorialInput } from "~/types/liquidaciones";
 import { HORAS_SEMANALES_DEFAULT } from "~/utils/liquidacionCalculos";
 type RRHHContextType = {
   getSueldosData: () => Promise<void>;
@@ -75,6 +75,15 @@ type RRHHContextType = {
     reportes: Reporte[],
     deletedIds: string[],
   ) => Promise<CrudGlobalResponse>;
+  /* Historial */
+  historial: LiquidacionHistorial[];
+  CUDHistorial: (
+    rows: LiquidacionHistorialInput[],
+    liquidacionId: string,
+  ) => Promise<CrudGlobalResponse>;
+  removeHistorialByLiquidacion: (
+    liquidacionId: string,
+  ) => Promise<CrudGlobalResponse>;
 };
 
 type HeadersType = {
@@ -84,7 +93,7 @@ type HeadersType = {
   liquidaciones: SheetCellValue[];
   fichadas: SheetCellValue[];
   reportes: SheetCellValue[];
-  //
+  historial:SheetCellValue[];
 };
 type ParamsFromSheetsData = {
   headers: HeadersType;
@@ -103,7 +112,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
   const [premios, setPremios] = useState<Premios[]>([]);
   const [saldoEmpleados, setSaldoEmpleados] = useState<CtaCteEmpleados[]>([]);
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([]);
-
+  const [historial, setHistorial] = useState<LiquidacionHistorial[]>([])
   const [paramsFromSheets, setParamsFromSheets] =
     useState<ParamsFromSheetsData | null>(null);
   const paramsFromSheetsRef = useRef<ParamsFromSheetsData | null>(null);
@@ -133,6 +142,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           liquidaciones: data[3]?.[0] || null,
           fichadas: data[4]?.[0] || null,
           reportes: data[5]?.[0] || null,
+          historial: data[6]?.[0]||null
           //
         },
         values: {
@@ -142,6 +152,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
           liquidaciones: data[3] || [],
           fichadas: data[4] || [],
           reportes: data[5] || [],
+          historial: data[6] || []
           //
         },
       };
@@ -153,6 +164,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       const liquidacionesData = getDataInJSONFormat<Liquidacion>(data[3]);
       const fichadasData = getDataInJSONFormat<Fichada>(data[4]);
       const reportesData = getDataInJSONFormat<Reporte>(data[5]);
+      const historialData = getDataInJSONFormat<LiquidacionHistorial>(data[6]);
       const employeesWithHoraTrabajo = employeesData.map((emp) => {
         const valorHoraRegular = emp.valor_salario_semanal
           ? emp.valor_salario_semanal / HORAS_SEMANALES_DEFAULT
@@ -214,6 +226,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       setPremios(premiosData);
       setSaldoEmpleados(ctasCorrientesArray);
       setLiquidaciones(combinedData);
+      setHistorial(historialData)
       setIsReady(true);
     } catch (error) {
       setIsReady(false);
@@ -287,7 +300,7 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
     async <T extends { id?: string }>(
       entities: T[],
       deletedIds: string[],
-      sheetKey: "fichadas" | "reportes" | "mvto_empleados",
+      sheetKey: "fichadas" | "reportes" | "mvto_empleados" | "historial",
       entityLabel: string,
       successMessage: string,
     ) => {
@@ -355,6 +368,109 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
       ),
     [CUDSueldosEntities],
   );
+  const CUDHistorial = useCallback(
+    async (
+      rows: LiquidacionHistorialInput[],
+      liquidacionId: string,
+    ): Promise<CrudGlobalResponse> => {
+      // Refresca para leer el estado actual de la hoja historial
+      // (guard anti-duplicado: si la liquidación ya fue archivada, no reescribe)
+      paramsFromSheetsRef.current = null;
+      await getSueldosData();
+      const params = paramsFromSheetsRef.current as ParamsFromSheetsData | null;
+      if (!params) {
+        return {
+          success: false,
+          message: "No se pudo guardar el historial",
+          error: "No se pudieron leer los datos actuales del Sheet",
+        };
+      }
+      const headersHistorial = params.headers.historial ?? [];
+      const colLiq = headersHistorial.findIndex(
+        (h) => String(h).trim().toLowerCase() === "liquidacion_id",
+      );
+      if (colLiq === -1) {
+        return {
+          success: false,
+          message: "No se pudo guardar el historial",
+          error: "La hoja historial no tiene la columna liquidacion_id",
+        };
+      }
+      const yaExiste = (params.values.historial ?? [])
+        .slice(1)
+        .some((row) => row[colLiq] === liquidacionId);
+      if (yaExiste) {
+        return {
+          success: true,
+          message: "El historial de la liquidación ya estaba guardado",
+          error: null,
+        };
+      }
+      return CUDSueldosEntities(
+        rows,
+        [],
+        "historial",
+        "registro de historial",
+        "Historial guardado exitosamente",
+      );
+    },
+    [CUDSueldosEntities, getSueldosData],
+  );
+  const removeHistorialByLiquidacion = useCallback(
+    async (liquidacionId: string): Promise<CrudGlobalResponse> => {
+      // Refresca para leer el estado actual de la hoja historial
+      paramsFromSheetsRef.current = null;
+      await getSueldosData();
+      const params = paramsFromSheetsRef.current as ParamsFromSheetsData | null;
+      if (!params) {
+        return {
+          success: false,
+          message: "No se pudo eliminar el historial",
+          error: "No se pudieron leer los datos actuales del Sheet",
+        };
+      }
+      const headersHistorial = params.headers.historial ?? [];
+      const colId = headersHistorial.findIndex(
+        (h) => String(h).trim().toLowerCase() === "id",
+      );
+      const colLiq = headersHistorial.findIndex(
+        (h) => String(h).trim().toLowerCase() === "liquidacion_id",
+      );
+      if (colId === -1 || colLiq === -1) {
+        return {
+          success: false,
+          message: "No se pudo eliminar el historial",
+          error:
+            "La hoja historial no tiene las columnas id / liquidacion_id",
+        };
+      }
+      const idsToDelete = (params.values.historial ?? [])
+        .slice(1)
+        .filter(
+          (row) =>
+            row[colLiq] === liquidacionId &&
+            row[colId] !== undefined &&
+            row[colId] !== null &&
+            row[colId] !== "",
+        )
+        .map((row) => String(row[colId]));
+      if (idsToDelete.length === 0) {
+        return {
+          success: true,
+          message: "No había registros de historial para eliminar",
+          error: null,
+        };
+      }
+      return CUDSueldosEntities(
+        [],
+        idsToDelete,
+        "historial",
+        "registro de historial",
+        "Historial eliminado exitosamente",
+      );
+    },
+    [CUDSueldosEntities, getSueldosData],
+  );
   const isDNIRegistered = useCallback(
     (dni: string | number) => {
       return employees.some((employee) => employee.dni === dni);
@@ -391,6 +507,9 @@ export const RRHHProvider = ({ children }: { children: React.ReactNode }) => {
         reactivateLiquidacion,
         CUDFichadas,
         CUDReportes,
+        historial,
+        CUDHistorial,
+        removeHistorialByLiquidacion,
       }}
     >
       {children}

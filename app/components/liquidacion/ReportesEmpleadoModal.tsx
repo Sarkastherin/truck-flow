@@ -41,6 +41,7 @@ export default function ReportesEmpleadoModal({
   isSaving,
   onSave,
   onClose,
+  readOnly = false,
 }: {
   show: boolean;
   empleado: Employee | null;
@@ -51,6 +52,7 @@ export default function ReportesEmpleadoModal({
   isSaving: boolean;
   onSave: (reportes: ReporteFormValues[], deletedIds: string[]) => void;
   onClose: () => void;
+  readOnly?: boolean;
 }) {
   const isGrupo = grupoEmpleados.length > 0;
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -249,11 +251,13 @@ export default function ReportesEmpleadoModal({
           </span>
           <div className="flex items-center gap-3">
             <Button color="alternative" onClick={onClose} disabled={isSaving}>
-              Cancelar
+              {readOnly ? "Cerrar" : "Cancelar"}
             </Button>
-            <Button color="yellow" onClick={onSubmit} disabled={isSaving}>
-              {isSaving ? "Guardando..." : "Guardar reportes"}
-            </Button>
+            {!readOnly && (
+              <Button color="yellow" onClick={onSubmit} disabled={isSaving}>
+                {isSaving ? "Guardando..." : "Guardar reportes"}
+              </Button>
+            )}
           </div>
         </div>
       }
@@ -293,18 +297,23 @@ export default function ReportesEmpleadoModal({
                 ? "No hay premios cargados. Agregá el primero para aplicarlo a todos los empleados seleccionados"
                 : "No hay reportes cargados para este empleado"}
             </p>
-            <Button
-              type="button"
-              size="sm"
-              color="light"
-              className="mx-auto"
-              onClick={handleAppend}
-            >
-              Agregar el primer reporte
-            </Button>
+            {!readOnly && (
+              <Button
+                type="button"
+                size="sm"
+                color="light"
+                className="mx-auto"
+                onClick={handleAppend}
+              >
+                Agregar el primer reporte
+              </Button>
+            )}
           </div>
         ) : (
-          <fieldset className="grid grid-cols-1 gap-4">
+          <fieldset
+            className="grid grid-cols-1 gap-4"
+            disabled={readOnly}
+          >
             <div className="relative overflow-x-auto rounded-lg shadow-md" style={{ minHeight: "calc(100vh - 400px" }}>
               <Table>
                 <colgroup>
@@ -312,7 +321,7 @@ export default function ReportesEmpleadoModal({
                   <col className="w-[1%]" />
                   <col className="w-[28%]" />
                   <col className="w-[16%]" />
-                  <col className="w-[1%]" />
+                  {!readOnly && <col className="w-[1%]" />}
                 </colgroup>
                 <TableHead className="bg-yellow-50 dark:bg-yellow-400/30">
                   <TableRow className="dark:text-white">
@@ -328,9 +337,11 @@ export default function ReportesEmpleadoModal({
                     <th scope="col" className="px-4 py-3">
                       Subtotal
                     </th>
-                    <th scope="col" className="px-4 py-3">
-                      <LuTrash2 className="mx-auto h-4 w-4" />
-                    </th>
+                    {!readOnly && (
+                      <th scope="col" className="px-4 py-3">
+                        <LuTrash2 className="mx-auto h-4 w-4" />
+                      </th>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -434,35 +445,39 @@ export default function ReportesEmpleadoModal({
                         <TableCell className="px-4 py-3 text-end text-sm font-semibold whitespace-nowrap">
                           {formatCurrency(subtotal)}
                         </TableCell>
-                        <TableCell className="ps-2 pe-4">
-                          <Button
-                            type="button"
-                            color="red"
-                            size="sm"
-                            outline
-                            className="px-2.5 py-0"
-                            onClick={() => handleRemove(index)}
-                            disabled={isSaving}
-                          >
-                            <LuTrash2 className="mx-auto size-3.5" />
-                          </Button>
-                        </TableCell>
+                        {!readOnly && (
+                          <TableCell className="ps-2 pe-4">
+                            <Button
+                              type="button"
+                              color="red"
+                              size="sm"
+                              outline
+                              className="px-2.5 py-0"
+                              onClick={() => handleRemove(index)}
+                              disabled={isSaving}
+                            >
+                              <LuTrash2 className="mx-auto size-3.5" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     );
                   })}
                 </TableBody>
               </Table>
             </div>
-            <button
-              type="button"
-              onClick={handleAppend}
-              disabled={isSaving}
-              className="w-full rounded-lg border-2 border-dashed border-base-300 bg-base-50/50 p-4 transition-all hover:border-yellow-400 hover:bg-yellow-50/50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-base-600 dark:bg-base-800/50 dark:hover:border-yellow-600 dark:hover:bg-yellow-900/20"
-            >
-              <span className="text-sm font-medium text-base-600 transition-colors hover:text-yellow-600 dark:text-base-400 dark:hover:text-yellow-400">
-                + Agregar otro reporte
-              </span>
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleAppend}
+                disabled={isSaving}
+                className="w-full rounded-lg border-2 border-dashed border-base-300 bg-base-50/50 p-4 transition-all hover:border-yellow-400 hover:bg-yellow-50/50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-base-600 dark:bg-base-800/50 dark:hover:border-yellow-600 dark:hover:bg-yellow-900/20"
+              >
+                <span className="text-sm font-medium text-base-600 transition-colors hover:text-yellow-600 dark:text-base-400 dark:hover:text-yellow-400">
+                  + Agregar otro reporte
+                </span>
+              </button>
+            )}
           </fieldset>
         )}
       </div>

@@ -20,4 +20,7 @@ export default defineConfig({
     ],
     exclude: ["react-csv", "prop-types"],
   },
+  server: {
+    port: 3000
+  }
 });

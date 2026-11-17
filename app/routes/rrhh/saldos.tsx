@@ -21,6 +21,8 @@ import {
 } from "flowbite-react";
 import MvtoModal from "~/components/modals/customs/MvtoEmpleadoModal";
 import { formatCurrency, formatDateUStoES } from "~/utils/formats";
+import { LuReceiptText } from "react-icons/lu";
+import ShowSaldosModal from "~/components/modals/customs/ShowSaldosModal";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -30,6 +32,7 @@ export function meta({}: Route.MetaArgs) {
 }
 const getColumns = (
   handleAddMvto: (empleado: Employee) => void,
+  handleShowSaldos: (movimientos: MvtoEmpleados[]) => void,
 ): TableColumn<CtaCteEmpleados>[] => {
   return [
     {
@@ -62,28 +65,39 @@ const getColumns = (
     },
     {
       name: "Acciones",
-      width: "95px",
+      width: "140px",
       cell: (row) => (
-        <Badge
-          className="cursor-pointer"
-          color="yellow"
-          onClick={() => handleAddMvto(row.empleado)}
-        >
-          + Mvto
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            className="cursor-pointer"
+            color="yellow"
+            onClick={() => handleAddMvto(row.empleado)}
+          >
+            + Mvto
+          </Badge>
+          <Badge
+            className="cursor-pointer"
+            color="dark"
+            onClick={() => handleShowSaldos(row.movimientos)}
+          >
+            <LuReceiptText className="w-4 h-4" />
+          </Badge>
+        </div>
       ),
     },
   ];
 };
 export default function MvtoEmpleadosPage() {
-  const { form, onCreate, onUpdate } =
-    useMvtoEmpleado();
+  const { form, onCreate, onUpdate } = useMvtoEmpleado();
   const { openModal } = useModal();
   const { getSueldosData, saldoEmpleados, isLoading, isReady } = useRRHH();
   useEffect(() => {
     if (saldoEmpleados.length === 0 && !isReady) getSueldosData();
   }, [isReady, saldoEmpleados, getSueldosData]);
-  const handleOpenModal = (empleado: Employee, mvtoData?: MvtoEmpleados) => {
+  const handleOpenModalAddMvto = (
+    empleado: Employee,
+    mvtoData?: MvtoEmpleados,
+  ) => {
     form.reset(
       mvtoData
         ? {
@@ -138,7 +152,7 @@ export default function MvtoEmpleadosPage() {
     data: row,
   }: ExpanderComponentProps<CtaCteEmpleados>) => {
     const handleRowClick = (mov: MvtoEmpleados) => {
-      handleOpenModal(row.empleado, mov);
+      handleOpenModalAddMvto(row.empleado, mov);
     };
     return (
       <Table className="font-mono text-sm">
@@ -226,7 +240,19 @@ export default function MvtoEmpleadosPage() {
       onSelect: handleSelectEmployee,
     });
   };
-  const columns = getColumns(handleAddMvto);
+  const handleOpenShowSaldos = (
+    movimientos: MvtoEmpleados[],
+  ) => {
+    openModal("custom", {
+      component: ShowSaldosModal,
+      title: "Saldos por conceptos",
+      size: "2xl",
+      props: {
+        movimientos,
+      },
+    });
+  };
+  const columns = getColumns(handleAddMvto, handleOpenShowSaldos);
   return (
     <>
       <TableComponent

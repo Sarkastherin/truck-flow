@@ -1,10 +1,9 @@
 import type { CommonTypes } from "./commonTypes";
 import type { Employee, MvtoEmpleados } from "./rrhh";
-export type StatusLiquidacion = "nueva" | "en_proceso" | "cerrada";
+export type StatusLiquidacion = "nueva" | "completada";
 export const optionsStatusLiq: { value: StatusLiquidacion; label: string }[] = [
   { value: "nueva", label: "Nueva" },
-  { value: "en_proceso", label: "En proceso" },
-  { value: "cerrada", label: "Cerrada" },
+  { value: "completada", label: "Completada" },
 ];
 export type Fichada = CommonTypes & {
   fecha: string;
@@ -60,7 +59,7 @@ export type LiquidacionResumen = {
   premio_recuperado: number;
   monto_premio: number;
   deuda: number;
-  descuento:number;
+  descuento: number;
   mvtoDescuento?: MvtoEmpleados[];
   saldo: number;
   active: boolean;
@@ -77,3 +76,38 @@ export type LiquidacionFormValues = Omit<Liquidacion, keyof CommonTypes> & {
   created_at?: string;
   updated_at?: string;
 };
+
+export type LiquidacionHistorial = {
+  id: string;
+  created_at: string;
+  empleado_id: string;
+  liquidacion_id: string;
+  hs_totales: number;
+  hs_feriado: number;
+  hs_pagadas: number;
+  hs_regulares: number;
+  hs_extras: number;
+  salario: number;
+  extra: number;
+  carrocerias: number;
+  faltas: number;
+  tardanzas: number;
+  sal_temprano: number;
+  perdidos: number;
+  ganados: number;
+  recuperados: number;
+  total_premios: number;
+  deuda: number;
+  descuento: number;
+  saldo: number;
+  total: number;
+  created_by: string;
+  updated_by: string;
+  updated_at: string;
+  active: boolean;
+};
+
+export type LiquidacionHistorialInput = Omit<
+  LiquidacionHistorial,
+  "id" | "created_at" | "created_by" | "updated_at" | "updated_by" | "active"
+> & { id?: string };

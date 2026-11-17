@@ -1,6 +1,7 @@
 import type {
   Fichada,
   Liquidacion,
+  LiquidacionHistorialInput,
   LiquidacionResumen,
   Reporte,
 } from "~/types/liquidaciones";
@@ -364,6 +365,43 @@ export function calcularResumenLiquidacion({
       mvtoDescuento: pagosLiquidacion,
       saldo,
       active: true,
+    };
+  });
+}
+
+export function mapResumenToHistorial(
+  resumen: LiquidacionResumen[],
+  liquidacionId: string,
+): LiquidacionHistorialInput[] {
+  return resumen.map((row) => {
+    const hs_pagadas = row.horas_trabajadas + row.horas_feriado;
+    return {
+      empleado_id: row.empleado.id,
+      liquidacion_id: liquidacionId,
+      hs_totales: row.horas_trabajadas,
+      hs_feriado: row.horas_feriado,
+      hs_pagadas: round2(hs_pagadas),
+      hs_regulares: round2(hs_pagadas - row.horas_extras),
+      hs_extras: row.horas_extras,
+      salario: row.monto_salario_regular,
+      extra: row.monto_salario_extra,
+      carrocerias: row.carrocerias,
+      faltas: row.faltas,
+      tardanzas: row.tardanzas,
+      sal_temprano: row.salidas_tempranas,
+      perdidos: row.premios_perdidos,
+      ganados: row.premios_ganados,
+      recuperados: row.premio_recuperado,
+      total_premios: row.monto_premio,
+      deuda: row.deuda,
+      descuento: row.descuento,
+      saldo: row.saldo,
+      total: round2(
+        row.monto_salario_regular +
+          row.monto_salario_extra +
+          row.monto_premio -
+          row.descuento,
+      ),
     };
   });
 }

@@ -43,6 +43,7 @@ export const SHEET_NAMES_SUELDOS = {
   liquidaciones: "liquidaciones",
   fichadas: "fichadas",
   reportes: "reportes",
+  historial: "historial"
   
 };
 

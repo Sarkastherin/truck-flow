@@ -62,11 +62,13 @@ export default function Reportes({
   liquidacionId,
   fichadasGuardadas,
   reportesGuardados,
+  readOnly = false,
 }: {
   liquidacion?: Liquidacion;
   liquidacionId?: string;
   fichadasGuardadas: Fichada[];
   reportesGuardados: Reporte[];
+  readOnly?: boolean;
 }) {
   const { premios, isLoading, CUDReportes, employees, saldoEmpleados } =
     useRRHH();
@@ -210,7 +212,7 @@ export default function Reportes({
         searchKeys={["empleado.nombre_completo", "empleado.dni", "empleado.grupo"]}
         searchPlaceholder="Buscar por nombre, DNI o grupo"
         scrollHeightOffset={360}
-        selectableRows
+        selectableRows={!readOnly}
         selectedRows={selected}
         onSelectedRowsChange={({ selectedRows }) => setSelected(selectedRows)}
         customTheme={{
@@ -224,48 +226,54 @@ export default function Reportes({
           },
         }}
         message={
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              {optionsGrupos.map((grupo) => {
-                const color = `border-${grupo.color}-500 text-${grupo.color}-500 hover:bg-${grupo.color}-500`
-                return (
-                  <Button
-                    size="xs"
-                    onClick={() =>
-                      setSelected(
-                        resumen.filter(
-                          (res) => res.empleado.grupo === grupo.value,
-                        ),
-                      )
-                    }
-                    color={grupo.color}
-                  >
-                    Grupo: {grupo.label}
-                  </Button>
-                );
-              })}
+          readOnly ? (
+            <span className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
+              Total: {formatCurrency(totalPremiosGeneral)}
+            </span>
+          ) : (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                {optionsGrupos.map((grupo) => {
+                  const color = `border-${grupo.color}-500 text-${grupo.color}-500 hover:bg-${grupo.color}-500`
+                  return (
+                    <Button
+                      size="xs"
+                      onClick={() =>
+                        setSelected(
+                          resumen.filter(
+                            (res) => res.empleado.grupo === grupo.value,
+                          ),
+                        )
+                      }
+                      color={grupo.color}
+                    >
+                      Grupo: {grupo.label}
+                    </Button>
+                  );
+                })}
 
-              <button
-                className="text-sm border px-1.5 rounded border-base-500 text-base-500 font-semibold hover:bg-base-500 hover:text-white cursor-pointer transition-all font-mono"
-                onClick={() => {
-                  setSelected([]);
-                  setGrupoEmpleados([]);
-                }}
-                color={"light"}
-              >
-                Limpiar
-              </button>
-            </div>
-            {selected.length > 0 && (
-              <div
-                className="mt-2 text-xs underline text-primary-600 dark:text-primary-400 cursor-pointer"
-                onClick={handleSelectGroup}
-              >
-                Cargar premio/producción a los {selected.length} seleccionado
-                {selected.length === 1 ? "" : "s"}
+                <button
+                  className="text-sm border px-1.5 rounded border-base-500 text-base-500 font-semibold hover:bg-base-500 hover:text-white cursor-pointer transition-all font-mono"
+                  onClick={() => {
+                    setSelected([]);
+                    setGrupoEmpleados([]);
+                  }}
+                  color={"light"}
+                >
+                  Limpiar
+                </button>
               </div>
-            )}
-          </div>
+              {selected.length > 0 && (
+                <div
+                  className="mt-2 text-xs underline text-primary-600 dark:text-primary-400 cursor-pointer"
+                  onClick={handleSelectGroup}
+                >
+                  Cargar premio/producción a los {selected.length} seleccionado
+                  {selected.length === 1 ? "" : "s"}
+                </div>
+              )}
+            </div>
+          )
         }
         pagination={false}
       />
@@ -283,6 +291,7 @@ export default function Reportes({
             : handleSaveReportes
         }
         onClose={handleCloseReportesModal}
+        readOnly={readOnly}
       />
     </>
   );

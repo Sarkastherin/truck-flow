@@ -84,6 +84,7 @@ export const getFichadasColumns = (
   ) => void,
   onDeleteRow?: (row: FichadasFileUI) => void,
   isSaving = false,
+  readOnly = false,
 ): TableColumn<FichadasFileUI>[] => [
   {
     name: "Fecha",
@@ -116,7 +117,7 @@ export const getFichadasColumns = (
     name: "Entrada",
     id: "entrada",
     selector: (row) => row.entrada,
-    editable: true,
+    editable: !readOnly,
     onCellEdit,
     grow: 0,
   },
@@ -124,7 +125,7 @@ export const getFichadasColumns = (
     name: "Salida",
     id: "salida",
     selector: (row) => row.salida ?? "",
-    editable: true,
+    editable: !readOnly,
     onCellEdit,
     sortable: true,
     grow: 0,
@@ -218,6 +219,7 @@ export default function FichadasTableModal({
   onAddRow,
   onDeleteRow,
   pendingDeletes = 0,
+  readOnly = false,
 }: {
   show: boolean;
   title: string;
@@ -241,6 +243,7 @@ export default function FichadasTableModal({
   onAddRow?: (row: FichadasFileUI) => void;
   onDeleteRow?: (row: FichadasFileUI) => void;
   pendingDeletes?: number;
+  readOnly?: boolean;
 }) {
   const [showDniAlert, setShowDniAlert] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -249,7 +252,7 @@ export default function FichadasTableModal({
   const [newEntrada, setNewEntrada] = useState("");
   const [newSalida, setNewSalida] = useState("");
   const [addError, setAddError] = useState("");
-  const columns = getFichadasColumns(onCellEdit, onDeleteRow, isSaving);
+  const columns = getFichadasColumns(onCellEdit, onDeleteRow, isSaving, readOnly);
   const rowStyles = getFichadasRowStyles(diasNoLaborables);
   const saveDisabled = isSaving || hasNoEncontrados;
 
@@ -358,9 +361,11 @@ export default function FichadasTableModal({
               </span>
             )}
           </div>
-          <Button color="yellow" onClick={onSave} disabled={saveDisabled}>
-            {isSaving ? "Guardando..." : "Guardar, y continuar"}
-          </Button>
+          {!readOnly && (
+            <Button color="yellow" onClick={onSave} disabled={saveDisabled}>
+              {isSaving ? "Guardando..." : "Guardar, y continuar"}
+            </Button>
+          )}
         </div>
       }
     >
@@ -488,7 +493,7 @@ export default function FichadasTableModal({
           searchPlaceholder="Buscar por nombre o DNI"
           pointerOnHover={false}
           highlightOnHover={false}
-          cellNavigation
+          cellNavigation={!readOnly}
           conditionalRowStyles={rowStyles}
           customTheme={{
             typography: { fontSize: "13px", fontSizeHeader: "13px" },

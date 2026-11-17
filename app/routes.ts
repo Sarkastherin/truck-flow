@@ -80,6 +80,11 @@ export default [
       route("nomina", "routes/rrhh/nomina.tsx"),
       route("premios", "routes/rrhh/premios.tsx"),
       route("saldos", "routes/rrhh/saldos.tsx"),
+      route("liquidacion/historial", "routes/rrhh/liquidacion/historial/index.tsx"),
+      route(
+        "liquidacion/historial/:liquidacionId",
+        "routes/rrhh/liquidacion/historial/$liquidacionId.tsx",
+      ),
       route("liquidacion/:liquidacionId","routes/rrhh/liquidacion/$liquidacionId.tsx")
     ]),
     ...prefix("carrocerias-usadas", [

@@ -20,6 +20,10 @@ export function getDiasPeriodo(desde: string, hasta: string) {
   return dias > 0 ? dias : null;
 }
 
+/* Excluye las finalizadas; tolera el valor legacy "cerrada" de hojas viejas */
+const estaFinalizada = (liq: Liquidacion) =>
+  liq.status === "completada" || (liq.status as string) === "cerrada";
+
 export function SeleccionarLiquidacionModal({
   onSelect,
 }: {
@@ -38,7 +42,7 @@ export function SeleccionarLiquidacionModal({
     } 
     else {
       setIsLoading(false);
-      setFilteredData(data.filter((liq) => liq.status !== "cerrada"));
+      setFilteredData(data.filter((liq) => !estaFinalizada(liq)));
     }
   }, [getSueldosData, liquidaciones, data]);
   const handleSearch = (value: string) => {
@@ -46,7 +50,7 @@ export function SeleccionarLiquidacionModal({
     const lowercasedValue = value.toLowerCase();
     const filtered = data?.filter(
       (item) =>
-        item.status !== "cerrada" &&
+        !estaFinalizada(item) &&
         (item.desde.toLowerCase().includes(lowercasedValue) ||
           item.hasta.toLowerCase().includes(lowercasedValue)),
     );

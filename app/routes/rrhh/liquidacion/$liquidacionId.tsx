@@ -3,8 +3,8 @@ import type { Route } from "../../+types/home";
 import { useParams } from "react-router";
 import { useRRHH } from "~/context/RRHHContext";
 import { Button, Card, TabItem, Tabs, type TabsRef } from "flowbite-react";
-import { LuArrowRight, LuCalendarDays, LuSettings2 } from "react-icons/lu";
-import type { Liquidacion } from "~/types/liquidaciones";
+import { LuArrowRight, LuCalendarDays, LuCheckCheck, LuSettings2 } from "react-icons/lu";
+import type { Liquidacion, LiquidacionResumen } from "~/types/liquidaciones";
 import { BadgeStatusLiq } from "~/components/specials/Badges";
 import { formatDateUStoES } from "~/utils/formats";
 import { getDiasPeriodo } from "~/components/modals/customs/SeleccionarLiquidacionModal";
@@ -20,6 +20,10 @@ import type { DirtyMap } from "~/utils/prepareUpdatePayload";
 import ProcesarFichadas from "~/components/liquidacion/ProcesarFichadas";
 import Reportes from "~/components/liquidacion/Reportes";
 import Resumen from "~/components/liquidacion/Resumen";
+import {
+  calcularResumenLiquidacion,
+  mapResumenToHistorial,
+} from "~/utils/liquidacionCalculos";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Liquidación" },
@@ -30,7 +34,14 @@ export function meta({}: Route.MetaArgs) {
 type TabsTypes = "fichadas" | "produccion" | "resumen";
 
 export default function Liquidacion() {
-  const { liquidaciones, updateLiquidacion } = useRRHH();
+  const {
+    liquidaciones,
+    updateLiquidacion,
+    employees,
+    premios,
+    saldoEmpleados,
+    CUDHistorial,
+  } = useRRHH();
   const { liquidacionId } = useParams();
   const tabsRef = useRef<TabsRef>(null);
   const [activeTab, setActiveTab] = useState(0);
@@ -75,6 +86,7 @@ export default function Liquidacion() {
 
   const fichadasGuardadas = liquidacion?.fichada ?? [];
   const reportesGuardados = liquidacion?.reporte ?? [];
+  const isReadOnly = liquidacion?.status === "completada";
 
   const handleSaveConfig = async (config: ConfigSemanaValues) => {
     if (!liquidacion) return;
@@ -135,6 +147,100 @@ export default function Liquidacion() {
     </Button>
   );
 
+  const ejecutarCompletar = async (resumen: LiquidacionResumen[]) => {
+    if (!liquidacion) return;
+    openModal("loading", {
+      props: {
+        title: "Completando liquidación",
+        message: "Guardando el resumen en el historial...",
+      },
+    });
+    try {
+      const resultHistorial = await CUDHistorial(
+        mapResumenToHistorial(resumen, liquidacion.id),
+        liquidacion.id,
+      );
+      if (!resultHistorial.success) {
+        throw new Error(
+          resultHistorial.error ||
+            resultHistorial.message ||
+            "No se pudo guardar el historial",
+        );
+      }
+      const result = await updateLiquidacion(
+        { ...liquidacion, status: "completada" },
+        { status: true } as DirtyMap<Liquidacion>,
+      );
+      if (!result.success) {
+        throw new Error(
+          result.error ||
+            result.message ||
+            "No se pudo actualizar el status",
+        );
+      }
+      closeModal();
+      openModal("success", {
+        props: {
+          title: "Liquidación completada",
+          message:
+            "El resumen se guardó en el historial y la liquidación quedó como Completada.",
+        },
+      });
+    } catch (error) {
+      openModal("error", {
+        props: {
+          title: "Error al completar",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Hubo un error al completar la liquidación. Inténtalo de nuevo.",
+        },
+      });
+    }
+  };
+
+  const handleCompletarLiquidacion = () => {
+    if (!liquidacion) return;
+    const pendientesSalida = fichadasGuardadas.filter((f) => !f.salida).length;
+    if (pendientesSalida > 0) {
+      openModal("error", {
+        props: {
+          title: "No se puede completar",
+          message: `Faltan completar salidas: ${pendientesSalida} fichada${pendientesSalida === 1 ? "" : "s"} sin hora de salida.`,
+        },
+      });
+      return;
+    }
+    const resumen = calcularResumenLiquidacion({
+      liquidacion,
+      employees,
+      premios,
+      fichadas: fichadasGuardadas,
+      reportes: reportesGuardados,
+      saldoEmpleados,
+    });
+    if (resumen.length === 0) {
+      openModal("error", {
+        props: {
+          title: "No se puede completar",
+          message:
+            "No hay empleados activos para generar el resumen de la liquidación.",
+        },
+      });
+      return;
+    }
+    openModal("confirmation", {
+      props: {
+        title: "Completar liquidación",
+        message:
+          "Se guardará el resumen en el historial y la liquidación quedará como Completada. Esta acción no se puede deshacer.",
+        confirmText: "Completar liquidación",
+        cancelText: "Cancelar",
+        onConfirm: () => void ejecutarCompletar(resumen),
+      },
+    });
+  };
+
   return (
     <>
       <Card>
@@ -158,11 +264,17 @@ export default function Liquidacion() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <ButtonConfSemana />
+              {!isReadOnly && <ButtonConfSemana />}
               <span className="text-xs uppercase tracking-tight font-semibold text-base-500">
                 Status
               </span>
               <BadgeStatusLiq status={liquidacion.status} />
+              {liquidacion.status === "nueva" && (
+                <Button size="sm" color="green" onClick={handleCompletarLiquidacion}>
+                  <LuCheckCheck className="me-1 size-4" />
+                  Completar liquidación
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -180,6 +292,7 @@ export default function Liquidacion() {
               <ProcesarFichadas
                 liquidacion={liquidacion}
                 liquidacionId={liquidacionId}
+                readOnly={isReadOnly}
               />
             )}
             {activeTab === 1 && (
@@ -188,6 +301,7 @@ export default function Liquidacion() {
                 liquidacionId={liquidacionId}
                 fichadasGuardadas={fichadasGuardadas}
                 reportesGuardados={reportesGuardados}
+                readOnly={isReadOnly}
               />
             )}
             {activeTab === 2 && (
@@ -196,6 +310,7 @@ export default function Liquidacion() {
                 liquidacionId={liquidacionId}
                 fichadasGuardadas={fichadasGuardadas}
                 reportesGuardados={reportesGuardados}
+                readOnly={isReadOnly}
               />
             )}
           </TabItem>

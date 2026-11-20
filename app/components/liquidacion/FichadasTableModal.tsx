@@ -192,11 +192,20 @@ export const getFichadasRowStyles = (
       when: (row) => !row.salida,
       classNames: [
         "border-l-4",
+        "border-yellow-500",
+        "!bg-yellow-300/20",
+        "!text-yellow-500",
+      ],
+    },
+    {
+      when: (row) => !row.empleado,
+       classNames: [
+        "border-l-4",
         "border-red-500",
         "!bg-red-300/20",
         "!text-red-500",
       ],
-    },
+    }
   ];
 };
 

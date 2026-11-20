@@ -2,7 +2,6 @@ import DataTable, {
   type TableColumn,
   type TableProps,
   type ConditionalStyles,
-  type ThemeProp,
   type FilterState,
   createTheme,
   isFilterActive,

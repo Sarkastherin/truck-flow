@@ -131,6 +131,7 @@ export const DatosCamion = ({
           value={pedidoData?.camion?.marca.toLocaleUpperCase()}
           isFirst
         />
+        <Cell title="Patente" value={pedidoData?.camion?.patente} />
         <Cell title="Modelo" value={pedidoData?.camion?.modelo} />
         <Cell
           title="Centro Eje"
@@ -139,7 +140,7 @@ export const DatosCamion = ({
           unit="mm"
         />
       </Row>
-      <Row isLast>
+      <Row >
         <Cell
           title="Tipo de larguero"
           value={pedidoData?.camion?.tipo_larguero?.toLocaleUpperCase()}
@@ -157,6 +158,17 @@ export const DatosCamion = ({
           value={pedidoData?.camion?.voladizo_trasero}
           convertToCM={convertToCM}
           unit="mm"
+        />
+      </Row>
+      <Row isLast>
+        <Cell
+          title="Nombre de contacto"
+          value={pedidoData?.camion?.contacto_nombre}
+          isFirst
+        />
+        <Cell
+          title="Nombre de contacto"
+          value={pedidoData?.camion?.contacto_telefono ||""}
         />
       </Row>
     </Box>

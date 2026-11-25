@@ -23,6 +23,8 @@ import {
   getChequeTransition,
 } from "~/utils/chequeStateMachine";
 import ApplyActionsToCheques from "~/components/modals/customs/ApplyActionsToCheques";
+import { ButtonDownload, ButtonCopy } from "~/components/ExportButtons";
+import { ButtonExport } from "~/components/ButtonExport";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cheques" },
@@ -30,7 +32,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function PedidosHome() {
+export default function ChequesHome() {
   const { openModal, closeModal, setMessageForm, setStepForm } = useModal();
   const { getAdministracionData, cheques, bancos, CUDCheques, CUDMovimientos } =
     useAdministracion();
@@ -372,18 +374,7 @@ export default function PedidosHome() {
         labelButton=""
         message={
           <div className="flex gap-2 w-full">
-            <Button size="sm" color={"alternative"} onClick={() => copy("csv")}>
-              <FaCopy className="me-1.5" />
-              Copiar
-            </Button>
-            <Button
-              size="sm"
-              color={"alternative"}
-              onClick={() => download(`cheques.csv`)}
-            >
-              <FaDownload className="me-1.5" />
-              Descargar
-            </Button>
+            <ButtonDownload columns={columns} rows={cheques} nameFile="cheques"/>
           </div>
         }
         hasActiveColumn={false}

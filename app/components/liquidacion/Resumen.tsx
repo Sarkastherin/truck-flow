@@ -2,17 +2,17 @@ import { useMemo } from "react";
 import { useRRHH } from "~/context/RRHHContext";
 import type { Liquidacion, LiquidacionResumen } from "~/types/liquidaciones";
 import { calcularResumenLiquidacion } from "~/utils/liquidacionCalculos";
-import { useTableExport, type TableColumn } from "react-data-table-component";
+import { type TableColumn } from "react-data-table-component";
 import TableComponent from "~/components/TableComponentNew";
 import { formatCurrency } from "~/utils/formats";
 import type { Fichada, Reporte } from "~/types/liquidaciones";
-import { Badge, Button } from "flowbite-react";
-import { FaCopy, FaDownload } from "react-icons/fa6";
+import { Badge } from "flowbite-react";
 import { FaCirclePlus } from "react-icons/fa6";
 import MvtoModal from "../modals/customs/MvtoEmpleadoModal";
 import { useMvtoEmpleado } from "~/hooks/useMvtoEmpleado";
 import type { Employee, MvtoEmpleados } from "~/types/rrhh";
 import { useModal } from "~/context/ModalContext";
+import { ButtonDownload } from "../ExportButtons";
 const getResumenColumns = (
   handleOpenPago: (empleado: Employee, mvtoData?: MvtoEmpleados[]) => void,
   readOnly = false,
@@ -319,7 +319,7 @@ export default function Resumen({
   reportesGuardados: Reporte[];
   readOnly?: boolean;
 }) {
-  const { form, onCreate, onUpdate, onDelete, onReactivate } =
+  const { form, onCreate, onUpdate } =
     useMvtoEmpleado();
   const { openModal } = useModal();
   const { premios, isLoading, employees, saldoEmpleados, liquidaciones, historial } =
@@ -442,11 +442,6 @@ export default function Resumen({
     }),
     [resumen],
   );
-  const { download, copy } = useTableExport({
-    columns: columns,
-    rows: resumen,
-    valueSource: "format",
-  });
 
   if (pendientesSalida > 0) {
     return (
@@ -501,26 +496,7 @@ export default function Resumen({
               <span className="text-sm font-bold text-yellow-700 dark:text-yellow-400">
                 Total: {formatCurrency(totalesResumen.total)}
               </span>
-              <Button
-                size="sm"
-                color={"alternative"}
-                onClick={() => copy("csv")}
-              >
-                <FaCopy className="me-1.5" />
-                Copiar
-              </Button>
-              <Button
-                size="sm"
-                color={"alternative"}
-                onClick={() =>
-                  download(
-                    `${liquidacion?.desde}/${liquidacion?.hasta}-resumen.csv`,
-                  )
-                }
-              >
-                <FaDownload className="me-1.5" />
-                Descargar
-              </Button>
+              <ButtonDownload columns={columns} rows={resumen} nameFile={`${liquidacion?.desde}/${liquidacion?.hasta}-resumen`}/>
             </div>
           }
           pointerOnHover={false}

@@ -2,7 +2,7 @@
   "name": "truck-flow",
   "private": true,
   "type": "module",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",

@@ -98,6 +98,7 @@ type ConfiguracionContextType = {
     deletedIds: string[],
   ) => Promise<CrudGlobalResponse>;
   getCarrozadoNombre: (carrozadoId?: string) => string;
+  isLoading: boolean
 };
 
 type HeadersType = {
@@ -138,12 +139,14 @@ export const ConfiguracionesProvider = ({
   const [controlCarrozado, setControlCarrozado] = useState<ControlCarrozado[]>(
     [],
   );
+  const [isLoading, setIsLoading] = useState(false)
   const [paramsFromSheets, setParamsFromSheets] = useState<{
     headers: HeadersType;
     values: Record<string, SheetCellValue[][]>;
   } | null>(null);
   const getConfiguracionesData = useCallback(async () => {
     try {
+      setIsLoading(true)
       const { data, error } = await getAllSheets(
         SHEET_ID_CONFIGURACIONES,
         SHEETS,
@@ -216,6 +219,7 @@ export const ConfiguracionesProvider = ({
       console.error("Error fetching orders data:", error);
       return;
     }
+    finally {setIsLoading(false)}
   }, []);
   const vendedoresOptions = useMemo(() => {
     const vendedores = personal.filter(
@@ -501,6 +505,7 @@ export const ConfiguracionesProvider = ({
         CUDValoresPredefinidos,
         CUDControlCarrozado,
         getCarrozadoNombre,
+        isLoading
       }}
     >
       {children}

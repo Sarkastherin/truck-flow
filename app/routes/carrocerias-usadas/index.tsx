@@ -80,7 +80,7 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
   },
 ];
 export default function CarroceriasUsadasHome() {
-  const { getCarroceriasUsadasData, carroceriasUsadas } =
+  const { getCarroceriasUsadasData, carroceriasUsadas, isLoading } =
     useCarroceriasUsadas();
   const navigate = useNavigate();
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function CarroceriasUsadasHome() {
         onAddRecord={() => navigate("/carrocerias-usadas/nueva")}
         color= "teal"
         scrollHeightOffset={370}
-        isLoading={false}
+        isLoading={isLoading}
         labelButton="Agregar Carrocería usada"
         title="Inventario de Carrocerías Usadas"
         searchPlaceholder="Buscar por tipo, color o status"

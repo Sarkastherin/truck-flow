@@ -71,7 +71,7 @@ const filterFields = [
 ];
 
 export default function SociosComerciales() {
-  const { socios } = useSociosComercial();
+  const { socios, isLoading } = useSociosComercial();
   const { openModal } = useModal();
   const { form, onCreate, onUpdate, onDelete, onReactivate } = useSocio({
     tipoSocio: "cliente",
@@ -164,7 +164,7 @@ export default function SociosComerciales() {
         <TableComponent
           columns={columns}
           data={filteredSocios}
-          isLoading={false}
+          isLoading={isLoading}
           labelButton={`Agregar ${singularName}`}
           scrollHeightOffset={270}
           onRowClicked={handleRowClicked}

@@ -15,8 +15,6 @@ import type {
 import { capitalize } from "~/utils/functions";
 import { BadgeStatusCheque } from "~/components/specials/Badges";
 import TableComponent from "~/components/TableComponentNew";
-import { Button } from "flowbite-react";
-import { FaCopy, FaDownload } from "react-icons/fa6";
 import { useModal } from "~/context/ModalContext";
 import {
   chequeStateMachine,
@@ -24,7 +22,6 @@ import {
 } from "~/utils/chequeStateMachine";
 import ApplyActionsToCheques from "~/components/modals/customs/ApplyActionsToCheques";
 import { ButtonDownload, ButtonCopy } from "~/components/ExportButtons";
-import { ButtonExport } from "~/components/ButtonExport";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cheques" },
@@ -34,7 +31,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function ChequesHome() {
   const { openModal, closeModal, setMessageForm, setStepForm } = useModal();
-  const { getAdministracionData, cheques, bancos, CUDCheques, CUDMovimientos } =
+  const { getAdministracionData, cheques, bancos, CUDCheques, CUDMovimientos, isLoading } =
     useAdministracion();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<ChequeConSociosYMovimiento[]>([]);
@@ -365,7 +362,7 @@ export default function ChequesHome() {
         data={cheques || []}
         searchKeys={["cliente.razon_social", "tipo", "banco", "numero", "importe", "cliente.razon_social", "proveedor.razon_social", "status"]}
         onRowClicked={handleRowClick}
-        isLoading={false}
+        isLoading={isLoading}
         title={"Cheques"}
         backPath="/administracion"
         color={"green"}

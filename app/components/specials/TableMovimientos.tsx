@@ -1,8 +1,6 @@
 import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import {
-  optionMediosPago,
-  optionsTipoMovimiento,
   type MovimientoDetalle,
   type MovimientoFormValues,
   type Documento,
@@ -15,7 +13,6 @@ import EditMovimiento from "../modals/customs/EditMovimiento";
 import { useMovimientos } from "~/hooks/useMovimientos";
 import type { FileTypeActions } from "../FileInputComponent";
 import { useState, useRef, useEffect } from "react";
-import { BadgeStatusMovimiento } from "./Badges";
 const columns: TableColumn<MovimientoDetalle>[] = [
   {
     name: "Fecha",

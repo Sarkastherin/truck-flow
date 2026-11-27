@@ -69,7 +69,7 @@ const columns: TableColumn<CtaCte>[] = [
 export default function CtasCtesHome() {
   const location = useLocation();
   const { openModal } = useModal();
-  const { getAdministracionData, ctasCorrientesData } = useAdministracion();
+  const { getAdministracionData, ctasCorrientesData, isLoading } = useAdministracion();
   const navigate = useNavigate();
   useEffect(() => {
     if (!ctasCorrientesData) {
@@ -106,7 +106,7 @@ export default function CtasCtesHome() {
         columns={columns}
         data={ctasCorrientesData || []}
         onAddRecord={handleOpenModal}
-        isLoading={false}
+        isLoading={isLoading}
         labelButton="Agregar movimientos"
         title={"Cuentas Corrientes - Clientes"}
         backPath="/administracion"

@@ -56,6 +56,7 @@ type AdministracionContextType = {
   cheques: ChequeConSociosYMovimiento[];
   getBancos: () => Promise<BancosProps[] | null>;
   bancos: BancosProps[] | null;
+  isLoading: boolean
   createMovimiento: (
     dataForm: MovimientoDetalle,
     files: FileList | null,
@@ -113,6 +114,7 @@ export const AdministracionProvider = ({
   const [ctasCorrientesData, setCtasCorrientesData] = useState<CtaCte[]>([]);
   const [bancos, setBancos] = useState<BancosProps[] | null>(null);
   const [cheques, setCheques] = useState<ChequeConSociosYMovimiento[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [paramsFromSheets, setParamsFromSheets] = useState<{
     headers: HeadersType;
     values: Record<string, SheetCellValue[][]>;
@@ -120,6 +122,7 @@ export const AdministracionProvider = ({
   const getAdministracionData = useCallback(async () => {
     if (!socios || socios.length === 0) return;
     try {
+      setIsLoading(true)
       const { data, error } = await getAllSheets(
         SHEET_ID_CTAS_CORRIENTES,
         SHEETS,
@@ -235,6 +238,9 @@ export const AdministracionProvider = ({
     } catch (error) {
       console.error("Error fetching orders data:", error);
       return;
+    }
+    finally {
+      setIsLoading(false)
     }
   }, [socios]);
   const fetchBancos = async () => {
@@ -600,6 +606,7 @@ export const AdministracionProvider = ({
         createNewMovimiento,
         isCHEQUERegistered,
         anularPago,
+        isLoading
       }}
     >
       {children}

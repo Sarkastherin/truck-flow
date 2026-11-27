@@ -15,6 +15,7 @@ import {
   LuPencilRuler,
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
+import { useConfiguracion } from "~/context/ConfiguracionesContext";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Configuraciones de Productos" },
@@ -63,6 +64,7 @@ const submenu: { key: TabsTypes; name: string; icon: IconType }[] = [
 ];
 
 export default function ParametrosGenerales() {
+  const {isLoading} = useConfiguracion()
   const { getItemsConfig } = useItemsConfig();
   const [activeTab, setActiveTab] = useState<TabsTypes>("colores");
   const itemsConfig = getItemsConfig();
@@ -99,7 +101,7 @@ export default function ParametrosGenerales() {
             <TableComponent
               columns={activeItem.columns}
               data={activeItem.data}
-              isLoading={false}
+              isLoading={isLoading}
               labelButton=""
               scrollHeightOffset={270}
               onRowClicked={activeItem.onOpenDetails}

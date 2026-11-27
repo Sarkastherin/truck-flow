@@ -43,6 +43,7 @@ type Response = {
 type CarroceriasUsadasContextType = {
   getCarroceriasUsadasData: () => Promise<void>;
   carroceriasUsadas: CarroceriaUsadaData[] | null;
+  isLoading: boolean
   createNewCarroceriaUsada: (newCarroceria: CarroceriaUsadaData) => Promise<CrudGlobalResponse & { data: CarroceriaUsadaData | null }>;
   updateCarroceriaUsadaBase: UpdateGlobalMethod<CarroceriaUsadaData>;
   changeStatusCarroceriaUsada: (
@@ -89,9 +90,11 @@ export const CarroceriasUsadasProvider = ({
     headers: HeadersType;
     values: Record<string, SheetCellValue[][]>;
   } | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const getCarroceriasUsadasData = useCallback(async () => {
     try {
       if (!socios || socios.length === 0) return;
+      setIsLoading(true)
       const { data, error } = await getAllSheets(SHEET_ID_INVENTARIO, SHEETS);
       if (error) {
         throw new Error(
@@ -147,6 +150,7 @@ export const CarroceriasUsadasProvider = ({
       console.error("Error fetching orders data:", error);
       return;
     }
+    finally {setIsLoading(false)}
   }, [socios]);
   const generateCarroceriaNumber = () => {
     if (!carroceriasUsadas) {
@@ -295,7 +299,8 @@ export const CarroceriasUsadasProvider = ({
         CUDFotos,
         createPrestamoBase,
         updatePrestamoBase,
-        createNewCarroceriaUsada
+        createNewCarroceriaUsada,
+        isLoading
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import type { Route } from "../+types/home";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent  from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
@@ -28,43 +28,55 @@ const columns: TableColumn<CarroceriaUsadaData>[] = [
     name: "Numero",
     selector: (row) => row.numero_carroceria || "",
     sortable: true,
-    width: "100px",
+    width: "130px",
+    filterable: true, 
   },
   {
     name: "Propietario anterior",
     selector: (row) => row.duenno?.razon_social || "",
     sortable: true,
+    filterable: true, 
   },
   {
     name: "Modelo",
     selector: (row) => row.tipo_carrozado || "",
     sortable: true,
+    filterable: true, 
+    filterType: "set"
   },
   {
     name: "Marca",
     selector: (row) => row.marca_carroceria || "",
     sortable: true,
-    width: "120px",
+    width: "170px",
+    filterable: true, 
+    filterType: "set"
   },
   {
     name: "Año",
     selector: (row) => row.anno_fabricacion || "",
     sortable: true,
-    width: "80px",
+    width: "120px",
+    filterable: true, 
+    filterType: "number"
   },
 
   {
     name: "Precio lista",
     selector: (row) => row.precio_lista || 0,
     format: (row) => formatCurrency(row.precio_lista || 0),
-    width: "130px",
+    width: "180px",
     sortable: true,
+    filterable: true, 
+    filterType: "number"
   },
   {
     name: "Status",
     cell: (row) => <BadgeStatusCarroceriaUsada status={row.status} />,
     sortable: true,
-    width: "110px",
+    width: "120px",
+    filterable: true, 
+    filterType: "set"
   },
 ];
 export default function CarroceriasUsadasHome() {
@@ -84,37 +96,20 @@ export default function CarroceriasUsadasHome() {
   }
   return (
     <>
-      <SubTitles
-        title="Inventario de Carrocerías Usadas"
-        back_path="/"
-        icon={{
-          component: FaTrailer,
-          color: "text-teal-500 dark:text-teal-400",
-        }}
-      />
       <TableComponent
         columns={columns}
         data={carroceriasUsadas || []}
-        filterFields={[
-          {
-            key: "tipo_carrozado",
-            label: "Tipo Carrozado",
-          },
-          { key: "color", label: "Color" },
-          {
-            key: "status",
-            label: "Estado",
-            type: "select",
-            options: statusOptionsCarroceriaUsada,
-          },
-        ]}
-        onRowClick={(row) => handleRowClick(row)}
-        btnOnClick={{
-          color: "teal",
-          title: "Agregar Carrocería Usada",
-          onClick: () => navigate("/carrocerias-usadas/nueva"),
-        }}
+        searchKeys={["tipo_carrozado","color", "status" ]}
+        onRowClicked={(row) => handleRowClick(row)}
+        onAddRecord={() => navigate("/carrocerias-usadas/nueva")}
+        color= "teal"
         scrollHeightOffset={370}
+        isLoading={false}
+        labelButton="Agregar Carrocería usada"
+        title="Inventario de Carrocerías Usadas"
+        searchPlaceholder="Buscar por tipo, color o status"
+        hasActiveColumn={false}
+        backPath="/"
       />
     </>
   );

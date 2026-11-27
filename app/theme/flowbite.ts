@@ -45,5 +45,13 @@ export const flowbiteTheme = createTheme({
     root: {
       base: "border border-red-500"
     }
+  },
+  button: {
+    color: {
+      orange: "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-300 dark:bg-orange-500 dark:hover:bg-orange-600 dark:focus:ring-orange-600"
+    },
+    outlineColor: {
+      orange: "border border-orange-500 text-orange-500 hover:border-orange-600 hover:bg-orange-600 hover:text-white focus:ring-orange-300 dark:border-orange-600 dark:text-orange-400 dark:hover:border-orange-500 dark:hover:bg-orange-500 dark:hover:text-white dark:focus:ring-orange-600"
+    }
   }
 });

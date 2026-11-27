@@ -199,6 +199,7 @@ export const AdministracionProvider = ({
           haber: saldo.haber,
           isClosed: saldo.isClosed,
           movimientos: movimientosConChequesYDocumentos,
+          active: true
         });
       });
       const chequesConSociosYMovimiento = chequesData.map((cheque) => {

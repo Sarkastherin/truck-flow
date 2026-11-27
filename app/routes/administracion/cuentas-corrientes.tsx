@@ -1,5 +1,5 @@
 import type { Route } from "../+types/home";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
@@ -13,6 +13,7 @@ import { SeleccionarSocioModal } from "~/components/modals/customs/SeleccionarSo
 import type { SocioComercial } from "~/types/socios";
 import { useLocation } from "react-router";
 import { formatCurrency } from "~/utils/formats";
+import { formatCuit } from "~/components/InputsForm";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Cuentas Corrientes" },
@@ -27,11 +28,15 @@ const columns: TableColumn<CtaCte>[] = [
     name: "Cliente",
     selector: (row) => row.cliente?.razon_social || "",
     sortable: true,
+    filterable: true,
   },
   {
     name: "CUIT/CUIL",
     selector: (row) => row.cliente?.cuit_cuil || "",
+    format: (row) => formatCuit(row.cliente.cuit_cuil),
     sortable: true,
+    width: "150px",
+    filterable: true,
   },
   {
     name: "Debe",
@@ -39,6 +44,8 @@ const columns: TableColumn<CtaCte>[] = [
     format: (row) => formatCurrency(row.debe),
     width: "150px",
     sortable: true,
+    filterable: true,
+    filterType: "number",
   },
   {
     name: "Haber",
@@ -46,14 +53,17 @@ const columns: TableColumn<CtaCte>[] = [
     format: (row) => formatCurrency(row.haber),
     width: "150px",
     sortable: true,
+    filterable: true,
+    filterType: "number",
   },
-
   {
     name: "Saldo",
     selector: (row) => row.debe - row.haber,
     format: (row) => formatCurrency(row.debe - row.haber),
     width: "180px",
     sortable: true,
+    filterable: true,
+    filterType: "number",
   },
 ];
 export default function CtasCtesHome() {
@@ -92,38 +102,20 @@ export default function CtasCtesHome() {
   }, [location.search]);
   return (
     <>
-      <SubTitles
-        title="Cuentas Corrientes"
-        back_path="/administracion"
-        icon={{ component: LuBookUser, color: "text-orange-500" }}
-      />
       <TableComponent
         columns={columns}
         data={ctasCorrientesData || []}
-        filterFields={[
-          { key: "cliente.razon_social", label: "Cliente" },
-          {
-            key: "cliente.cuit_cuil",
-            label: "CUIT/CUIL",
-          },
-          {
-            key: "isClosed",
-            label: "Estado de Cuenta",
-            type: "select",
-            emptyOption: "Todos",
-            options: [
-              { value: "true", label: "Cerrada" },
-              { value: "false", label: "Abierta" },
-            ],
-          },
-        ]}
-        onRowClick={(row) => handleRowClick(row)}
-        btnOnClick={{
-          color: "orange",
-          title: "Agregar movimiento",
-          onClick: handleOpenModal,
-        }}
-        scrollHeightOffset={370}
+        onAddRecord={handleOpenModal}
+        isLoading={false}
+        labelButton="Agregar movimientos"
+        title={"Cuentas Corrientes - Clientes"}
+        backPath="/administracion"
+        color={"orange"}
+        scrollHeightOffset={270}
+        hasActiveColumn={false}
+        searchKeys={["cliente.razon_social", "cliente.cuit_cuil"]}
+        searchPlaceholder="Buscar por razón social o CUIT"
+        onRowClicked={handleRowClick}
       />
     </>
   );

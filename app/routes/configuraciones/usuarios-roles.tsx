@@ -1,5 +1,5 @@
 import type { Route } from "../+types/home";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import { formatDateUStoES } from "~/utils/formats";
 import { statusOptionsPedidos } from "~/types/pedido";
@@ -18,8 +18,8 @@ import { useUser } from "~/context/UserContext";
 import { useUsuario } from "~/hooks/useUsuario";
 import { UsuarioModal } from "~/components/modals/customs/UsuarioModal";
 import { useModal } from "~/context/ModalContext";
-import {optionsRoles} from "~/types/users";
-import {BadgeStatusUsuarioRole} from "~/components/specials/Badges";
+import { optionsRoles } from "~/types/users";
+import { BadgeStatusUsuarioRole } from "~/components/specials/Badges";
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Usuarios y Roles" },
@@ -52,11 +52,6 @@ const columns: TableColumn<UsersTable>[] = [
     cell: (row) => <BadgeStatusUsuarioRole role={row.role} />,
     width: "150px",
     sortable: true,
-  },
-  {
-    name: "Estado",
-    selector: (row) => row.active,
-    width: "110px",
   },
 ];
 export default function UsuariosRoles() {
@@ -105,38 +100,17 @@ export default function UsuariosRoles() {
     });
   };
   return (
-    <>
-      <SubTitles
-        title="Usuarios y Roles"
-        back_path="/configuraciones"
-        icon={{ component: LuUserRoundCog, color: "text-orange-500" }}
-      />
-      <TableComponent
-        columns={columns}
-        data={users || []}
-        filterFields={[
-          {
-            key: "nombre",
-            label: "Nombre",
-          },
-          { key: "apellido", label: "Apellido" },
-          {
-            key: "email",
-            label: "Email",
-          },
-          {
-            key: "role",
-            label: "Rol",
-          },
-        ]}
-        onRowClick={(row) => handleRowClick(row)}
-        btnOnClick={{
-          color: "orange",
-          title: "Nuevo Usuario",
-          onClick: () => handleNewUser(),
-        }}
-        scrollHeightOffset={370}
-      />
-    </>
+    <TableComponent
+      columns={columns}
+      data={users || []}
+      onRowClicked={handleRowClick}
+      onAddRecord={handleNewUser}
+      labelButton="Agregar usuario"
+      color="orange"
+      scrollHeightOffset={370}
+      title={"Usuarios y Roles"}
+      isLoading={false}
+      searchKeys={["nombre", "apellido"]}
+    />
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Route } from "../+types/home";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import { LoadingComponent } from "~/components/LoadingComponent";
 import type { SocioComercial } from "~/types/socios";
@@ -13,7 +13,6 @@ import { useSociosComercial } from "~/context/SociosComercialesContext";
 import { useModal } from "~/context/ModalContext";
 import { useSocio } from "~/hooks/useSocio";
 import { SocioModal } from "~/components/modals/customs/SocioModal";
-import { SubTitles } from "~/components/SubTitles";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -45,9 +44,10 @@ const columns: TableColumn<SocioComercial>[] = [
   },
   {
     name: "CUIT/CUIL",
-    selector: (row) => formatCuit(row.cuit_cuil || ""),
+    selector: (row) => row.cuit_cuil,
+    format: (row) => formatCuit(row.cuit_cuil || ""),
     sortable: true,
-    width: "130px",
+    width: "140px",
   },
   {
     name: "Provincia",
@@ -60,13 +60,6 @@ const columns: TableColumn<SocioComercial>[] = [
     selector: (row) => row.localidad,
     sortable: true,
     width: "150px",
-  },
-
-  {
-    name: "Status",
-    selector: (row) => row.active,
-    sortable: true,
-    width: "95px",
   },
 ];
 
@@ -148,10 +141,7 @@ export default function SociosComerciales() {
   };
 
   return (
-    <div
-      className="flex h-full"
-      style={{ minHeight: "calc(100vh - 110px)" }}
-    >
+    <div className="flex h-full" style={{ minHeight: "calc(100vh - 110px)" }}>
       <Sidebar
         aria-label="Menu de socios comerciales"
         submenu={submenu}
@@ -160,7 +150,7 @@ export default function SociosComerciales() {
         collapsible
       />
       <div className="relative flex-1 min-w-0 p-6 pt-0 pb-0">
-        <div className="flex justify-between items-center mb-4">
+        {/* <div className="flex justify-between items-center mb-4">
           <SubTitles
             title={`Gestión de ${pluralName}`}
             back_path="/configuraciones"
@@ -170,20 +160,19 @@ export default function SociosComerciales() {
             <FaPlus className="mr-2" />
             Nuevo {singularName}
           </Button>
-        </div>
+        </div> */}
         <TableComponent
           columns={columns}
           data={filteredSocios}
-          filterFields={filterFields}
-          scrollHeightOffset={375}
-          inactiveField="active"
-          onRowClick={handleRowClicked}
-          emptyState={{
-            title: `No hay ${pluralName} cargados`,
-            description: `Puedes crear el primer ${singularName} para comenzar.`,
-            actionLabel: `Crear ${singularName}`,
-            onAction: handleOpenNuevo,
-          }}
+          isLoading={false}
+          labelButton={`Agregar ${singularName}`}
+          scrollHeightOffset={270}
+          onRowClicked={handleRowClicked}
+          title={`Gestión de ${pluralName}`}
+          onAddRecord={handleOpenNuevo}
+          color="blue"
+          searchKeys={["razon_social", "provincia", "localidad", "cuit_cuil"]}
+          searchPlaceholder="Buscar por rozón social, cuit, provincia o localidad"
         />
       </div>
     </div>

@@ -90,9 +90,6 @@ export default function CuentaCorriente() {
         </Card>
         <div className="w-full mt-6">
           <ButtonsActionsCtaCte clienteId={socio?.id || ""} />
-          <h2 className="text-xl font-semibold text-base-900 dark:text-white my-4">
-            Movimientos
-          </h2>
           {ctaCte ? (
             <TableMovimientos movimientos={ctaCte.movimientos} />
           ) : (

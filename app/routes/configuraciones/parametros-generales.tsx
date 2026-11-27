@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Route } from "../+types/home";
 import { Sidebar } from "~/components/Sidebar";
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import useItemsConfig from "~/hooks/useItemsConfig";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "flowbite-react";
@@ -69,10 +69,7 @@ export default function ParametrosGenerales() {
   const activeItem = itemsConfig.find((item) => item.tab === activeTab);
   const iconActive = submenu.find((item) => item.key === activeTab)?.icon;
   return (
-    <div
-      className="flex h-full"
-      style={{ minHeight: "calc(100vh - 110px)" }}
-    >
+    <div className="flex h-full" style={{ minHeight: "calc(100vh - 110px)" }}>
       <Sidebar
         aria-label="Menu de configuraciones de productos"
         submenu={submenu}
@@ -102,6 +99,15 @@ export default function ParametrosGenerales() {
             <TableComponent
               columns={activeItem.columns}
               data={activeItem.data}
+              isLoading={false}
+              labelButton=""
+              scrollHeightOffset={270}
+              onRowClicked={activeItem.onOpenDetails}
+              searchKeys={["nombre"]}
+            />
+            {/* <TableComponent
+              columns={activeItem.columns}
+              data={activeItem.data}
               onRowClick={activeItem.onOpenDetails}
               filterFields={activeItem.filterFields}
               scrollHeightOffset={375}
@@ -112,7 +118,7 @@ export default function ParametrosGenerales() {
                 actionLabel: `Crear ${activeItem.singularName}`,
                 onAction: activeItem.onOpenNew,
               }}
-            />
+            /> */}
           </div>
         )}
       </div>

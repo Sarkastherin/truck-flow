@@ -1,4 +1,4 @@
-import { TableComponent } from "~/components/TableComponent";
+import TableComponent from "~/components/TableComponentNew";
 import type { TableColumn } from "react-data-table-component";
 import {
   optionMediosPago,
@@ -19,46 +19,58 @@ import { BadgeStatusMovimiento } from "./Badges";
 const columns: TableColumn<MovimientoDetalle>[] = [
   {
     name: "Fecha",
-    selector: (row) => formatDateUStoES(row.fecha_movimiento),
+    selector: (row) => row.fecha_movimiento,
+    format: (row) => formatDateUStoES(row.fecha_movimiento),
     sortable: true,
     sortFunction: (rowA, rowB) => {
       const dateA = new Date(rowA.fecha_movimiento);
       const dateB = new Date(rowB.fecha_movimiento);
       return dateA.getTime() - dateB.getTime();
     },
+    filterable: true,
+    filterType: "date",
   },
   {
     name: "Tipo",
     selector: (row) => capitalize(row.tipo_movimiento),
     sortable: true,
+    filterable: true,
+    filterType: "set",
   },
-  { name: "Origen", selector: (row) => capitalize(row.origen), sortable: true },
+  {
+    name: "Origen",
+    selector: (row) => capitalize(row.origen),
+    sortable: true,
+    filterable: true,
+    filterType: "set",
+  },
   {
     name: "Medio de pago",
     selector: (row) => capitalize(row.medio_pago) || "-",
     sortable: true,
+    filterable: true,
+    filterType: "set",
   },
   {
     name: "Debe",
     selector: (row) => row.debe,
     format: (row) => formatCurrency(row.debe || 0),
     sortable: true,
+    filterable: true,
+    filterType: "number",
   },
   {
     name: "Haber",
     selector: (row) => row.haber,
     format: (row) => formatCurrency(row.haber || 0),
     sortable: true,
-  },
-  {
-    name: "Estado",
-    width: "100px",
-    cell: (row) => <BadgeStatusMovimiento active={row.active} />,
-    sortable: true,
+    filterable: true,
+    filterType: "number",
   },
   {
     name: "Cheques",
     width: "95px",
+    selector: (row) => row.cheques && row.cheques.length > 0,
     cell: (row) => {
       if (row.cheques && row.cheques.length > 0) {
         return (
@@ -70,6 +82,7 @@ const columns: TableColumn<MovimientoDetalle>[] = [
         return null;
       }
     },
+    sortable: true,
   },
   {
     name: "Doc.",
@@ -142,26 +155,12 @@ export default function TableMovimientos({
     <TableComponent
       columns={columns}
       data={movimientos}
-      onRowClick={handleRowClick}
-      filterFields={[
-        {
-          key: "fecha_movimiento",
-          label: "Fecha",
-          type: "dateRange",
-        },
-        {
-          key: "tipo_movimiento",
-          label: "Tipo de movimiento",
-          type: "select",
-          options: optionsTipoMovimiento,
-        },
-        {
-          key: "medio_pago",
-          label: "Medio de pago",
-          type: "select",
-          options: optionMediosPago,
-        },
-      ]}
+      isLoading={false}
+      labelButton=""
+      title={"Movimientos"}
+      scrollHeightOffset={570}
+      searchKeys={["tipo_movimiento", "origen", "medio_pago"]}
+      searchPlaceholder="Buscar por Tipo de movimiento, origen o medio de pago"
     />
   );
 }

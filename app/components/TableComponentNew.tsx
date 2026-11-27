@@ -32,7 +32,10 @@ export type ColorsTypes =
   | "default"
   | "primary"
   | "lime"
-  | "yellow";
+  | "yellow"
+  | "orange"
+  | "teal";
+
 
 type TableComponentProps<T> = TableProps<T> & {
   columns: TableColumn<T>[];
@@ -40,8 +43,8 @@ type TableComponentProps<T> = TableProps<T> & {
   isLoading: boolean;
   labelButton: string;
   title?: string;
-  backPath: string;
-  color: ColorsTypes;
+  backPath?: string;
+  color?: ColorsTypes;
   scrollHeightOffset?: number;
   searchKeys?: ReadonlyArray<string>;
   searchPlaceholder?: string;
@@ -169,7 +172,7 @@ export default function TableComponent<T extends { active?: boolean }>({
   labelButton,
   title,
   backPath,
-  color,
+  color = "default",
   scrollHeightOffset,
   searchKeys,
   searchPlaceholder = "Buscar...",
@@ -193,8 +196,8 @@ export default function TableComponent<T extends { active?: boolean }>({
           id: "activo",
           name: "Activo",
           cell: (row) => (
-            <Badge color={row.active !== false ? "green" : "red"}>
-              {row.active !== false ? "Sí" : "No"}
+            <Badge color={row.active ? "green" : "red"}>
+              {row.active ? "Sí" : "No"}
             </Badge>
           ),
           selector: (row) => (row.active ? "Sí" : "No"),
@@ -235,7 +238,7 @@ export default function TableComponent<T extends { active?: boolean }>({
   const inactiveCount = data.filter((row) => !row.active).length;
   const query = search.trim().toLowerCase();
   const visibleData = data
-    .filter((row) => !hasActiveColumn || showInactive || row.active !== false)
+    .filter((row) => !hasActiveColumn || showInactive || row.active)
     .filter((row) => {
       if (!query) return true;
       if (searchKeys) {

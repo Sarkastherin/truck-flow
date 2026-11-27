@@ -260,7 +260,9 @@ export default function useItemsConfig() {
   const createOnOpenNew = useCallback(
     (fieldsForm: FieldsForm[], itemName: string, tab: TabsTypes) => () => {
       const newForm = form;
-      newForm.reset(fieldsForm.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {}));
+      newForm.reset(
+        fieldsForm.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {}),
+      );
       const handlers = handlersByTab[tab];
       openModal("form", {
         component: ItemConfigModal,
@@ -338,84 +340,52 @@ export default function useItemsConfig() {
     () => ({
       colores: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
       carrozados: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
       puertas_traseras: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
       personal: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         {
           name: "Apellido",
           selector: (row: any) => row.apellido,
           sortable: true,
+          filterable:true
         },
         {
           name: "Sector",
-          selector: (row: any) => (capitalize(row.sector) || "--"),
+          selector: (row: any) => capitalize(row.sector) || "--",
           sortable: true,
+          filterable:true,
+          filterType: "set"
         },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
       trabajos_chasis: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
       items_control: [
         createDateColumn("Fecha de creación", "created_at"),
-        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true },
+        { name: "Nombre", selector: (row: any) => row.nombre, sortable: true, filterable:true },
         {
           name: "Atributo relacionado",
           selector: (row: any) => row.atributo_relacionado,
           sortable: true,
+          filterable:true
         },
         createDateColumn("Última actualización", "updated_at"),
-        {
-          name: "Estado",
-          selector: (row: any) => (row.active ? "Activo" : "Inactivo"),
-          sortable: true,
-          width: "120px",
-        },
       ],
     }),
     [],

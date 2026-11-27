@@ -142,4 +142,5 @@ export type CtaCte = {
   isClosed: boolean;
 } & {
   movimientos: MovimientoDetalle[];
+  active: boolean
 };

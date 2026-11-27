@@ -161,6 +161,7 @@ export default function TableMovimientos({
       scrollHeightOffset={570}
       searchKeys={["tipo_movimiento", "origen", "medio_pago"]}
       searchPlaceholder="Buscar por Tipo de movimiento, origen o medio de pago"
+      onRowClicked={handleRowClick}
     />
   );
 }
